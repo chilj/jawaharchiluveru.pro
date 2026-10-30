@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Status from '../../components/Status.astro';
-import { isPlaceholder, isVisible } from '../../lib/content';
+import { isPlaceholder, isVisible, withBase } from '../../lib/content';
 
 export async function getStaticPaths() {
   const entries = await getCollection('playbook', (e) => isVisible(e.data.status));
@@ -19,7 +19,7 @@ const { Content } = await render(entry);
     <p class="eyebrow">{p.kind}</p>
     <h1>{p.title} <Status status={p.status} /></h1>
     {!isPlaceholder(p.summary) && <p class="lede">{p.summary}</p>}
-    {p.file && <p><a class="btn primary" href={p.file} download>Download</a></p>}
+    {p.file && <p><a class="btn primary" href={withBase(p.file)} download>Download</a></p>}
     <div class="prose"><Content /></div>
   </article>
 </Base>

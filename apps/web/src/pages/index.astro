@@ -8,7 +8,7 @@ import Icon from '../components/Icon.astro';
 import LogoTile from '../components/LogoTile.astro';
 import { brandFor } from '../lib/icons';
 import {
-  byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished,
+  byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase,
 } from '../lib/content';
 
 const { nav, byId } = await getSections();
@@ -47,7 +47,7 @@ const section = (id: string) => ({
         </a>
       )}
       {connect.links.map((l) => <a class="btn" href={l.url} rel="noopener" target="_blank">{l.label}<Icon name="external-link" /></a>)}
-      {about.resume && <a class="btn" href={about.resume}><Icon name="file-text" />Résumé</a>}
+      {about.resume && <a class="btn" href={withBase(about.resume)}><Icon name="file-text" />Résumé</a>}
     </div>
     {about.stats.length > 0 && (
       <dl class="stats">

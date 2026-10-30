@@ -45,3 +45,7 @@ export function tenure(start: string, end?: string) {
   const part = (n: number, unit: string) => (n ? `${n} ${unit}${n > 1 ? 's' : ''}` : '');
   return [part(y, 'yr'), part(m, 'mo')].filter(Boolean).join(' ');
 }
+
+/** Prefix a site-relative path from content (e.g. "/files/resume.pdf") with the deploy base. */
+export const withBase = (path: string) =>
+  path.startsWith('/') ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}` : path;

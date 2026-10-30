@@ -60,5 +60,16 @@ npm run build     # static output in apps/web/dist
 ## Deploy
 
 `.github/workflows/deploy.yml` builds every pull request and deploys every push to `main` to GitHub Pages.
-One-time setup: repo **Settings → Pages → Source: GitHub Actions**, then add `www.jawaharchiluveru.pro`
-under **Custom domain**.
+The site URL and base path come from the Pages settings, so it works at `https://chilj.github.io/jawaharchiluveru.pro/`
+and, once a custom domain is set, at the domain root with no code change.
+
+One-time setup:
+
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+   (Pages on a private repo needs a paid GitHub plan; on GitHub Free, make the repo public.)
+2. **Actions → Build & deploy → Run workflow** (or push to `main`).
+3. Custom domain: at your DNS provider, add a `CNAME` record for `www` → `chilj.github.io`, plus
+   `A` records for the apex `jawaharchiluveru.pro` → `185.199.108.153`, `185.199.109.153`,
+   `185.199.110.153`, `185.199.111.153`. Then **Settings → Pages → Custom domain:**
+   `www.jawaharchiluveru.pro`, and tick **Enforce HTTPS** once the certificate is issued.
+   Run the workflow again so links pick up the new base.
