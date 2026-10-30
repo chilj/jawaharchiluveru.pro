@@ -1,10 +1,10 @@
 ---
 title: "Platform Modernization Executive White Paper"
 kind: White Paper
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 5
 ---
 
-TBD
+TODO

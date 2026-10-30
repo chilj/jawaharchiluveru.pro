@@ -6,5 +6,5 @@ end: 2021-04
 location: Irving, TX
 clients: [7-Eleven]
 status: published
-highlights: []     # TBD
+highlights: []     # TODO
 ---

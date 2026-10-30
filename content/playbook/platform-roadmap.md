@@ -1,10 +1,10 @@
 ---
 title: "Now / Next / Later Platform Roadmap"
 kind: Roadmap
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 2
 ---
 
-TBD
+TODO

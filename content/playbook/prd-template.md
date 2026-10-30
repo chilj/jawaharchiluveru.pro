@@ -1,10 +1,10 @@
 ---
 title: "Product Requirements Document (PRD) Template"
 kind: PRD
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 1
 ---
 
-TBD
+TODO

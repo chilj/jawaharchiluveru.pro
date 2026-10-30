@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Status from '../../components/Status.astro';
-import { isTbd, isVisible } from '../../lib/content';
+import { isPlaceholder, isVisible } from '../../lib/content';
 
 export async function getStaticPaths() {
   const entries = await getCollection('playbook', (e) => isVisible(e.data.status));
@@ -13,12 +13,12 @@ const { entry } = Astro.props;
 const p = entry.data;
 const { Content } = await render(entry);
 ---
-<Base title={p.title} description={isTbd(p.summary) ? undefined : p.summary}>
+<Base title={p.title} description={isPlaceholder(p.summary) ? undefined : p.summary}>
   <article class="wrap detail">
     <a class="back" href={`${import.meta.env.BASE_URL}#playbook`}>← Playbook</a>
     <p class="eyebrow">{p.kind}</p>
     <h1>{p.title} <Status status={p.status} /></h1>
-    {!isTbd(p.summary) && <p class="lede">{p.summary}</p>}
+    {!isPlaceholder(p.summary) && <p class="lede">{p.summary}</p>}
     {p.file && <p><a class="btn primary" href={p.file} download>Download</a></p>}
     <div class="prose"><Content /></div>
   </article>

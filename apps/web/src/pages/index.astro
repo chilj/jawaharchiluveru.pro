@@ -3,7 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Status from '../components/Status.astro';
 import ComingSoon from '../components/ComingSoon.astro';
-import { byOrder, formatMonth, getSections, isTbd, isVisible } from '../lib/content';
+import { byOrder, formatMonth, getSections, isPlaceholder, isVisible } from '../lib/content';
 
 const { nav, byId } = await getSections();
 const aboutEntry = (await getEntry('about', 'about'))!;
@@ -18,10 +18,10 @@ const earlier = career.filter((e) => e.data.earlier);
 const caseStudies = (await getCollection('case-studies', (e) => isVisible(e.data.status))).sort(byOrder);
 const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status))).sort(byOrder);
 const toolkit = (await getCollection('toolkit')).sort(byOrder)
-  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isTbd(i) || import.meta.env.DEV) }))
+  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i) || import.meta.env.DEV) }))
   .filter((g) => g.items.length);
 const connect = (await getEntry('connect', 'connect'))!.data;
-const booking = connect.booking.url && !isTbd(connect.booking.url) ? connect.booking.url : undefined;
+const booking = connect.booking.url && !isPlaceholder(connect.booking.url) ? connect.booking.url : undefined;
 
 const show = (id: string) => nav.some((s) => s.id === id);
 const label = (id: string) => byId[id]?.label ?? id;
@@ -89,8 +89,8 @@ const label = (id: string) => byId[id]?.label ?? id;
             <a class="card link-card" href={`${import.meta.env.BASE_URL}case-studies/${id}/`}>
               <p class="tag">{c.domain} <Status status={c.status} /></p>
               <h3>{c.title}</h3>
-              {!isTbd(c.summary) && <p>{c.summary}</p>}
-              {!isTbd(c.outcome) && <p class="result">{c.outcome}</p>}
+              {!isPlaceholder(c.summary) && <p>{c.summary}</p>}
+              {!isPlaceholder(c.outcome) && <p class="result">{c.outcome}</p>}
             </a>
           ))}
         </div>
@@ -109,7 +109,7 @@ const label = (id: string) => byId[id]?.label ?? id;
               <a href={`${import.meta.env.BASE_URL}playbook/${id}/`}>
                 <span class="kind">{p.kind}</span>
                 <span class="artifact-title">{p.title} <Status status={p.status} /></span>
-                {!isTbd(p.summary) && <span class="artifact-summary">{p.summary}</span>}
+                {!isPlaceholder(p.summary) && <span class="artifact-summary">{p.summary}</span>}
               </a>
             </li>
           ))}
@@ -125,7 +125,7 @@ const label = (id: string) => byId[id]?.label ?? id;
         {toolkit.map((g) => (
           <div>
             <h3>{g.data.label}</h3>
-            <ul class="chips">{g.items.map((i) => <li class={isTbd(i) ? 'chip-tbd' : ''}>{i}</li>)}</ul>
+            <ul class="chips">{g.items.map((i) => <li class={isPlaceholder(i) ? 'chip-placeholder' : ''}>{i}</li>)}</ul>
           </div>
         ))}
       </div>
@@ -142,7 +142,7 @@ const label = (id: string) => byId[id]?.label ?? id;
       <div class="cta">
         {booking
           ? <a class="btn primary" href={booking} rel="noopener" target="_blank">{connect.booking.label}</a>
-          : import.meta.env.DEV && <span class="btn disabled">{connect.booking.label} <Status status="tbd" /></span>}
+          : import.meta.env.DEV && <span class="btn disabled">{connect.booking.label} <Status status="planned" /></span>}
         {connect.email && <a class="btn" href={`mailto:${connect.email}`}>{connect.email}</a>}
       </div>
     </section>

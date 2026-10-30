@@ -14,11 +14,11 @@ frameworks:
 tools:
   label: Everyday Tools
   order: 4
-  items: [TBD]   # e.g. Jira, Confluence, Figma, Miro, Amplitude
+  items: [TODO]   # e.g. Jira, Confluence, Figma, Miro, Amplitude
 ai:
   label: AI-Assisted Work
   order: 5
-  items: [TBD]   # e.g. Claude, Copilot, Cursor
+  items: [TODO]   # e.g. Claude, Copilot, Cursor
 credentials:
   label: Certifications
   order: 6

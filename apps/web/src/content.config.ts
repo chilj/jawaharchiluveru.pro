@@ -6,8 +6,8 @@ import { z } from 'astro/zod';
 const CONTENT = '../../content';
 const entries = ['**/*.md', '!**/_*.md'];
 
-// tbd: placeholder, draft: in progress. Both are visible in `npm run dev` only.
-const status = z.enum(['tbd', 'draft', 'published']).default('tbd');
+// planned: placeholder, draft: in progress. Both are visible in `npm run dev` only.
+const status = z.enum(['planned', 'draft', 'published']).default('planned');
 
 const sections = defineCollection({
   loader: file(`${CONTENT}/sections.yaml`),

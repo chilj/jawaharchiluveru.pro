@@ -1,10 +1,10 @@
 ---
 title: "DevEx ROI Model & Calculator"
 kind: ROI Model
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 3
 ---
 
-TBD
+TODO

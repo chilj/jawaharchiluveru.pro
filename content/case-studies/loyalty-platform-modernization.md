@@ -1,21 +1,21 @@
 ---
 title: Omnichannel Loyalty Platform Modernization
-summary: TBD
+summary: TODO
 domain: Retail / Loyalty
-client: TBD
-outcome: TBD
-status: tbd
+client: TODO
+outcome: TODO
+status: planned
 order: 3
 ---
 
 ## Context
-TBD
+TODO
 
 ## Problem
-TBD
+TODO
 
 ## Approach
-TBD
+TODO
 
 ## Outcome
-TBD
+TODO

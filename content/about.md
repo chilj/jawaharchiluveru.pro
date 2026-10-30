@@ -8,7 +8,7 @@ tagline: >-
 description: >-
   Senior Technical Product Manager focused on Platform Engineering, Developer
   Experience and platform modernization, with 16+ years across retail, fintech and media.
-resume: ""          # TBD: drop resume.pdf in content/public/files/ and set "/files/resume.pdf"
+resume: ""          # TODO: drop resume.pdf in content/public/files/ and set "/files/resume.pdf"
 stats:
   - value: "16+"
     label: years in product & delivery

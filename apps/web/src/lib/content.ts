@@ -1,12 +1,12 @@
 import { getCollection } from 'astro:content';
 
-type Status = 'tbd' | 'draft' | 'published';
+type Status = 'planned' | 'draft' | 'published';
 
 /** Unpublished entries show up while developing locally, never on the live site. */
 export const isVisible = (status: Status) => status === 'published' || import.meta.env.DEV;
 
-/** A field still holding the "TBD" placeholder. */
-export const isTbd = (value?: string) => !value || value.trim().toUpperCase() === 'TBD';
+/** A field still holding a "TODO" placeholder. */
+export const isPlaceholder = (value?: string) => !value || ['TODO', 'TBD'].includes(value.trim().toUpperCase());
 
 export async function getSections() {
   const all = await getCollection('sections');

@@ -1,10 +1,10 @@
 ---
 title: "Delivery Health Status Report"
 kind: Template
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 6
 ---
 
-TBD
+TODO

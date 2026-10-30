@@ -1,10 +1,10 @@
 ---
 title: "GO / NO-GO Decision Memo"
 kind: Decision Memo
-summary: TBD
+summary: TODO
 file: ""
-status: tbd
+status: planned
 order: 4
 ---
 
-TBD
+TODO

@@ -1,21 +1,21 @@
 ---
 title: "Platform as a Product: Internal Developer Platform"
-summary: TBD
+summary: TODO
 domain: Platform Engineering
-client: TBD
-outcome: TBD
-status: tbd
+client: TODO
+outcome: TODO
+status: planned
 order: 1
 ---
 
 ## Context
-TBD
+TODO
 
 ## Problem
-TBD
+TODO
 
 ## Approach
-TBD
+TODO
 
 ## Outcome
-TBD
+TODO
