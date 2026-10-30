@@ -3,7 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Status from '../components/Status.astro';
 import ComingSoon from '../components/ComingSoon.astro';
-import { byOrder, formatMonth, getSections, isPlaceholder, isVisible } from '../lib/content';
+import { byOrder, formatMonth, yearRange, getSections, isPlaceholder, isVisible } from '../lib/content';
 
 const { nav, byId } = await getSections();
 const aboutEntry = (await getEntry('about', 'about'))!;
@@ -58,9 +58,10 @@ const label = (id: string) => byId[id]?.label ?? id;
           <li>
             <article class="role">
               <h3>{r.title} · <span class="org">{r.org}</span> <Status status={r.status} /></h3>
-              <p class="meta">{formatMonth(r.start)} – {formatMonth(r.end)}{r.location && ` · ${r.location}`}</p>
+              {r.product && <p class="product">{r.product}</p>}
+              <p class="meta">{formatMonth(r.start)} – {formatMonth(r.end)}{r.location && ` · ${r.location}`}{r.via && ` · via ${r.via}`}</p>
               {r.clients.length > 0 && <p class="clients">Clients: {r.clients.join(', ')}</p>}
-              {r.highlights.length > 0 && <ul>{r.highlights.map((h) => <li>{h}</li>)}</ul>}
+              {r.highlights.length > 0 && <ul>{r.highlights.filter((h) => !isPlaceholder(h)).map((h) => <li>{h}</li>)}</ul>}
             </article>
           </li>
         ))}
@@ -70,7 +71,7 @@ const label = (id: string) => byId[id]?.label ?? id;
               <h3>Earlier career</h3>
               <ul>
                 {earlier.map(({ data: r }) => (
-                  <li>{r.title}, {r.org} · {r.start.slice(0, 4)}–{r.end?.slice(0, 4)}{r.location && ` · ${r.location}`}</li>
+                  <li>{r.title}, {r.org} · {yearRange(r.start, r.end)}{r.location && ` · ${r.location}`}</li>
                 ))}
               </ul>
             </article>

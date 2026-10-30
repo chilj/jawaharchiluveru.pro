@@ -115,6 +115,7 @@ nav a:hover { color: var(--text); text-decoration: none; }
 .timeline > li:last-child { border-left-color: transparent; }
 .role h3 { font-size: 19px; }
 .role .org { color: var(--accent); }
+.role .product { margin: 4px 0 0; font-weight: 600; font-size: 15.5px; }
 .role .meta { color: var(--muted); font-size: 15px; margin: 4px 0; }
 .role ul { margin: 8px 0 0; padding-left: 18px; }
 .role li { margin-bottom: 6px; }

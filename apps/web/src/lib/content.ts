@@ -22,3 +22,8 @@ export function formatMonth(ym?: string) {
   const [y, m] = ym.split('-').map(Number);
   return new Date(y, (m || 1) - 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
 }
+
+export function yearRange(start: string, end?: string) {
+  const [a, b] = [start.slice(0, 4), end ? end.slice(0, 4) : 'Present'];
+  return a === b ? a : `${a}–${b}`;
+}

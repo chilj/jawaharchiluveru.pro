@@ -1,32 +1,44 @@
 # Groups shown in the Toolkit section. Add, remove or rename freely.
 product:
-  label: Product & Delivery
+  label: Product Leadership
   order: 1
-  items: [Platform as a Product, Roadmapping, Release Planning, Estimation, ROI Modeling, Executive Reporting, Agile / Scrum]
-platform:
-  label: Platform & DevEx
+  items: [Technical Product Management, Platform Product Management, Product Discovery, Backlog Management, Release Governance, Stakeholder Management]
+integration:
+  label: APIs & Integration
   order: 2
-  items: [AWS / EKS, GitLab CI/CD, Service Mesh, DevOps, Spring Boot, Dynatrace, Datadog]
-frameworks:
-  label: Frameworks
+  items: [API Product Management, API Standardization, MuleSoft, Systems Integration (40+), Third-Party Integration]
+events:
+  label: Event-Driven & Messaging
   order: 3
-  items: [DORA, SPACE, DX Core 4]
-tools:
-  label: Everyday Tools
+  items: [Event-Driven Architecture, GCP Pub/Sub, Dead-Letter Queues, Omnichannel Messaging, Cordial]
+cloud:
+  label: Cloud & Platform
   order: 4
-  items: [TODO]   # e.g. Jira, Confluence, Figma, Miro, Amplitude
-ai:
-  label: AI-Assisted Work
+  items: [AWS, Google Cloud, Kubernetes, Terraform, Istio, GitLab CI/CD, Jenkins, Dynatrace, Datadog]
+agile:
+  label: Agile
   order: 5
-  items: [TODO]   # e.g. Claude, Copilot, Cursor
+  items: [Scrum, Kanban, SAFe, WSJF, Product Ownership]
+data:
+  label: Data
+  order: 6
+  items: [SQL, Data Migration, Data Reconciliation, Product Analytics, KPI Instrumentation]
+ai:
+  label: AI-Native Execution
+  order: 7
+  items: [AI-Assisted Discovery, Requirements Synthesis, Documentation, Prototyping, Vendor Evaluation, Claude, AWS Q / Kiro, GitHub Copilot]
 credentials:
   label: Certifications
-  order: 6
-  items: [Agile Product Owner Role, AI-Native Ready, Vibe Coding Fundamentals, SQL Fundamentals]
+  order: 8
+  items:
+    - Certified ScrumMaster (Scrum Alliance)
+    - Certified Scrum Product Owner (Scrum Alliance)
+    - SAFe 6 Product Owner / Product Manager (Scaled Agile)
+    - SQL Fundamentals (SoloLearn)
 education:
   label: Education
-  order: 7
+  order: 9
   items:
-    - M.S. Engineering Management, UT Arlington
+    - M.S. Engineering / Industrial Management, UT Arlington
     - MBA, NIT Warangal
-    - B.E. Biomedical Engineering, JBIET
+    - B.Tech Biomedical Engineering, JNTU Hyderabad

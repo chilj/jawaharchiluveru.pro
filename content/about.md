@@ -3,23 +3,24 @@ name: Jawahar Chiluveru
 role: Senior Technical Product Manager
 location: Dallas–Fort Worth, TX
 tagline: >-
-  I turn complex, cross-functional modernization efforts into measurable business
-  outcomes. Platform as a Product, Developer Experience and AI-driven engineering.
+  Technical Product Manager with 16+ years delivering scalable digital platforms across
+  retail, e-commerce, fintech and enterprise systems.
 description: >-
-  Senior Technical Product Manager focused on Platform Engineering, Developer
-  Experience and platform modernization, with 16+ years across retail, fintech and media.
+  Senior Technical Product Manager with 16+ years delivering scalable digital platforms:
+  loyalty and omnichannel engagement, platform modernization, API ecosystems and developer
+  experience across AWS and Google Cloud.
 resume: ""          # TODO: drop resume.pdf in content/public/files/ and set "/files/resume.pdf"
 stats:
   - value: "16+"
     label: years in product & delivery
-  - value: "10+"
-    label: enterprise organizations
-  - value: "3"
-    label: "industries: retail, fintech, media"
+  - value: "20M+"
+    label: loyalty members served
+  - value: "15+"
+    label: major platform releases led
 ---
 
-I'm a T-shaped technical product manager: the kind who can sit in an architecture review and a steering committee meeting on the same day and speak both languages fluently.
+I lead cross-functional teams that build customer-centric products, loyalty platforms and omnichannel engagement systems used by millions of people. My work spans cloud modernization, event-driven architectures and API ecosystems across AWS and Google Cloud.
 
-Over 16+ years I've led platform modernization, API ecosystems, shared-services architecture, and loyalty and lifecycle-marketing platforms for organizations ranging from Fortune 500 retailers to fintech and insurance leaders. Today my focus is Platform Engineering, Developer Experience (DevEx) and Internal Developer Platforms: the infrastructure that lets engineering teams move faster with less friction.
+I translate complex business problems into scalable technical solutions, balancing product strategy, platform reliability and measurable business outcomes. Today my focus is Platform-as-a-Product: the infrastructure, observability and developer experience that let engineering teams ship faster with less friction.
 
-I'm known for evidence-forward, steering-committee-grade deliverables: ROI models, executive white papers and clear GO / NO-GO recommendations grounded in real data, not manufactured causation.
+Certified ScrumMaster and SAFe 6 Product Owner / Product Manager.

@@ -1,9 +1,8 @@
 ---
 title: Associate Business Analyst
-org: Progressive Digital Media Group
+org: Progressive Digital Media
 start: 2009-11
 end: 2011-07
-location: Hyderabad, India
-status: published
 earlier: true
+status: published
 ---

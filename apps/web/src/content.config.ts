@@ -32,6 +32,8 @@ const career = defineCollection({
   schema: z.object({
     title: z.string(),
     org: z.string(),
+    via: z.string().optional(),
+    product: z.string().optional(),
     start: z.string(),
     end: z.string().optional(),
     location: z.string().optional(),
