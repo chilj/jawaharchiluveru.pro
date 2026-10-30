@@ -1,0 +1,6 @@
+---
+// Small badge marking unpublished entries (only rendered in dev).
+interface Props { status: 'tbd' | 'draft' | 'published' }
+const { status } = Astro.props;
+---
+{status !== 'published' && <span class={`status status-${status}`}>{status === 'tbd' ? 'TBD' : 'Draft'}</span>}

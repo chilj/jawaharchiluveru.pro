@@ -1,0 +1,93 @@
+import { defineCollection } from 'astro:content';
+import { file, glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+// All editable content lives in /content at the repo root.
+const CONTENT = '../../content';
+const entries = ['**/*.md', '!**/_*.md'];
+
+// tbd: placeholder, draft: in progress. Both are visible in `npm run dev` only.
+const status = z.enum(['tbd', 'draft', 'published']).default('tbd');
+
+const sections = defineCollection({
+  loader: file(`${CONTENT}/sections.yaml`),
+  schema: z.object({ label: z.string(), order: z.number(), enabled: z.boolean().default(true) }),
+});
+
+const about = defineCollection({
+  loader: glob({ base: CONTENT, pattern: 'about.md' }),
+  schema: z.object({
+    name: z.string(),
+    role: z.string(),
+    location: z.string().optional(),
+    tagline: z.string(),
+    description: z.string(),
+    resume: z.string().optional(),
+    stats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
+  }),
+});
+
+const career = defineCollection({
+  loader: glob({ base: `${CONTENT}/career`, pattern: entries }),
+  schema: z.object({
+    title: z.string(),
+    org: z.string(),
+    start: z.string(),
+    end: z.string().optional(),
+    location: z.string().optional(),
+    clients: z.array(z.string()).default([]),
+    highlights: z.array(z.string()).default([]),
+    earlier: z.boolean().default(false),
+    status,
+  }),
+});
+
+const caseStudies = defineCollection({
+  loader: glob({ base: `${CONTENT}/case-studies`, pattern: entries }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    domain: z.string().optional(),
+    client: z.string().optional(),
+    year: z.number().optional(),
+    outcome: z.string().optional(),
+    order: z.number().default(99),
+    status,
+  }),
+});
+
+const playbook = defineCollection({
+  loader: glob({ base: `${CONTENT}/playbook`, pattern: entries }),
+  schema: z.object({
+    title: z.string(),
+    kind: z.string(),
+    summary: z.string(),
+    file: z.string().optional(),
+    order: z.number().default(99),
+    status,
+  }),
+});
+
+const toolkit = defineCollection({
+  loader: file(`${CONTENT}/toolkit.yaml`),
+  schema: z.object({ label: z.string(), order: z.number().default(99), items: z.array(z.string()) }),
+});
+
+const connect = defineCollection({
+  loader: glob({ base: CONTENT, pattern: 'connect.md' }),
+  schema: z.object({
+    heading: z.string(),
+    intro: z.string().optional(),
+    booking: z.object({
+      label: z.string().default('Book time'),
+      url: z.string().optional(),
+      embed: z.boolean().default(false),
+    }),
+    email: z.string().optional(),
+    links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+  }),
+});
+
+export const collections = {
+  sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
+};

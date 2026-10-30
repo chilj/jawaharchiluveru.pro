@@ -1,0 +1,150 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Status from '../components/Status.astro';
+import ComingSoon from '../components/ComingSoon.astro';
+import { byOrder, formatMonth, getSections, isTbd, isVisible } from '../lib/content';
+
+const { nav, byId } = await getSections();
+const aboutEntry = (await getEntry('about', 'about'))!;
+const about = aboutEntry.data;
+const { Content: Bio } = await render(aboutEntry);
+
+const career = (await getCollection('career', (e) => isVisible(e.data.status)))
+  .sort((a, b) => b.data.start.localeCompare(a.data.start));
+const roles = career.filter((e) => !e.data.earlier);
+const earlier = career.filter((e) => e.data.earlier);
+
+const caseStudies = (await getCollection('case-studies', (e) => isVisible(e.data.status))).sort(byOrder);
+const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status))).sort(byOrder);
+const toolkit = (await getCollection('toolkit')).sort(byOrder)
+  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isTbd(i) || import.meta.env.DEV) }))
+  .filter((g) => g.items.length);
+const connect = (await getEntry('connect', 'connect'))!.data;
+const booking = connect.booking.url && !isTbd(connect.booking.url) ? connect.booking.url : undefined;
+
+const show = (id: string) => nav.some((s) => s.id === id);
+const label = (id: string) => byId[id]?.label ?? id;
+---
+<Base>
+  <section class="hero wrap" id="top">
+    <p class="eyebrow">{about.role}{about.location && ` · ${about.location}`}</p>
+    <h1>{about.name}</h1>
+    <p class="lede">{about.tagline}</p>
+    <div class="cta">
+      {show('connect') && <a class="btn primary" href={booking ?? '#connect'}>{booking ? connect.booking.label : label('connect')}</a>}
+      {connect.links.map((l) => <a class="btn" href={l.url} rel="noopener" target="_blank">{l.label}</a>)}
+      {about.resume && <a class="btn" href={about.resume}>Résumé</a>}
+    </div>
+    {about.stats.length > 0 && (
+      <dl class="stats">
+        {about.stats.map((s) => <div><dt>{s.value}</dt><dd>{s.label}</dd></div>)}
+      </dl>
+    )}
+  </section>
+
+  {show('about') && (
+    <section class="wrap section" id="about">
+      <h2>{label('about')}</h2>
+      <div class="prose"><Bio /></div>
+    </section>
+  )}
+
+  {show('career') && (
+    <section class="wrap section" id="career">
+      <h2>{label('career')}</h2>
+      <ol class="timeline">
+        {roles.map(({ data: r }) => (
+          <li>
+            <article class="role">
+              <h3>{r.title} · <span class="org">{r.org}</span> <Status status={r.status} /></h3>
+              <p class="meta">{formatMonth(r.start)} – {formatMonth(r.end)}{r.location && ` · ${r.location}`}</p>
+              {r.clients.length > 0 && <p class="clients">Clients: {r.clients.join(', ')}</p>}
+              {r.highlights.length > 0 && <ul>{r.highlights.map((h) => <li>{h}</li>)}</ul>}
+            </article>
+          </li>
+        ))}
+        {earlier.length > 0 && (
+          <li>
+            <article class="role">
+              <h3>Earlier career</h3>
+              <ul>
+                {earlier.map(({ data: r }) => (
+                  <li>{r.title}, {r.org} · {r.start.slice(0, 4)}–{r.end?.slice(0, 4)}{r.location && ` · ${r.location}`}</li>
+                ))}
+              </ul>
+            </article>
+          </li>
+        )}
+      </ol>
+    </section>
+  )}
+
+  {show('case-studies') && (
+    <section class="wrap section" id="case-studies">
+      <h2>{label('case-studies')}</h2>
+      {caseStudies.length === 0 ? <ComingSoon what={label('case-studies')} /> : (
+        <div class="cards">
+          {caseStudies.map(({ id, data: c }) => (
+            <a class="card link-card" href={`${import.meta.env.BASE_URL}case-studies/${id}/`}>
+              <p class="tag">{c.domain} <Status status={c.status} /></p>
+              <h3>{c.title}</h3>
+              {!isTbd(c.summary) && <p>{c.summary}</p>}
+              {!isTbd(c.outcome) && <p class="result">{c.outcome}</p>}
+            </a>
+          ))}
+        </div>
+      )}
+    </section>
+  )}
+
+  {show('playbook') && (
+    <section class="wrap section" id="playbook">
+      <h2>{label('playbook')}</h2>
+      <p class="section-intro">Templates and artifacts from how I run product and programs.</p>
+      {playbook.length === 0 ? <ComingSoon what={`${label('playbook')} artifacts`} /> : (
+        <ul class="artifacts">
+          {playbook.map(({ id, data: p }) => (
+            <li>
+              <a href={`${import.meta.env.BASE_URL}playbook/${id}/`}>
+                <span class="kind">{p.kind}</span>
+                <span class="artifact-title">{p.title} <Status status={p.status} /></span>
+                {!isTbd(p.summary) && <span class="artifact-summary">{p.summary}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )}
+
+  {show('toolkit') && (
+    <section class="wrap section" id="toolkit">
+      <h2>{label('toolkit')}</h2>
+      <div class="skills">
+        {toolkit.map((g) => (
+          <div>
+            <h3>{g.data.label}</h3>
+            <ul class="chips">{g.items.map((i) => <li class={isTbd(i) ? 'chip-tbd' : ''}>{i}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {show('connect') && (
+    <section class="wrap section" id="connect">
+      <h2>{connect.heading}</h2>
+      {connect.intro && <p class="prose">{connect.intro}</p>}
+      {booking && connect.booking.embed && (
+        <iframe class="scheduler" src={booking} title={connect.booking.label} loading="lazy"></iframe>
+      )}
+      <div class="cta">
+        {booking
+          ? <a class="btn primary" href={booking} rel="noopener" target="_blank">{connect.booking.label}</a>
+          : import.meta.env.DEV && <span class="btn disabled">{connect.booking.label} <Status status="tbd" /></span>}
+        {connect.email && <a class="btn" href={`mailto:${connect.email}`}>{connect.email}</a>}
+      </div>
+    </section>
+  )}
+</Base>

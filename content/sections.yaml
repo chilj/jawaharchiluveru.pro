@@ -1,0 +1,26 @@
+# Site sections: rename, reorder or hide any section here.
+# `order` sets the position in the nav and on the page; `enabled: false` hides a section.
+about:
+  label: About
+  order: 1
+  enabled: true
+career:
+  label: Career
+  order: 2
+  enabled: true
+case-studies:
+  label: Case Studies
+  order: 3
+  enabled: true
+playbook:
+  label: Playbook
+  order: 4
+  enabled: true
+toolkit:
+  label: Toolkit
+  order: 5
+  enabled: true
+connect:
+  label: Let's Talk
+  order: 6
+  enabled: true

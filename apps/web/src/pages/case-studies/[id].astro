@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Status from '../../components/Status.astro';
+import { isTbd, isVisible } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('case-studies', (e) => isVisible(e.data.status));
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const c = entry.data;
+const { Content } = await render(entry);
+const facts = [['Domain', c.domain], ['Client', c.client], ['Year', c.year?.toString()], ['Outcome', c.outcome]]
+  .filter(([, v]) => !isTbd(v));
+---
+<Base title={c.title} description={isTbd(c.summary) ? undefined : c.summary}>
+  <article class="wrap detail">
+    <a class="back" href={`${import.meta.env.BASE_URL}#case-studies`}>← All case studies</a>
+    <h1>{c.title} <Status status={c.status} /></h1>
+    {!isTbd(c.summary) && <p class="lede">{c.summary}</p>}
+    {facts.length > 0 && <dl class="facts">{facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}
+    <div class="prose"><Content /></div>
+  </article>
+</Base>

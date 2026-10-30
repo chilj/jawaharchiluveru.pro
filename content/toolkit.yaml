@@ -1,0 +1,32 @@
+# Groups shown in the Toolkit section. Add, remove or rename freely.
+product:
+  label: Product & Delivery
+  order: 1
+  items: [Platform as a Product, Roadmapping, Release Planning, Estimation, ROI Modeling, Executive Reporting, Agile / Scrum]
+platform:
+  label: Platform & DevEx
+  order: 2
+  items: [AWS / EKS, GitLab CI/CD, Service Mesh, DevOps, Spring Boot, Dynatrace, Datadog]
+frameworks:
+  label: Frameworks
+  order: 3
+  items: [DORA, SPACE, DX Core 4]
+tools:
+  label: Everyday Tools
+  order: 4
+  items: [TBD]   # e.g. Jira, Confluence, Figma, Miro, Amplitude
+ai:
+  label: AI-Assisted Work
+  order: 5
+  items: [TBD]   # e.g. Claude, Copilot, Cursor
+credentials:
+  label: Certifications
+  order: 6
+  items: [Agile Product Owner Role, AI-Native Ready, Vibe Coding Fundamentals, SQL Fundamentals]
+education:
+  label: Education
+  order: 7
+  items:
+    - M.S. Engineering Management, UT Arlington
+    - MBA, NIT Warangal
+    - B.E. Biomedical Engineering, JBIET
