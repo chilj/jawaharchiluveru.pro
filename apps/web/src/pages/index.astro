@@ -3,7 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Status from '../components/Status.astro';
 import ComingSoon from '../components/ComingSoon.astro';
-import { byOrder, formatMonth, yearRange, getSections, isPlaceholder, isVisible } from '../lib/content';
+import { byOrder, formatMonth, yearRange, getSections, isPlaceholder, isVisible, showUnpublished } from '../lib/content';
 
 const { nav, byId } = await getSections();
 const aboutEntry = (await getEntry('about', 'about'))!;
@@ -18,7 +18,7 @@ const earlier = career.filter((e) => e.data.earlier);
 const caseStudies = (await getCollection('case-studies', (e) => isVisible(e.data.status))).sort(byOrder);
 const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status))).sort(byOrder);
 const toolkit = (await getCollection('toolkit')).sort(byOrder)
-  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i) || import.meta.env.DEV) }))
+  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i) || showUnpublished) }))
   .filter((g) => g.items.length);
 const connect = (await getEntry('connect', 'connect'))!.data;
 const booking = connect.booking.url && !isPlaceholder(connect.booking.url) ? connect.booking.url : undefined;
@@ -143,7 +143,7 @@ const label = (id: string) => byId[id]?.label ?? id;
       <div class="cta">
         {booking
           ? <a class="btn primary" href={booking} rel="noopener" target="_blank">{connect.booking.label}</a>
-          : import.meta.env.DEV && <span class="btn disabled">{connect.booking.label} <Status status="planned" /></span>}
+          : showUnpublished && <span class="btn disabled">{connect.booking.label} <Status status="planned" /></span>}
         {connect.email && <a class="btn" href={`mailto:${connect.email}`}>{connect.email}</a>}
       </div>
     </section>

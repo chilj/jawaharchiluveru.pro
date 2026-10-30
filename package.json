@@ -1,11 +1,16 @@
 {
   "name": "jawaharchiluveru.pro",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "npm run dev -w @jc/web",
     "build": "npm run build -w @jc/web",
-    "preview": "npm run preview -w @jc/web"
+    "preview": "npm run preview -w @jc/web",
+    "build:review": "npm run build:review -w @jc/web"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

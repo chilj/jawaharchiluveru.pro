@@ -2,8 +2,10 @@ import { getCollection } from 'astro:content';
 
 type Status = 'planned' | 'draft' | 'published';
 
-/** Unpublished entries show up while developing locally, never on the live site. */
-export const isVisible = (status: Status) => status === 'published' || import.meta.env.DEV;
+/** Unpublished entries show up in `npm run dev` and review builds, never on the live site. */
+export const showUnpublished = import.meta.env.DEV || process.env.SHOW_DRAFTS === 'true';
+
+export const isVisible = (status: Status) => status === 'published' || showUnpublished;
 
 /** A field still holding a "TODO" placeholder. */
 export const isPlaceholder = (value?: string) => !value || ['TODO', 'TBD'].includes(value.trim().toUpperCase());
