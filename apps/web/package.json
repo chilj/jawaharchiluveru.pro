@@ -9,6 +9,8 @@
     "build:review": "SHOW_DRAFTS=true astro build --outDir dist-review"
   },
   "dependencies": {
-    "astro": "7.4.1"
+    "astro": "7.4.1",
+    "lucide-static": "1.57.0",
+    "simple-icons": "16.35.0"
   }
 }

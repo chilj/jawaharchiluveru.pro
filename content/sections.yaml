@@ -1,26 +1,34 @@
 # Site sections: rename, reorder or hide any section here.
 # `order` sets the position in the nav and on the page; `enabled: false` hides a section.
+# `icon` is any Lucide icon name (https://lucide.dev/icons). Visitors can collapse sections;
+# `collapsed: true` starts a section closed.
 about:
   label: About
+  icon: user
   order: 1
   enabled: true
 career:
   label: Career
+  icon: route
   order: 2
   enabled: true
 case-studies:
   label: Case Studies
+  icon: book-open
   order: 3
   enabled: true
 playbook:
   label: Playbook
+  icon: clipboard-list
   order: 4
   enabled: true
 toolkit:
   label: Toolkit
+  icon: toolbox
   order: 5
   enabled: true
 connect:
   label: Let's Talk
+  icon: messages-square
   order: 6
   enabled: true

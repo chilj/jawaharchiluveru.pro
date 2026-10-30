@@ -1,0 +1,6 @@
+---
+import { uiIcon } from '../lib/icons';
+interface Props { name: string }
+const svg = uiIcon(Astro.props.name);
+---
+{svg && <Fragment set:html={svg} />}

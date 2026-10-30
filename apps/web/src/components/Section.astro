@@ -1,0 +1,17 @@
+---
+// A collapsible page section. Open/closed state is remembered per visitor (see Base.astro).
+import Icon from './Icon.astro';
+interface Props { id: string; title: string; icon: string; open?: boolean; count?: string }
+const { id, title, icon, open = true, count } = Astro.props;
+---
+<section class="wrap section" id={id}>
+  <details class="fold" data-fold={id} open={open}>
+    <summary>
+      <span class="section-icon"><Icon name={icon} /></span>
+      <h2>{title}</h2>
+      {count && <span class="count">{count}</span>}
+      <span class="chev"><Icon name="chevron-down" /></span>
+    </summary>
+    <div class="fold-body"><slot /></div>
+  </details>
+</section>

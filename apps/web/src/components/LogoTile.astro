@@ -1,0 +1,12 @@
+---
+// Square tile with a brand mark when one exists, otherwise a monogram or UI icon.
+import { brandFor, monogram, uiIcon } from '../lib/icons';
+interface Props { name: string; logo?: string; mark?: string; icon?: string; size?: 'sm' | 'md' }
+const { name, logo, mark, icon, size = 'md' } = Astro.props;
+const brand = mark ? undefined : brandFor(name, logo);
+const fallback = icon ? uiIcon(icon) : undefined;
+const text = mark ?? monogram(name);
+---
+<span class={`tile tile-${size}`} title={name}>
+  {brand ? <Fragment set:html={brand} /> : fallback && !mark ? <Fragment set:html={fallback} /> : <span class="mono">{text}</span>}
+</span>

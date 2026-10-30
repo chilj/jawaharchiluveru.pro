@@ -22,9 +22,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <meta property="og:description" content={description}>
   <meta property="og:url" content={canonical}>
   <link rel="canonical" href={canonical}>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232f5bd3'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='28' font-weight='700' fill='white'>JC</text></svg>">
 </head>
 <body>
+  <div class="backdrop" aria-hidden="true">
+    <span class="glow glow-a"></span><span class="glow glow-b"></span><span class="glow glow-c"></span>
+  </div>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="wrap nav">
@@ -38,5 +44,34 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <footer class="site-footer wrap">
     <p>© {new Date().getFullYear()} {about.name}</p>
   </footer>
+  <script>
+    // Collapsible sections and roles: remember each visitor's open/closed choices,
+    // open a section when it's linked to, and expand or collapse everything at once.
+    const KEY = 'jc-folds';
+    const folds = [...document.querySelectorAll<HTMLDetailsElement>('details[data-fold]')];
+    let saved: Record<string, boolean> = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) ?? '{}'); } catch {}
+    const save = () => {
+      try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(folds.map((d) => [d.dataset.fold, d.open])))); } catch {}
+    };
+    for (const d of folds) {
+      if (d.dataset.fold! in saved) d.open = saved[d.dataset.fold!];
+      d.addEventListener('toggle', save);
+    }
+    const reveal = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      target?.querySelector<HTMLDetailsElement>(':scope > details')?.setAttribute('open', '');
+    };
+    reveal();
+    addEventListener('hashchange', reveal);
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-fold-all]')) {
+      b.addEventListener('click', () => {
+        const open = b.dataset.foldAll === 'open';
+        for (const d of folds) d.open = open;
+        save();
+      });
+    }
+  </script>
 </body>
 </html>

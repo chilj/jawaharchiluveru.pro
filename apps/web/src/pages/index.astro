@@ -3,7 +3,13 @@ import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Status from '../components/Status.astro';
 import ComingSoon from '../components/ComingSoon.astro';
-import { byOrder, formatMonth, yearRange, getSections, isPlaceholder, isVisible, showUnpublished } from '../lib/content';
+import Section from '../components/Section.astro';
+import Icon from '../components/Icon.astro';
+import LogoTile from '../components/LogoTile.astro';
+import { brandFor } from '../lib/icons';
+import {
+  byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished,
+} from '../lib/content';
 
 const { nav, byId } = await getSections();
 const aboutEntry = (await getEntry('about', 'about'))!;
@@ -14,17 +20,20 @@ const career = (await getCollection('career', (e) => isVisible(e.data.status)))
   .sort((a, b) => b.data.start.localeCompare(a.data.start));
 const roles = career.filter((e) => !e.data.earlier);
 const earlier = career.filter((e) => e.data.earlier);
+const firstYear = career.at(-1)?.data.start.slice(0, 4);
 
 const caseStudies = (await getCollection('case-studies', (e) => isVisible(e.data.status))).sort(byOrder);
 const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status))).sort(byOrder);
 const toolkit = (await getCollection('toolkit')).sort(byOrder)
-  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i) || showUnpublished) }))
+  .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i.name) || showUnpublished) }))
   .filter((g) => g.items.length);
 const connect = (await getEntry('connect', 'connect'))!.data;
 const booking = connect.booking.url && !isPlaceholder(connect.booking.url) ? connect.booking.url : undefined;
 
 const show = (id: string) => nav.some((s) => s.id === id);
-const label = (id: string) => byId[id]?.label ?? id;
+const section = (id: string) => ({
+  id, title: byId[id]?.label ?? id, icon: byId[id]?.icon ?? 'circle', open: !byId[id]?.collapsed,
+});
 ---
 <Base>
   <section class="hero wrap" id="top">
@@ -32,9 +41,13 @@ const label = (id: string) => byId[id]?.label ?? id;
     <h1>{about.name}</h1>
     <p class="lede">{about.tagline}</p>
     <div class="cta">
-      {show('connect') && <a class="btn primary" href={booking ?? '#connect'}>{booking ? connect.booking.label : label('connect')}</a>}
-      {connect.links.map((l) => <a class="btn" href={l.url} rel="noopener" target="_blank">{l.label}</a>)}
-      {about.resume && <a class="btn" href={about.resume}>Résumé</a>}
+      {show('connect') && (
+        <a class="btn primary" href={booking ?? '#connect'}>
+          <Icon name="calendar" />{booking ? connect.booking.label : section('connect').title}
+        </a>
+      )}
+      {connect.links.map((l) => <a class="btn" href={l.url} rel="noopener" target="_blank">{l.label}<Icon name="external-link" /></a>)}
+      {about.resume && <a class="btn" href={about.resume}><Icon name="file-text" />Résumé</a>}
     </div>
     {about.stats.length > 0 && (
       <dl class="stats">
@@ -43,72 +56,102 @@ const label = (id: string) => byId[id]?.label ?? id;
     )}
   </section>
 
+  <div class="fold-controls wrap" aria-label="Sections">
+    <button type="button" data-fold-all="open"><Icon name="unfold-vertical" />Expand all</button>
+    <button type="button" data-fold-all="close"><Icon name="fold-vertical" />Collapse all</button>
+  </div>
+
   {show('about') && (
-    <section class="wrap section" id="about">
-      <h2>{label('about')}</h2>
+    <Section {...section('about')}>
       <div class="prose"><Bio /></div>
-    </section>
+    </Section>
   )}
 
   {show('career') && (
-    <section class="wrap section" id="career">
-      <h2>{label('career')}</h2>
-      <ol class="timeline">
-        {roles.map(({ data: r }) => (
-          <li>
-            <article class="role">
-              <h3>{r.title} · <span class="org">{r.org}</span> <Status status={r.status} /></h3>
-              {r.product && <p class="product">{r.product}</p>}
-              <p class="meta">{formatMonth(r.start)} – {formatMonth(r.end)}{r.location && ` · ${r.location}`}{r.via && ` · via ${r.via}`}</p>
-              {r.clients.length > 0 && <p class="clients">Clients: {r.clients.join(', ')}</p>}
-              {r.highlights.length > 0 && <ul>{r.highlights.filter((h) => !isPlaceholder(h)).map((h) => <li>{h}</li>)}</ul>}
-            </article>
+    <Section {...section('career')} count={`${roles.length + earlier.length} roles · since ${firstYear}`}>
+      <ol class="journey">
+        {roles.map(({ id, data: r }, i) => (
+          <li class={!r.end ? 'is-current' : ''}>
+            <details class="role" data-fold={`career-${id}`} open={i === 0}>
+              <summary>
+                <LogoTile name={r.org} logo={r.logo} mark={r.mark} />
+                <span class="role-head">
+                  <span class="role-title">{r.title} <Status status={r.status} /></span>
+                  <span class="role-org">{r.org}{r.product && <span class="role-product"> · {r.product}</span>}</span>
+                  <span class="meta">
+                    {formatMonth(r.start)} – {formatMonth(r.end)}
+                    <span class="tenure">{tenure(r.start, r.end)}</span>
+                    {!r.end && <span class="now">Current</span>}
+                  </span>
+                </span>
+                <span class="chev"><Icon name="chevron-down" /></span>
+              </summary>
+              <div class="role-body">
+                {(r.location || r.via) && (
+                  <p class="role-facts">
+                    {r.location && <span><Icon name="map-pin" />{r.location}</span>}
+                    {r.via && <span><Icon name="building-2" />via {r.via}</span>}
+                  </p>
+                )}
+                {r.clients.length > 0 && <p class="clients">Clients: {r.clients.join(', ')}</p>}
+                {r.highlights.length > 0 && <ul>{r.highlights.filter((h) => !isPlaceholder(h)).map((h) => <li>{h}</li>)}</ul>}
+              </div>
+            </details>
           </li>
         ))}
         {earlier.length > 0 && (
           <li>
-            <article class="role">
-              <h3>Earlier career</h3>
-              <ul>
+            <details class="role" data-fold="career-earlier">
+              <summary>
+                <span class="tile tile-md"><Icon name="briefcase" /></span>
+                <span class="role-head">
+                  <span class="role-title">Earlier career</span>
+                  <span class="meta">{earlier.at(-1)!.data.start.slice(0, 4)} – {earlier[0].data.end?.slice(0, 4)} · {earlier.length} roles</span>
+                </span>
+                <span class="chev"><Icon name="chevron-down" /></span>
+              </summary>
+              <ul class="earlier">
                 {earlier.map(({ data: r }) => (
-                  <li>{r.title}, {r.org} · {yearRange(r.start, r.end)}{r.location && ` · ${r.location}`}</li>
+                  <li>
+                    <LogoTile name={r.org} logo={r.logo} mark={r.mark} size="sm" />
+                    <span><strong>{r.title}</strong>, {r.org}<span class="meta"> · {yearRange(r.start, r.end)}</span></span>
+                  </li>
                 ))}
               </ul>
-            </article>
+            </details>
           </li>
         )}
       </ol>
-    </section>
+    </Section>
   )}
 
   {show('case-studies') && (
-    <section class="wrap section" id="case-studies">
-      <h2>{label('case-studies')}</h2>
-      {caseStudies.length === 0 ? <ComingSoon what={label('case-studies')} /> : (
+    <Section {...section('case-studies')} count={caseStudies.length ? `${caseStudies.length}` : undefined}>
+      {caseStudies.length === 0 ? <ComingSoon what={section('case-studies').title} /> : (
         <div class="cards">
           {caseStudies.map(({ id, data: c }) => (
             <a class="card link-card" href={`${import.meta.env.BASE_URL}case-studies/${id}/`}>
               <p class="tag">{c.domain} <Status status={c.status} /></p>
               <h3>{c.title}</h3>
+              {!isPlaceholder(c.client) && <p class="card-client"><LogoTile name={c.client!} size="sm" />{c.client}</p>}
               {!isPlaceholder(c.summary) && <p>{c.summary}</p>}
               {!isPlaceholder(c.outcome) && <p class="result">{c.outcome}</p>}
             </a>
           ))}
         </div>
       )}
-    </section>
+    </Section>
   )}
 
   {show('playbook') && (
-    <section class="wrap section" id="playbook">
-      <h2>{label('playbook')}</h2>
+    <Section {...section('playbook')} count={playbook.length ? `${playbook.length}` : undefined}>
       <p class="section-intro">Templates and artifacts from how I run product and programs.</p>
-      {playbook.length === 0 ? <ComingSoon what={`${label('playbook')} artifacts`} /> : (
+      {playbook.length === 0 ? <ComingSoon what={`${section('playbook').title} artifacts`} /> : (
         <ul class="artifacts">
           {playbook.map(({ id, data: p }) => (
             <li>
               <a href={`${import.meta.env.BASE_URL}playbook/${id}/`}>
-                <span class="kind">{p.kind}</span>
+                <span class="kind"><Icon name="file-text" />{p.kind}</span>
                 <span class="artifact-title">{p.title} <Status status={p.status} /></span>
                 {!isPlaceholder(p.summary) && <span class="artifact-summary">{p.summary}</span>}
               </a>
@@ -116,36 +159,54 @@ const label = (id: string) => byId[id]?.label ?? id;
           ))}
         </ul>
       )}
-    </section>
+    </Section>
   )}
 
   {show('toolkit') && (
-    <section class="wrap section" id="toolkit">
-      <h2>{label('toolkit')}</h2>
+    <Section {...section('toolkit')}>
       <div class="skills">
         {toolkit.map((g) => (
-          <div>
-            <h3>{g.data.label}</h3>
-            <ul class="chips">{g.items.map((i) => <li class={isPlaceholder(i) ? 'chip-placeholder' : ''}>{i}</li>)}</ul>
+          <div class={`skill-group layout-${g.data.layout}`}>
+            <h3><Icon name={g.data.icon} />{g.data.label}</h3>
+            {g.data.layout === 'list' ? (
+              <ul class="cred-list">
+                {g.items.map((i) => (
+                  <li>
+                    <LogoTile name={i.detail ?? i.name} logo={i.logo} mark={i.mark} icon={g.data.icon} />
+                    <span><strong>{i.name}</strong>{i.detail && <span class="meta">{i.detail}</span>}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul class="chips">
+                {g.items.map((i) => {
+                  const svg = brandFor(i.name, i.logo);
+                  return (
+                    <li class={isPlaceholder(i.name) ? 'chip-placeholder' : svg ? 'chip-brand' : ''}>
+                      {svg && <Fragment set:html={svg} />}{i.name}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         ))}
       </div>
-    </section>
+    </Section>
   )}
 
   {show('connect') && (
-    <section class="wrap section" id="connect">
-      <h2>{connect.heading}</h2>
+    <Section {...section('connect')} title={connect.heading}>
       {connect.intro && <p class="prose">{connect.intro}</p>}
       {booking && connect.booking.embed && (
         <iframe class="scheduler" src={booking} title={connect.booking.label} loading="lazy"></iframe>
       )}
       <div class="cta">
         {booking
-          ? <a class="btn primary" href={booking} rel="noopener" target="_blank">{connect.booking.label}</a>
-          : showUnpublished && <span class="btn disabled">{connect.booking.label} <Status status="planned" /></span>}
-        {connect.email && <a class="btn" href={`mailto:${connect.email}`}>{connect.email}</a>}
+          ? <a class="btn primary" href={booking} rel="noopener" target="_blank"><Icon name="calendar" />{connect.booking.label}</a>
+          : showUnpublished && <span class="btn disabled"><Icon name="calendar" />{connect.booking.label} <Status status="planned" /></span>}
+        {connect.email && <a class="btn" href={`mailto:${connect.email}`}><Icon name="mail" />{connect.email}</a>}
       </div>
-    </section>
+    </Section>
   )}
 </Base>

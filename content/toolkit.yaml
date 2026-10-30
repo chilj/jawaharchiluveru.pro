@@ -1,44 +1,59 @@
 # Groups shown in the Toolkit section. Add, remove or rename freely.
+# Items are plain names, or objects with: name, detail, logo (Simple Icons slug,
+# https://simpleicons.org) and mark (monogram text when there's no logo).
+# Brand logos are matched automatically for well-known tool names.
+# `layout: list` shows a group as rows with logo tiles instead of chips.
 product:
   label: Product Leadership
+  icon: layers
   order: 1
   items: [Technical Product Management, Platform Product Management, Product Discovery, Backlog Management, Release Governance, Stakeholder Management]
 integration:
   label: APIs & Integration
+  icon: plug
   order: 2
   items: [API Product Management, API Standardization, MuleSoft, Systems Integration (40+), Third-Party Integration]
 events:
   label: Event-Driven & Messaging
+  icon: radio
   order: 3
   items: [Event-Driven Architecture, GCP Pub/Sub, Dead-Letter Queues, Omnichannel Messaging, Cordial]
 cloud:
   label: Cloud & Platform
+  icon: cloud
   order: 4
   items: [AWS, Google Cloud, Kubernetes, Terraform, Istio, GitLab CI/CD, Jenkins, Dynatrace, Datadog]
 agile:
   label: Agile
+  icon: repeat
   order: 5
   items: [Scrum, Kanban, SAFe, WSJF, Product Ownership]
 data:
   label: Data
+  icon: database
   order: 6
   items: [SQL, Data Migration, Data Reconciliation, Product Analytics, KPI Instrumentation]
 ai:
   label: AI-Native Execution
+  icon: sparkles
   order: 7
   items: [AI-Assisted Discovery, Requirements Synthesis, Documentation, Prototyping, Vendor Evaluation, Claude, AWS Q / Kiro, GitHub Copilot]
 credentials:
   label: Certifications
+  icon: award
   order: 8
+  layout: list
   items:
-    - Certified ScrumMaster (Scrum Alliance)
-    - Certified Scrum Product Owner (Scrum Alliance)
-    - SAFe 6 Product Owner / Product Manager (Scaled Agile)
-    - SQL Fundamentals (SoloLearn)
+    - { name: Certified ScrumMaster, detail: Scrum Alliance, logo: scrumalliance }
+    - { name: Certified Scrum Product Owner, detail: Scrum Alliance, logo: scrumalliance }
+    - { name: SAFe 6 Product Owner / Product Manager, detail: Scaled Agile, mark: SAFe }
+    - { name: SQL Fundamentals, detail: SoloLearn, logo: sololearn }
 education:
   label: Education
+  icon: graduation-cap
   order: 9
+  layout: list
   items:
-    - M.S. Engineering / Industrial Management, UT Arlington
-    - MBA, NIT Warangal
-    - B.Tech Biomedical Engineering, JNTU Hyderabad
+    - { name: "M.S., Engineering / Industrial Management", detail: The University of Texas at Arlington, mark: UTA }
+    - { name: "MBA, Information Technology & Marketing", detail: "National Institute of Technology, Warangal", mark: NITW }
+    - { name: "B.Tech, Biomedical Engineering", detail: JNTU Hyderabad, mark: JNTU }

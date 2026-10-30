@@ -29,3 +29,19 @@ export function yearRange(start: string, end?: string) {
   const [a, b] = [start.slice(0, 4), end ? end.slice(0, 4) : 'Present'];
   return a === b ? a : `${a}–${b}`;
 }
+
+/** Whole months between two YYYY-MM strings (end defaults to now). */
+export function months(start: string, end?: string) {
+  const [y1, m1] = start.split('-').map(Number);
+  const now = new Date();
+  const [y2, m2] = end ? end.split('-').map(Number) : [now.getFullYear(), now.getMonth() + 1];
+  return Math.max(1, (y2 - y1) * 12 + (m2 - m1));
+}
+
+/** "5 yrs", "1 yr 6 mos", "7 mos". */
+export function tenure(start: string, end?: string) {
+  const total = months(start, end);
+  const y = Math.floor(total / 12), m = total % 12;
+  const part = (n: number, unit: string) => (n ? `${n} ${unit}${n > 1 ? 's' : ''}` : '');
+  return [part(y, 'yr'), part(m, 'mo')].filter(Boolean).join(' ');
+}

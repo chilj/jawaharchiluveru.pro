@@ -11,7 +11,13 @@ const status = z.enum(['planned', 'draft', 'published']).default('planned');
 
 const sections = defineCollection({
   loader: file(`${CONTENT}/sections.yaml`),
-  schema: z.object({ label: z.string(), order: z.number(), enabled: z.boolean().default(true) }),
+  schema: z.object({
+    label: z.string(),
+    icon: z.string().default('circle'),
+    order: z.number(),
+    enabled: z.boolean().default(true),
+    collapsed: z.boolean().default(false),
+  }),
 });
 
 const about = defineCollection({
@@ -33,6 +39,8 @@ const career = defineCollection({
     title: z.string(),
     org: z.string(),
     via: z.string().optional(),
+    logo: z.string().optional(),   // Simple Icons slug
+    mark: z.string().optional(),   // monogram when there's no logo
     product: z.string().optional(),
     start: z.string(),
     end: z.string().optional(),
@@ -72,7 +80,16 @@ const playbook = defineCollection({
 
 const toolkit = defineCollection({
   loader: file(`${CONTENT}/toolkit.yaml`),
-  schema: z.object({ label: z.string(), order: z.number().default(99), items: z.array(z.string()) }),
+  schema: z.object({
+    label: z.string(),
+    icon: z.string().default('wrench'),
+    order: z.number().default(99),
+    layout: z.enum(['chips', 'list']).default('chips'),
+    items: z.array(z.union([
+      z.string().transform((name) => ({ name })),
+      z.object({ name: z.string(), detail: z.string().optional(), logo: z.string().optional(), mark: z.string().optional() }),
+    ])),
+  }),
 });
 
 const connect = defineCollection({
