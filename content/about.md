@@ -2,29 +2,38 @@
 name: Jawahar Chiluveru
 role: Senior Technical Product Manager
 location: Dallas–Fort Worth, TX
-tagline: >-
-  Technical Product Manager with 16+ years delivering scalable digital platforms across
-  retail, e-commerce, fintech and enterprise systems.
-seo_title: "Jawahar Chiluveru | Senior Technical PM, Platform & Loyalty"
-description: >-
-  Senior Technical Product Manager in Dallas–Fort Worth. 16+ years building loyalty,
-  omnichannel and developer platforms for Levi's, 7-Eleven and PayPal.
-social_image: /files/og-image.png
-social_image_alt: >-
-  Jawahar Chiluveru, Senior Technical Product Manager in Dallas–Fort Worth: 16+ years,
-  20M+ loyalty members served, 15+ major platform releases led.
-resume: ""          # TODO: drop resume.pdf in content/public/files/ and set "/files/resume.pdf"
+tagline: Technical Product Manager with 16+ years delivering scalable digital platforms across retail, e-commerce, fintech and enterprise systems.
+seo_title: Jawahar Chiluveru | Senior Technical PM, Platform & Loyalty
+description: Senior Technical Product Manager in Dallas–Fort Worth. 16+ years building loyalty, omnichannel and developer platforms for Levi's, 7-Eleven and PayPal.
+social_image: /files/1790274673358.jpeg
+social_image_alt: 'Jawahar Chiluveru, Senior Technical Product Manager in Dallas–Fort Worth: 16+ years, 25M+ loyalty members served, 25+ major platform releases led.'
+resume: ''
 stats:
-  - value: "16+"
+  - value: 16+
     label: years in product & delivery
-  - value: "20M+"
+  - value: 25M+
     label: loyalty members served
-  - value: "15+"
+  - value: 25+
     label: major platform releases led
 ---
 
-I lead cross-functional teams that build customer-centric products, loyalty platforms and omnichannel engagement systems used by millions of people. My work spans cloud modernization, event-driven architectures and API ecosystems across AWS and Google Cloud.
+I turn complex, cross-functional modernization efforts into measurable business outcomes — the kind of TPM who can sit in an architecture review and a steering committee meeting on the same day and speak both languages fluently.
 
-I translate complex business problems into scalable technical solutions, balancing product strategy, platform reliability and measurable business outcomes. Today my focus is Platform-as-a-Product: the infrastructure, observability and developer experience that let engineering teams ship faster with less friction.
+Over 16+ years, I've led platform modernization, API ecosystems, shared-services architecture, and loyalty/lifecycle-marketing platforms for organizations ranging from Fortune 500 retailers to fintech and insurance leaders. 
 
-Certified ScrumMaster and SAFe 6 Product Owner / Product Manager.
+My focus today is Platform Engineering, Developer Experience (DevEx), and Internal Developer Platforms (IDP) — the infrastructure that lets engineering teams move faster with less friction.
+
+Skilled in all stages of the software product lifecycle — from project resource estimation and product increment/release scheduling to delineating process requirements. 
+
+I'm meticulous about tracking and reporting on every facet of a project: status, cost, and issue resolution, so stakeholders always have a clear line of sight into delivery health.
+
+**Industry experience:**
+Retail / E-commerce / Omnichannel (\~8 yrs) - Catalyst Brands, Levi Strauss & Co., 7-Eleven, Advance Auto Parts
+Financial Services / Fintech / Insurance(\~4 yrs) - Mr. Cooper, PayPal/Braintree, Wells Fargo Advisors, State Farm
+Media / Logistics / Publishing (\~4 yrs) - RR Donnelley, Progressive Digital Media
+
+I bring a techno-functional lens to every engagement — architectural literacy across AWS/EKS, GitLab CI/CD, Dynatrace, Datadog, and Spring Boot, paired with metric-driven program management using DORA, SPACE, and DX Core 4 frameworks. 
+
+I'm known for evidence-forward, steering-committee-grade deliverables: ROI models, executive white papers, ROI calculators, and clear GO/NO-GO recommendations grounded in real data — not manufactured causation.
+
+Master's Degrees in Engineering Management from The University of Texas at Arlington, Texas, and Business Administration from the National Institute of Technology, Warangal, India.
