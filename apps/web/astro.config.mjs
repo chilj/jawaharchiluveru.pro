@@ -8,6 +8,8 @@ const base = `${(process.env.BASE_PATH || '').replace(/\/$/, '')}/`;
 export default defineConfig({
   site,
   base,
+  // Inline CSS into each page so styling never depends on resolving a separate asset path.
+  build: { inlineStylesheets: 'always' },
   // Static files (résumé, headshot, playbook downloads) live with the content.
   publicDir: '../../content/public',
 });
