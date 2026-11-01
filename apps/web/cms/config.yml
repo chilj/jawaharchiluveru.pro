@@ -29,7 +29,10 @@ collections:
           - { name: role, label: Role, widget: string }
           - { name: location, label: Location, widget: string, required: false }
           - { name: tagline, label: Tagline, widget: text, hint: One or two sentences under your name. }
-          - { name: description, label: Search description, widget: text, hint: Shown in search results and link previews. }
+          - { name: seo_title, label: Search title, widget: string, required: false, hint: 'Browser tab and search result title. Keep under 60 characters. Default: Name | Role.' }
+          - { name: description, label: Search description, widget: text, hint: 'Shown in search results and link previews. Keep to about 150 characters.' }
+          - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Use 1200×630 pixels (PNG or JPG).' }
+          - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe the image for screen readers.' }
           - { name: resume, label: Résumé (PDF), widget: file, required: false }
           - name: stats
             label: Headline numbers

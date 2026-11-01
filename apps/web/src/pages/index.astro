@@ -102,7 +102,7 @@ const section = (id: string) => ({
               <summary>
                 <LogoTile name={r.org} logo={r.logo} mark={r.mark} />
                 <span class="role-head">
-                  <span class="role-title">{r.title} <Status status={r.status} /></span>
+                  <h3 class="role-title">{r.title} <Status status={r.status} /></h3>
                   <span class="role-org">{r.org}{r.product && <span class="role-product"> · {r.product}</span>}</span>
                   <span class="meta">
                     {formatMonth(r.start)} – {formatMonth(r.end)}
@@ -131,7 +131,7 @@ const section = (id: string) => ({
               <summary>
                 <span class="tile tile-md"><Icon name="briefcase" /></span>
                 <span class="role-head">
-                  <span class="role-title">Earlier career</span>
+                  <h3 class="role-title">Earlier career</h3>
                   <span class="meta">{earlier.at(-1)!.data.start.slice(0, 4)} – {earlier[0].data.end?.slice(0, 4)} · {earlier.length} roles</span>
                 </span>
                 <span class="chev"><Icon name="chevron-down" /></span>

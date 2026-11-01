@@ -28,7 +28,10 @@ const about = defineCollection({
     role: z.string(),
     location: z.string().optional(),
     tagline: z.string(),
+    seo_title: z.string().optional(),     // home page <title>; default "name | role"
     description: z.string(),
+    social_image: z.string().optional(),  // 1200×630 preview for LinkedIn, Slack, X
+    social_image_alt: z.string().optional(),
     resume: z.string().optional(),
     stats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
   }),
