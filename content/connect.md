@@ -1,10 +1,10 @@
 ---
 heading: Let's talk
-intro: Open to conversations about platform, DevEx and technical product roles.
+intro: Open to conversations about platform, DevEx and technical product management roles.
 booking:
   label: Book a 30-minute call
-  url: ""            # TODO: your Calendly / Cal.com / Google Calendar appointment link
-  embed: false       # true = show the scheduler inline on the page
+  url: ''
+  embed: true
 email: jawahar.ch14@gmail.com
 links:
   - label: LinkedIn
