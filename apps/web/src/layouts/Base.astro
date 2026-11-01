@@ -1,7 +1,16 @@
 ---
 import { getEntry } from 'astro:content';
 import { getSections } from '../lib/content';
+// Self-hosted fonts: no render-blocking request to a third-party host.
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/sora/600.css';
+import '@fontsource/sora/700.css';
 import '../styles/global.css';
+// Preload the faces used above the fold to avoid a layout shift when they swap in.
+import soraBold from '@fontsource/sora/files/sora-latin-700-normal.woff2?url';
+import plexRegular from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url';
 
 interface Props { title?: string; description?: string }
 const about = (await getEntry('about', 'about'))!.data;
@@ -21,10 +30,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <meta property="og:title" content={title}>
   <meta property="og:description" content={description}>
   <meta property="og:url" content={canonical}>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content={about.name}>
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+  <link rel="preload" href={soraBold} as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href={plexRegular} as="font" type="font/woff2" crossorigin>
   <link rel="canonical" href={canonical}>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap">
+  <link rel="sitemap" href={`${home}sitemap.xml`}>
+  <slot name="head" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232f5bd3'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='28' font-weight='700' fill='white'>JC</text></svg>">
 </head>
 <body>

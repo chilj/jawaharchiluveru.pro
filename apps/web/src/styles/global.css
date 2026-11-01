@@ -186,10 +186,6 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .prose { max-width: 65ch; }
 .prose p { margin: 0 0 14px; }
 .prose h2 { font-size: 21px; margin: 32px 0 10px; }
-.coming-soon {
-  color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius);
-  padding: 20px; margin: 0; background: var(--surface-glass);
-}
 
 /* Status badges (dev and review builds only) */
 .status {

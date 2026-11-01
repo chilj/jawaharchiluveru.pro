@@ -2,7 +2,6 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Status from '../components/Status.astro';
-import ComingSoon from '../components/ComingSoon.astro';
 import Section from '../components/Section.astro';
 import Icon from '../components/Icon.astro';
 import LogoTile from '../components/LogoTile.astro';
@@ -31,11 +30,38 @@ const connect = (await getEntry('connect', 'connect'))!.data;
 const booking = connect.booking.url && !isPlaceholder(connect.booking.url) ? connect.booking.url : undefined;
 
 const show = (id: string) => nav.some((s) => s.id === id);
+
+// Structured data (schema.org Person) so search engines can connect the name, role and profiles.
+const current = roles.find((r) => !r.data.end)?.data;
+const group = (id: string) => toolkit.find((g) => g.id === id)?.items ?? [];
+const siteUrl = new URL(import.meta.env.BASE_URL, Astro.site).href;
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${siteUrl}#person`,
+  name: about.name,
+  url: siteUrl,
+  jobTitle: about.role,
+  description: about.description,
+  ...(about.location && { homeLocation: { '@type': 'Place', name: about.location } }),
+  ...(current && { worksFor: { '@type': 'Organization', name: current.org } }),
+  alumniOf: group('education').map((i) => ({ '@type': 'CollegeOrUniversity', name: i.detail ?? i.name })),
+  hasCredential: group('credentials').map((i) => ({
+    '@type': 'EducationalOccupationalCredential', name: i.name, ...(i.detail && { recognizedBy: { '@type': 'Organization', name: i.detail } }),
+  })),
+  knowsAbout: toolkit.filter((g) => g.data.layout === 'chips').flatMap((g) => g.items.map((i) => i.name)).filter((n) => !isPlaceholder(n)),
+  sameAs: connect.links.map((l) => l.url),
+};
+const website = { '@context': 'https://schema.org', '@type': 'WebSite', name: about.name, url: siteUrl, publisher: { '@id': `${siteUrl}#person` } };
 const section = (id: string) => ({
   id, title: byId[id]?.label ?? id, icon: byId[id]?.icon ?? 'circle', open: !byId[id]?.collapsed,
 });
 ---
 <Base>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+    <script type="application/ld+json" set:html={JSON.stringify(website)} />
+  </Fragment>
   <section class="hero wrap" id="top">
     <p class="eyebrow">{about.role}{about.location && ` · ${about.location}`}</p>
     <h1>{about.name}</h1>
@@ -127,7 +153,7 @@ const section = (id: string) => ({
 
   {show('case-studies') && (
     <Section {...section('case-studies')} count={caseStudies.length ? `${caseStudies.length}` : undefined}>
-      {caseStudies.length === 0 ? <ComingSoon what={section('case-studies').title} /> : (
+      {(
         <div class="cards">
           {caseStudies.map(({ id, data: c }) => (
             <a class="card link-card" href={`${import.meta.env.BASE_URL}case-studies/${id}/`}>
@@ -146,7 +172,7 @@ const section = (id: string) => ({
   {show('playbook') && (
     <Section {...section('playbook')} count={playbook.length ? `${playbook.length}` : undefined}>
       <p class="section-intro">Templates and artifacts from how I run product and programs.</p>
-      {playbook.length === 0 ? <ComingSoon what={`${section('playbook').title} artifacts`} /> : (
+      {(
         <ul class="artifacts">
           {playbook.map(({ id, data: p }) => (
             <li>

@@ -10,9 +10,19 @@ export const isVisible = (status: Status) => status === 'published' || showUnpub
 /** A field still holding a "TODO" placeholder. */
 export const isPlaceholder = (value?: string) => !value || ['TODO', 'TBD'].includes(value.trim().toUpperCase());
 
+/** Sections that list entries; each stays hidden (with its nav link) until an entry is visible. */
+const LISTING_SECTIONS = ['case-studies', 'playbook'] as const;
+
 export async function getSections() {
   const all = await getCollection('sections');
-  const enabled = all.filter((s) => s.data.enabled).sort((a, b) => a.data.order - b.data.order);
+  const empty = new Set<string>();
+  for (const id of LISTING_SECTIONS) {
+    const entries = await getCollection(id, (e) => isVisible(e.data.status));
+    if (entries.length === 0) empty.add(id);
+  }
+  const enabled = all
+    .filter((s) => s.data.enabled && !empty.has(s.id))
+    .sort((a, b) => a.data.order - b.data.order);
   const byId = Object.fromEntries(all.map((s) => [s.id, s.data]));
   return { nav: enabled.map((s) => ({ id: s.id, label: s.data.label })), byId };
 }
