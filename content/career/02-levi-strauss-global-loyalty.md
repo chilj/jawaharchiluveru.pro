@@ -18,6 +18,6 @@ highlights:
   - "Moved loyalty data feeds from Amazon Redshift to Google Cloud and coordinated release governance across engineering, QA, security, marketing and operations."
   - "Championed Agile transformation (Scrum, Kanban, WSJF), reducing sprint planning time by 30% and speeding delivery of high-value features by 15%."
   - "Authored the InventorySmart User Manual V2, cutting training time by 40% for 100+ store associates."
-  # VERIFY before uncommenting: the 40% figure isn't backed by the source docs.
-  # - "Resolved 50+ production incidents and wrote RCA reports, reducing SLA breach risk by 40%."
+to_verify:
+  - "Resolved 50+ production incidents and wrote RCA reports, reducing SLA breach risk by 40%."
 ---

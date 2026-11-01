@@ -1,6 +1,5 @@
 ---
-# Copy this file to a new name (e.g. idp-golden-paths.md) and fill it in.
-# Files starting with "_" are ignored by the site.
+# Copy into content/case-studies/ under a new name (e.g. idp-golden-paths.md) and fill it in.
 title: TODO
 summary: One-sentence hook shown on the card.
 domain: TODO          # e.g. Platform Engineering, Loyalty, Payments

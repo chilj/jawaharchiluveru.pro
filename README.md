@@ -11,14 +11,36 @@ content/                  ← everything you edit
 ├── sections.yaml         section names, order, on/off flags
 ├── about.md              About: headline, stats, bio
 ├── career/               Career: one file per role
-├── case-studies/         Case Studies: one file per story  (_template.md to copy)
-├── playbook/             Playbook: TPM artifacts            (_template.md to copy)
+├── case-studies/         Case Studies: one file per story
+├── playbook/             Playbook: TPM artifacts
 ├── toolkit.yaml          Toolkit: skills, tools, certifications, education
 ├── connect.md            Let's Talk: calendar booking link, email, social links
-└── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
+├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
+└── _templates/           starting points for new entries when editing files by hand
 apps/
 └── web/                  Astro static site that renders content/
+    └── cms/config.yml    forms for the content editor at /admin
 ```
+
+## Content editor
+
+Go to **https://www.jawaharchiluveru.pro/admin/** to edit everything in `content/` through forms:
+profile, section names, career roles, case studies, playbook artifacts, toolkit and booking link,
+plus uploads for your résumé and artifact files. Each save is a commit to `main`, so the site
+redeploys about a minute later.
+
+**Sign in (one time):** create a fine-grained GitHub token at
+https://github.com/settings/personal-access-tokens/new with access to only
+`chilj/jawaharchiluveru.pro` and **Contents: Read and write**. Paste it under
+**Sign In Using Access Token**. The token stays in that browser.
+
+In Chrome or Edge you can instead choose **Work with Local Repository** and pick your local clone;
+changes are written to disk and you commit and push them yourself.
+
+Things to know:
+- Use `status` to stage work: `planned` and `draft` items stay off the live site.
+- Unconfirmed career bullets go in **Needs verification**, which is never shown.
+- The editor rewrites YAML when it saves, so comments in edited files are dropped.
 
 ## Workflow
 
@@ -41,8 +63,8 @@ Because everything merges to trunk, half-finished content is controlled by flags
 
 A section with nothing published shows a "coming soon" note on the live site.
 
-To add an entry, copy the section's `_template.md` (files starting with `_` are ignored),
-fill it in, and flip `status` to `published` when it's ready.
+To add an entry, use **New** in the content editor, or copy a file from `content/_templates/`
+into the section's folder. Flip `status` to `published` when it's ready.
 
 **Book time:** set `booking.url` in `content/connect.md` to your Calendly, Cal.com or Google
 Calendar appointment-schedule link. Set `embed: true` to show the scheduler inline.

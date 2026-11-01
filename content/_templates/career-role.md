@@ -1,5 +1,4 @@
 ---
-# Copy to a new file (e.g. 13-company.md). Files starting with "_" are ignored.
 title: TODO
 org: TODO            # the company you worked for or with
 via: ""              # optional: consultancy you were placed through

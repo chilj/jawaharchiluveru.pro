@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { parse as parseYaml } from 'yaml';
 
 // All editable content lives in /content at the repo root.
 const CONTENT = '../../content';
@@ -47,6 +48,7 @@ const career = defineCollection({
     location: z.string().optional(),
     clients: z.array(z.string()).default([]),
     highlights: z.array(z.string()).default([]),
+    to_verify: z.array(z.string()).default([]),   // notes for you; never shown on the site
     earlier: z.boolean().default(false),
     status,
   }),
@@ -79,7 +81,10 @@ const playbook = defineCollection({
 });
 
 const toolkit = defineCollection({
-  loader: file(`${CONTENT}/toolkit.yaml`),
+  // toolkit.yaml holds `groups: [...]`; list position sets display order.
+  loader: file(`${CONTENT}/toolkit.yaml`, {
+    parser: (text) => parseYaml(text).groups.map((g: Record<string, unknown>, i: number) => ({ order: i, ...g })),
+  }),
   schema: z.object({
     label: z.string(),
     icon: z.string().default('wrench'),

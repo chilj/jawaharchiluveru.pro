@@ -1,59 +1,107 @@
-# Groups shown in the Toolkit section. Add, remove or rename freely.
-# Items are plain names, or objects with: name, detail, logo (Simple Icons slug,
-# https://simpleicons.org) and mark (monogram text when there's no logo).
-# Brand logos are matched automatically for well-known tool names.
-# `layout: list` shows a group as rows with logo tiles instead of chips.
-product:
+# Toolkit groups, shown in this order. Edit here or in the site editor at /admin.
+# Items: name, plus optional detail, logo (Simple Icons slug, https://simpleicons.org)
+# and mark (monogram text when there's no logo). Brand logos are matched automatically
+# for well-known tool names. `layout: list` shows a group as rows with logo tiles.
+groups:
+- id: product
   label: Product Leadership
   icon: layers
-  order: 1
-  items: [Technical Product Management, Platform Product Management, Product Discovery, Backlog Management, Release Governance, Stakeholder Management]
-integration:
+  items:
+  - name: Technical Product Management
+  - name: Platform Product Management
+  - name: Product Discovery
+  - name: Backlog Management
+  - name: Release Governance
+  - name: Stakeholder Management
+- id: integration
   label: APIs & Integration
   icon: plug
-  order: 2
-  items: [API Product Management, API Standardization, MuleSoft, Systems Integration (40+), Third-Party Integration]
-events:
+  items:
+  - name: API Product Management
+  - name: API Standardization
+  - name: MuleSoft
+  - name: Systems Integration (40+)
+  - name: Third-Party Integration
+- id: events
   label: Event-Driven & Messaging
   icon: radio
-  order: 3
-  items: [Event-Driven Architecture, GCP Pub/Sub, Dead-Letter Queues, Omnichannel Messaging, Cordial]
-cloud:
+  items:
+  - name: Event-Driven Architecture
+  - name: GCP Pub/Sub
+  - name: Dead-Letter Queues
+  - name: Omnichannel Messaging
+  - name: Cordial
+- id: cloud
   label: Cloud & Platform
   icon: cloud
-  order: 4
-  items: [AWS, Google Cloud, Kubernetes, Terraform, Istio, GitLab CI/CD, Jenkins, Dynatrace, Datadog]
-agile:
+  items:
+  - name: AWS
+  - name: Google Cloud
+  - name: Kubernetes
+  - name: Terraform
+  - name: Istio
+  - name: GitLab CI/CD
+  - name: Jenkins
+  - name: Dynatrace
+  - name: Datadog
+- id: agile
   label: Agile
   icon: repeat
-  order: 5
-  items: [Scrum, Kanban, SAFe, WSJF, Product Ownership]
-data:
+  items:
+  - name: Scrum
+  - name: Kanban
+  - name: SAFe
+  - name: WSJF
+  - name: Product Ownership
+- id: data
   label: Data
   icon: database
-  order: 6
-  items: [SQL, Data Migration, Data Reconciliation, Product Analytics, KPI Instrumentation]
-ai:
+  items:
+  - name: SQL
+  - name: Data Migration
+  - name: Data Reconciliation
+  - name: Product Analytics
+  - name: KPI Instrumentation
+- id: ai
   label: AI-Native Execution
   icon: sparkles
-  order: 7
-  items: [AI-Assisted Discovery, Requirements Synthesis, Documentation, Prototyping, Vendor Evaluation, Claude, AWS Q / Kiro, GitHub Copilot]
-credentials:
+  items:
+  - name: AI-Assisted Discovery
+  - name: Requirements Synthesis
+  - name: Documentation
+  - name: Prototyping
+  - name: Vendor Evaluation
+  - name: Claude
+  - name: AWS Q / Kiro
+  - name: GitHub Copilot
+- id: credentials
   label: Certifications
   icon: award
-  order: 8
   layout: list
   items:
-    - { name: Certified ScrumMaster, detail: Scrum Alliance, logo: scrumalliance }
-    - { name: Certified Scrum Product Owner, detail: Scrum Alliance, logo: scrumalliance }
-    - { name: SAFe 6 Product Owner / Product Manager, detail: Scaled Agile, mark: SAFe }
-    - { name: SQL Fundamentals, detail: SoloLearn, logo: sololearn }
-education:
+  - name: Certified ScrumMaster
+    detail: Scrum Alliance
+    logo: scrumalliance
+  - name: Certified Scrum Product Owner
+    detail: Scrum Alliance
+    logo: scrumalliance
+  - name: SAFe 6 Product Owner / Product Manager
+    detail: Scaled Agile
+    mark: SAFe
+  - name: SQL Fundamentals
+    detail: SoloLearn
+    logo: sololearn
+- id: education
   label: Education
   icon: graduation-cap
-  order: 9
   layout: list
   items:
-    - { name: "M.S., Engineering / Industrial Management", detail: The University of Texas at Arlington, mark: UTA }
-    - { name: "MBA, Information Technology & Marketing", detail: "National Institute of Technology, Warangal", mark: NITW }
-    - { name: "B.Tech, Biomedical Engineering", detail: JNTU Hyderabad, mark: JNTU }
+  - name: M.S., Engineering / Industrial Management
+    detail: The University of Texas at Arlington
+    mark: UTA
+  - name: MBA, Information Technology & Marketing
+    detail: National Institute of Technology, Warangal
+    mark: NITW
+  - name: B.Tech, Biomedical Engineering
+    detail: JNTU Hyderabad
+    mark: JNTU
