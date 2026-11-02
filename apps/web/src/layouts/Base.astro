@@ -77,6 +77,7 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <main id="main"><slot /></main>
   <footer class="site-footer wrap">
     <p>© {new Date().getFullYear()} {about.name}</p>
+    <p class="footer-links"><a href={`${home}privacy/`}>Privacy</a><button type="button" class="link-button" data-consent-settings hidden>Cookie settings</button></p>
   </footer>
   <script>
     // Collapsible sections and roles: remember each visitor's open/closed choices,

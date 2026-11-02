@@ -166,7 +166,16 @@ const analytics = defineCollection({
     ga4_id: z.string().optional(),
     cloudflare_token: z.string().optional(),
     respect_privacy_signals: z.boolean().default(true),
+    consent: z.enum(['europe', 'everyone', 'off']).default('europe'),
+    consent_text: z.string().default('This site uses analytics cookies to see which content is useful.'),
+    consent_accept: z.string().default('Accept'),
+    consent_decline: z.string().default('Decline'),
   }),
+});
+
+const privacy = defineCollection({
+  loader: glob({ base: CONTENT, pattern: 'privacy.md' }),
+  schema: z.object({ title: z.string().default('Privacy') }),
 });
 
 const connect = defineCollection({
@@ -186,7 +195,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
-  resume, analytics,
+  resume, analytics, privacy,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

@@ -507,3 +507,22 @@ details[open] > summary > .chev { transform: rotate(180deg); }
   background: var(--accent-soft); border: 1px solid transparent; border-radius: 0.5rem; padding: 0.4375rem 0.625rem;
 }
 .sbr-suggestion:hover { border-color: var(--accent); }
+
+/* Footer links and cookie consent banner */
+.site-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; }
+.site-footer p { margin: 0; }
+.footer-links { display: flex; gap: 1.25rem; }
+.footer-links a, .link-button { color: var(--muted); }
+.link-button { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+.link-button:hover, .footer-links a:hover { color: var(--text); }
+.consent {
+  position: fixed; z-index: 20; left: 50%; transform: translateX(-50%);
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); width: min(40rem, calc(100% - 2rem));
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; padding: 1rem 1.125rem;
+  background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.18);
+}
+.consent p { margin: 0; flex: 1 1 18rem; font-size: 0.9rem; line-height: 1.5; }
+.consent p a { margin-left: 0.25rem; }
+.consent-actions { display: flex; gap: 0.5rem; flex: none; }
+.consent .btn { cursor: pointer; font: inherit; font-size: 0.9rem; padding: 0.5rem 1rem; }

@@ -19,6 +19,7 @@ content/                  ← everything you edit
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── resume.yaml           Résumé button: PDF, button text, download name, last updated
 ├── analytics.yaml        Analytics: Microsoft Clarity, Google Analytics 4, Cloudflare Web Analytics IDs
+├── privacy.md            Privacy page (/privacy/)
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
 └── _templates/           starting points for new entries when editing files by hand
@@ -71,6 +72,9 @@ Things to know:
   events on top: `resume_download`, `contact_click` (email, LinkedIn, booking), `case_study_open`,
   `playbook_open`, `playbook_download`, `file_download`, `outbound_click`, `skill_search`.
   Visitors with Do Not Track or Global Privacy Control get no analytics (switchable).
+  Cookie consent: visitors in Europe (by time zone; or everyone, or no one) see a banner, and
+  Clarity/GA4 load only after **Accept**. The choice lasts 6 months; **Cookie settings** in the
+  footer reopens it. The Privacy page text is editable under Profile & settings.
 
 ## Workflow
 

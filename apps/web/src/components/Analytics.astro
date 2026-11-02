@@ -13,7 +13,14 @@ for (const [k, v] of Object.entries({ clarity: a?.clarity_id, ga4: a?.ga4_id, cl
   if (v?.trim() && !valid[k as keyof typeof valid]) console.warn(`[analytics] ${k} ID "${v}" doesn't look valid; ${k} stays off.`);
 }
 const enabled = Object.values(valid).some(Boolean);
-const config = { ...valid, respectPrivacy: a?.respect_privacy_signals ?? true };
+const cookieBased = !!(valid.clarity || valid.ga4);
+const config = {
+  ...valid,
+  respectPrivacy: a?.respect_privacy_signals ?? true,
+  consent: cookieBased ? (a?.consent ?? 'europe') : 'off',
+  text: { body: a?.consent_text ?? '', accept: a?.consent_accept ?? 'Accept', decline: a?.consent_decline ?? 'Decline' },
+  privacyHref: `${import.meta.env.BASE_URL}privacy/`,
+};
 ---
 {enabled && (
   <script is:inline define:vars={{ config }}>
@@ -26,6 +33,7 @@ const config = { ...valid, respectPrivacy: a?.respect_privacy_signals ?? true };
       window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
       window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
       window.jcTrack = function (name, label, extra) {
+        if (!cookieLoaded) return; // nothing is sent before consent (Cloudflare takes no events)
         var params = Object.assign(label ? { label: String(label).slice(0, 100) } : {}, extra || {});
         if (config.ga4) window.gtag('event', name, params);
         if (config.clarity) {
@@ -39,11 +47,61 @@ const config = { ...valid, respectPrivacy: a?.respect_privacy_signals ?? true };
         for (var k in attrs || {}) s.setAttribute(k, attrs[k]);
         document.head.appendChild(s);
       }
-      function load() {
-        if (config.ga4) { add('https://www.googletagmanager.com/gtag/js?id=' + config.ga4); window.gtag('js', new Date()); window.gtag('config', config.ga4); }
-        if (config.clarity) add('https://www.clarity.ms/tag/' + config.clarity);
-        if (config.cloudflare) add('https://static.cloudflareinsights.com/beacon.min.js', { defer: '', 'data-cf-beacon': JSON.stringify({ token: config.cloudflare }) });
+
+      // ---- Consent (cookie-setting services only; Cloudflare is cookie-free) ----
+      var KEY = 'jc-consent', MAX_AGE = 180 * 864e5;
+      var EU_EXTRA = ['Atlantic/Canary', 'Atlantic/Madeira', 'Atlantic/Azores', 'Atlantic/Reykjavik', 'Atlantic/Faroe', 'Africa/Ceuta', 'Asia/Nicosia', 'Asia/Famagusta'];
+      function inEurope() {
+        try { var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; return tz.indexOf('Europe/') === 0 || EU_EXTRA.indexOf(tz) !== -1; } catch (e) { return false; }
       }
+      var needsConsent = config.consent === 'everyone' || (config.consent === 'europe' && inEurope());
+      function readChoice() {
+        try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && Date.now() - v.at < MAX_AGE ? v.choice : null; } catch (e) { return null; }
+      }
+      function saveChoice(choice) { try { localStorage.setItem(KEY, JSON.stringify({ choice: choice, at: Date.now() })); } catch (e) {} }
+      var choice = readChoice();
+
+      var cookieLoaded = false;
+      function loadCookieBased() {
+        if (cookieLoaded) return; cookieLoaded = true;
+        if (config.ga4) { add('https://www.googletagmanager.com/gtag/js?id=' + config.ga4); window.gtag('js', new Date()); window.gtag('config', config.ga4); }
+        if (config.clarity) { add('https://www.clarity.ms/tag/' + config.clarity); if (needsConsent) window.clarity('consent'); }
+      }
+      function load() {
+        document.querySelectorAll('[data-consent-settings]').forEach(function (b) { b.hidden = !needsConsent; });
+        if (config.cloudflare) add('https://static.cloudflareinsights.com/beacon.min.js', { defer: '', 'data-cf-beacon': JSON.stringify({ token: config.cloudflare }) });
+        if (!needsConsent || choice === 'granted') loadCookieBased();
+        else if (!choice) showBanner();
+      }
+
+      var banner;
+      function showBanner() {
+        if (banner) { banner.hidden = false; banner.querySelector('button').focus(); return; }
+        banner = document.createElement('div');
+        banner.className = 'consent'; banner.setAttribute('role', 'region'); banner.setAttribute('aria-label', 'Cookie consent');
+        var p = document.createElement('p'); p.textContent = config.text.body + ' ';
+        var more = document.createElement('a'); more.href = config.privacyHref; more.textContent = 'Privacy'; p.appendChild(more);
+        var row = document.createElement('div'); row.className = 'consent-actions';
+        var yes = document.createElement('button'); yes.type = 'button'; yes.className = 'btn primary'; yes.textContent = config.text.accept;
+        var no = document.createElement('button'); no.type = 'button'; no.className = 'btn'; no.textContent = config.text.decline;
+        yes.addEventListener('click', function () { decide('granted'); });
+        no.addEventListener('click', function () { decide('denied'); });
+        row.append(yes, no); banner.append(p, row); document.body.appendChild(banner);
+      }
+      function decide(c) {
+        saveChoice(c); choice = c; if (banner) banner.hidden = true;
+        if (c === 'granted') { loadCookieBased(); window.jcTrack('consent', 'granted'); }
+        else if (cookieLoaded) {
+          // Withdrawn after accepting: tell the services and stop recording.
+          if (config.clarity) window.clarity('consent', false);
+          if (config.ga4) window.gtag('consent', 'update', { analytics_storage: 'denied' });
+        }
+      }
+      // Footer "Cookie settings" reopens the banner (shown only where consent applies).
+      document.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('[data-consent-settings]') && needsConsent) showBanner();
+      });
+
       if (document.readyState === 'complete') setTimeout(load, 0); else addEventListener('load', function () { setTimeout(load, 0); });
 
       // Every tappable control sends `ui_click` (label + section); key actions also get a named event.

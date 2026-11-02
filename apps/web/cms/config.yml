@@ -104,6 +104,17 @@ collections:
           - { name: ga4_id, label: Google Analytics 4 measurement ID, widget: string, required: false, pattern: ['^(G-[A-Za-z0-9]{4,15})?$', 'Starts with G-, e.g. G-ABC123XYZ'], hint: 'Optional. analytics.google.com → Admin → Data streams → your web stream → Measurement ID.' }
           - { name: cloudflare_token, label: Cloudflare Web Analytics token, widget: string, required: false, pattern: ['^([a-fA-F0-9]{32})?$', '32 letters and numbers'], hint: 'Optional, cookie-free visit counts. Cloudflare → Analytics & Logs → Web Analytics → your site → the token in the JS snippet.' }
           - { name: respect_privacy_signals, label: Skip visitors with Do Not Track or Global Privacy Control, widget: boolean, default: true }
+          - { name: consent, label: Ask for cookie consent, widget: select, default: europe, options: [{ label: 'Visitors in Europe (EU, UK and other European time zones)', value: europe }, { label: Every visitor, value: everyone }, { label: 'Never (not recommended if you get European visitors)', value: off }], hint: 'Clarity and Google Analytics load only after consent. Cloudflare Web Analytics is cookie-free and never asks.' }
+          - { name: consent_text, label: Banner text, widget: text }
+          - { name: consent_accept, label: Accept button, widget: string, default: Accept }
+          - { name: consent_decline, label: Decline button, widget: string, default: Decline }
+
+      - name: privacy
+        label: Privacy page
+        file: content/privacy.md
+        fields:
+          - { name: title, label: Title, widget: string, default: Privacy }
+          - { name: body, label: Page text, widget: markdown, hint: Shown at /privacy/ and linked from the footer and the cookie banner. }
 
       - name: sections
         label: Section names & order

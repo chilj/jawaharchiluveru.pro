@@ -1,0 +1,13 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+const entry = (await getEntry('privacy', 'privacy'))!;
+const { Content } = await render(entry);
+---
+<Base title={entry.data.title} description="How this site handles analytics and your privacy choices.">
+  <article class="wrap detail">
+    <a class="back" href={import.meta.env.BASE_URL}>← Home</a>
+    <h1>{entry.data.title}</h1>
+    <div class="prose"><Content /></div>
+  </article>
+</Base>
