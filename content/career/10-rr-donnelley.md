@@ -10,6 +10,7 @@ logo: ''
 mark: ''
 earlier: true
 status: published
-highlights: []
+highlights:
+  - Supported logistics metrics platform analyzing warehouse and shipment performance.
 to_verify: []
 ---
