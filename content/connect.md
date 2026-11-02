@@ -1,6 +1,6 @@
 ---
 heading: Let's talk
-intro: Open to conversations about platform, DevEx and technical product management roles.
+intro: Open to conversations about platform, Technical Product Management, Product Owner roles.
 booking:
   label: Book a 30-minute call
   url: ''
