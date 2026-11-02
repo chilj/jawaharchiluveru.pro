@@ -1,4 +1,5 @@
 ---
+# Copy into content/career/ as <start>-<company>.md, e.g. 2026-01-acme-corp.md (the editor at /admin names new roles the same way).
 title: TODO
 org: TODO            # the company you worked for or with
 via: ""              # optional: consultancy you were placed through
