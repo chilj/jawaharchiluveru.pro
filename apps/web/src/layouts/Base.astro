@@ -4,6 +4,7 @@ import { getSections, isVisible, withBase } from '../lib/content';
 import Icon from '../components/Icon.astro';
 import Analytics from '../components/Analytics.astro';
 import Feedback from '../components/Feedback.astro';
+import Chat from '../components/Chat.astro';
 import { buildTheme } from '../lib/theme';
 // Self-hosted fonts: no render-blocking request to a third-party host.
 // One variable file per family covers every weight used (two downloads instead of five).
@@ -85,6 +86,17 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
     <p class="footer-links">{feedback?.enabled && <button type="button" class="link-button" data-feedback-open>{feedback.button_label}</button>}<a href={`${home}privacy/`}>Privacy</a><button type="button" class="link-button" data-consent-settings hidden>Cookie settings</button></p>
   </footer>
   <Feedback />
+  <Chat />
+  <script>
+    // Keep the Feedback tab and Chat button above the cookie banner while it's showing.
+    const lift = () => {
+      const banner = document.querySelector<HTMLElement>('.consent');
+      const h = banner && !banner.hidden ? banner.getBoundingClientRect().height + 16 : 0;
+      document.documentElement.style.setProperty('--dock-lift', `${Math.round(h)}px`);
+    };
+    new MutationObserver(lift).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+    addEventListener('resize', lift);
+  </script>
   <script>
     // Collapsible sections and roles: remember each visitor's open/closed choices,
     // open a section when it's linked to, and expand or collapse everything at once.

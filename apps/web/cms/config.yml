@@ -141,8 +141,8 @@ collections:
               - { label: "Formspree (sent straight to your inbox; form ID)", value: formspree }
             hint: "The email app option sends to the email in Let's Talk. For Web3Forms, get a free access key at web3forms.com (it is emailed to you, and feedback goes to that address). For Formspree, create a form at formspree.io and use its ID (the part after /f/)."
           - { name: service_key, label: Web3Forms access key or Formspree form ID, widget: string, required: false, hint: "Leave empty for the email app option. Without a key, the form falls back to the email app." }
-          - { name: button_label, label: Button text, widget: string, default: Feedback, hint: "Used for the footer link and the floating button." }
-          - { name: floating_button, label: Show a floating Feedback button, widget: boolean, default: true, hint: "Bottom-right corner of every page. The footer link is always there." }
+          - { name: button_label, label: Button text, widget: string, default: Feedback, hint: "Used for the footer link and the bottom tab." }
+          - { name: bottom_tab, label: Show the Feedback tab at the bottom of every page, widget: boolean, default: true, hint: "Pinned to the bottom-left edge. The footer link is always there." }
           - { name: heading, label: Form heading, widget: string, default: Share feedback }
           - { name: intro, label: Intro, widget: text, required: false }
           - name: rating
@@ -163,6 +163,41 @@ collections:
           - { name: submit_label, label: Send button text, widget: string, default: Send feedback }
           - { name: success_message, label: Thank-you message, widget: string, hint: "Shown after feedback is sent through Web3Forms or Formspree. With the email app option, visitors are told to press Send instead." }
           - { name: subject, label: Email subject, widget: string, default: Site feedback, hint: "The topic is added after it, e.g. Site feedback: Design." }
+
+      - name: chat
+        label: Chat
+        file: content/chat.yaml
+        fields:
+          - { name: enabled, label: Show the chat button, widget: boolean, default: true, hint: "A floating button at the bottom-right of every page." }
+          - { name: button_label, label: Button text, widget: string, default: Chat, hint: "Shown next to the icon on tablets and computers; phones show the icon only." }
+          - { name: title, label: Chat title, widget: string, default: Chat with Jawahar }
+          - { name: status, label: Status line, widget: string, required: false, hint: "e.g. Usually replies within a day" }
+          - { name: greeting, label: Greeting, widget: text, hint: "The first message visitors see." }
+          - name: faqs
+            label: Suggested questions
+            label_singular: Question
+            widget: list
+            required: false
+            hint: "Shown as buttons. The chat answers them instantly on the page."
+            fields:
+              - { name: question, label: Question, widget: string }
+              - { name: answer, label: Answer, widget: text }
+          - name: channel
+            label: Where typed messages go
+            widget: select
+            default: email
+            options:
+              - { label: "Email (your email app opens with the message; uses the email in Let's Talk)", value: email }
+              - { label: "WhatsApp to my phone (your number becomes visible in the page)", value: whatsapp }
+              - { label: "Telegram (your number stays private; uses your Telegram username)", value: telegram }
+              - { label: "Tawk.to live chat (reply from the Tawk app on your phone; number stays private)", value: tawk }
+            hint: "If the setting for the chosen option is empty, the chat uses email."
+          - { name: whatsapp_number, label: WhatsApp number, widget: string, required: false, hint: "With country code, e.g. +1 214 555 0100. Anyone can see this number in the page source.", pattern: ['^[+0-9 ()-]*$', 'Digits, spaces, +, - and brackets only'] }
+          - { name: telegram_username, label: Telegram username, widget: string, required: false, hint: "Telegram → Settings → Username (e.g. @jawahar). Set Phone number privacy to Nobody to keep your number hidden.", pattern: ['^@?([A-Za-z0-9_]{5,32})?$', '5–32 letters, numbers or underscores'] }
+          - { name: tawk_property_id, label: Tawk.to property ID, widget: string, required: false, hint: "tawk.to → Administration → Chat Widget → the Direct Chat Link is tawk.to/chat/<property ID>/<widget ID>." }
+          - { name: tawk_widget_id, label: Tawk.to widget ID, widget: string, required: false }
+          - { name: input_placeholder, label: Message box placeholder, widget: string, default: Type a message… }
+          - { name: handoff_note, label: Note under the message box, widget: string, hint: "{channel} is replaced with your email app, WhatsApp, Telegram or live chat." }
 
       - name: privacy
         label: Privacy page

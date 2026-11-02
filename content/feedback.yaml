@@ -2,7 +2,7 @@ enabled: true
 delivery: email_app
 service_key: ''
 button_label: Feedback
-floating_button: true
+bottom_tab: true
 heading: Share feedback
 intro: What worked, what didn't, what's missing? I read every message.
 rating:

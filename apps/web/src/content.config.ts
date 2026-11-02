@@ -185,6 +185,25 @@ const analytics = defineCollection({
   }),
 });
 
+const chat = defineCollection({
+  loader: file(`${CONTENT}/chat.yaml`, { parser: (text) => [{ id: 'chat', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    enabled: z.boolean().default(true),
+    button_label: z.string().default('Chat'),
+    title: z.string().default('Chat'),
+    status: z.string().optional(),
+    greeting: z.string(),
+    channel: z.enum(['email', 'whatsapp', 'telegram', 'tawk']).default('email'),
+    whatsapp_number: z.string().optional(),
+    telegram_username: z.string().optional(),
+    tawk_property_id: z.string().optional(),
+    tawk_widget_id: z.string().optional(),
+    input_placeholder: z.string().default('Type a message…'),
+    handoff_note: z.string().default('Your message opens in {channel}, ready to send.'),
+    faqs: z.array(z.object({ question: z.string(), answer: z.string() })).default([]),
+  }),
+});
+
 const askField = z.enum(['hidden', 'optional', 'required']).default('optional');
 const feedback = defineCollection({
   loader: file(`${CONTENT}/feedback.yaml`, { parser: (text) => [{ id: 'feedback', ...(parseYaml(text) ?? {}) }] }),
@@ -193,7 +212,7 @@ const feedback = defineCollection({
     delivery: z.enum(['email_app', 'web3forms', 'formspree']).default('email_app'),
     service_key: z.string().optional(),
     button_label: z.string().default('Feedback'),
-    floating_button: z.boolean().default(true),
+    bottom_tab: z.boolean().default(true),
     heading: z.string().default('Share feedback'),
     intro: z.string().optional(),
     rating: z.object({
@@ -249,7 +268,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
-  resume, analytics, privacy, feedback,
+  resume, analytics, privacy, feedback, chat,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

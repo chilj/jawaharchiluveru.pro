@@ -1,6 +1,6 @@
 ---
 // Site feedback form, configured in content/feedback.yaml (editor: Profile & settings → Feedback form).
-// Opens from the footer link or the floating button on every page. Delivery:
+// Opens from the footer link or the tab pinned to the bottom-left of every page. Delivery:
 //   email_app  - opens the visitor's email app with the feedback filled in (no setup)
 //   web3forms  - sends straight to your inbox through Web3Forms (free access key)
 //   formspree  - sends straight to your inbox through Formspree (form ID)
@@ -19,8 +19,8 @@ const ask = (v: string) => v !== 'hidden';
 ---
 {show && f && (
   <>
-    {f.floating_button && (
-      <button type="button" class="feedback-fab" data-feedback-open aria-haspopup="dialog">
+    {f.bottom_tab && (
+      <button type="button" class="feedback-tab" data-feedback-open aria-haspopup="dialog">
         <Icon name="message-square-text" />{f.button_label}
       </button>
     )}

@@ -22,6 +22,7 @@ content/                  ← everything you edit
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── resume.yaml           Résumé button: PDF, button text, download name, last updated
 ├── analytics.yaml        Analytics: Microsoft Clarity, Google Analytics 4, Cloudflare Web Analytics IDs
+├── chat.yaml             Chat: greeting, suggested questions and answers, where typed messages go
 ├── feedback.yaml         Feedback form: delivery, wording, rating, topics, which fields to ask for
 ├── privacy.md            Privacy page (/privacy/)
 ├── connect.md            Let's Talk: calendar booking link, email, social links
@@ -77,7 +78,8 @@ Things to know:
   token. Each switches on when its ID is set and loads after the page renders. Every tappable
   control sends `ui_click` (label, section, and open/close state for collapsible headers). Named
   events on top: `resume_download`, `contact_click` (email, LinkedIn, booking), `case_study_open`,
-  `playbook_open`, `playbook_download`, `file_download`, `outbound_click`, `skill_search`.
+  `playbook_open`, `playbook_download`, `file_download`, `outbound_click`, `skill_search`,
+  `feedback_open`, `feedback_submit`, and the `chat_*` events below.
   Visitors with Do Not Track or Global Privacy Control get no analytics (switchable).
   Cookie consent: visitors in Europe (by time zone; or everyone, or no one) see a banner, and
   Clarity/GA4 load only after **Accept**. The choice lasts 6 months; **Cookie settings** in the
@@ -107,12 +109,21 @@ A section with nothing published shows a "coming soon" note on the live site.
 To add an entry, use **New** in the content editor, or copy a file from `content/_templates/`
 into the section's folder. Flip `status` to `published` when it's ready.
 
-**Feedback form:** every page has a **Feedback** link in the footer (and, optionally, a floating
-button). Set it up under Profile & settings → Feedback form. By default it opens the visitor's email
+**Feedback form:** every page has a **Feedback** link in the footer and, optionally, a **Feedback**
+tab pinned to the bottom-left edge. Set it up under Profile & settings → Feedback form. By default it opens the visitor's email
 app addressed to the email in Let's Talk. To have feedback arrive in your inbox without that step,
 choose **Web3Forms** and paste the free access key from web3forms.com (or **Formspree** and a form
 ID). If the service can't be reached, visitors are offered their email app instead. Submissions
 send a `feedback_submit` analytics event with the topic and rating.
+
+**Chat:** a floating **Chat** button at the bottom-right of every page (set it up under Profile &
+settings → Chat). It answers your suggested questions on the page, and a typed message goes to the
+channel you choose: email (default), WhatsApp (your number becomes visible in the page), Telegram
+(your username; number stays private) or Tawk.to live chat (reply from the Tawk app on your phone;
+it loads only when a visitor starts a chat). The Feedback tab and Chat button never overlap, hide
+behind the cookie banner, or cover the end of a page. Events: `chat_open`, `chat_reopen`,
+`chat_close`, `chat_faq` (the question), `chat_message` (the channel), `chat_live_start`,
+`chat_live_connected`.
 
 **Meeting requests:** the form in Let's Talk offers open slots from the availability under
 Profile & settings → Let's Talk → Meeting request form (time zone, days, hours, length, notice,

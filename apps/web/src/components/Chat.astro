@@ -1,0 +1,169 @@
+---
+// Floating chat, configured in content/chat.yaml (editor: Profile & settings → Chat).
+// Answers the configured FAQs on the page, then hands a typed message to the chosen channel:
+//   email     - the visitor's email app, to the email in Let's Talk (default)
+//   whatsapp  - WhatsApp to your number (the number is visible in the page)
+//   telegram  - Telegram chat with your username (number stays private)
+//   tawk      - Tawk.to live chat; you reply from the Tawk app on your phone (loads only when opened)
+import { getEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+const c = (await getEntry('chat', 'chat'))?.data;
+const email = (await getEntry('connect', 'connect'))?.data.email;
+const digits = c?.whatsapp_number?.replace(/\D/g, '') ?? '';
+const tg = c?.telegram_username?.trim().replace(/^@/, '') ?? '';
+const tawk = c?.tawk_property_id?.trim() && c?.tawk_widget_id?.trim() ? `${c.tawk_property_id.trim()}/${c.tawk_widget_id.trim()}` : '';
+const ready = { email: !!email, whatsapp: digits.length >= 8, telegram: /^[A-Za-z0-9_]{5,32}$/.test(tg), tawk: !!tawk };
+// A channel without its setting falls back to email, so the chat always works.
+let channel = c?.channel ?? 'email';
+if (c?.enabled && !ready[channel]) {
+  console.warn(`[chat] ${channel} isn't set up; using email instead.`);
+  channel = 'email';
+}
+const show = !!c?.enabled && ready[channel];
+const channelName = { email: 'your email app', whatsapp: 'WhatsApp', telegram: 'Telegram', tawk: 'live chat' }[channel];
+const config = show ? {
+  channel, email, whatsapp: digits, telegram: tg, tawk, title: c!.title,
+  note: c!.handoff_note.replace('{channel}', channelName),
+} : null;
+---
+{show && c && (
+  <div class="chat" data-chat={JSON.stringify(config)}>
+    <section class="chat-panel" id="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title" hidden>
+      <div class="chat-head">
+        <span class="chat-avatar" aria-hidden="true">JC</span>
+        <div>
+          <h2 id="chat-title">{c.title}</h2>
+          {c.status && <p>{c.status}</p>}
+        </div>
+        <button type="button" class="chat-close" data-chat-close aria-label="Close chat"><Icon name="x" /></button>
+      </div>
+      <div class="chat-log" role="log" aria-live="polite">
+        <p class="bubble bot">{c.greeting}</p>
+      </div>
+      {c.faqs.length > 0 && (
+        <div class="chat-chips" aria-label="Suggested questions">
+          {c.faqs.map((q, i) => <button type="button" class="chip" data-faq={i}>{q.question}</button>)}
+        </div>
+      )}
+      {channel === 'tawk' ? (
+        <div class="chat-compose">
+          <button type="button" class="btn primary chat-live" data-chat-live>Start a live chat</button>
+        </div>
+      ) : (
+        <form class="chat-compose">
+          <label class="sr-only" for="chat-input">Message</label>
+          <textarea id="chat-input" rows="1" placeholder={c.input_placeholder} required></textarea>
+          <button type="submit" class="chat-send" aria-label="Send"><Icon name="send" /></button>
+        </form>
+      )}
+      <p class="chat-note">{config!.note}</p>
+      <script type="application/json" data-chat-faqs set:html={JSON.stringify(c.faqs)} />
+    </section>
+    <button type="button" class="chat-fab" aria-expanded="false" aria-controls="chat-panel" data-chat-toggle>
+      <Icon name="message-circle" /><span>{c.button_label}</span>
+    </button>
+  </div>
+)}
+
+<script>
+  type Cfg = { channel: 'email' | 'whatsapp' | 'telegram' | 'tawk'; email?: string; whatsapp: string; telegram: string; tawk: string; title: string; note: string };
+  const root = document.querySelector<HTMLElement>('.chat[data-chat]');
+  if (root) {
+    const cfg: Cfg = JSON.parse(root.dataset.chat!);
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
+    const panel = $<HTMLElement>('.chat-panel')!;
+    const fab = $<HTMLButtonElement>('.chat-fab')!;
+    const log = $<HTMLElement>('.chat-log')!;
+    const faqs: { question: string; answer: string }[] = JSON.parse($('[data-chat-faqs]')?.textContent || '[]');
+    const track = (name: string, label?: string, extra?: Record<string, string>) => (window as any).jcTrack?.(name, label, extra);
+    let opened = false;
+
+    const setOpen = (open: boolean, how = 'button') => {
+      panel.hidden = !open;
+      fab.setAttribute('aria-expanded', String(open));
+      document.documentElement.classList.toggle('chat-open', open);
+      if (open) {
+        if (!opened) { opened = true; track('chat_open', location.pathname, { how }); } else track('chat_reopen', location.pathname);
+        ($<HTMLElement>('#chat-input') ?? $<HTMLElement>('.chip') ?? panel).focus();
+      } else {
+        track('chat_close', location.pathname);
+        fab.focus();
+      }
+    };
+    fab.addEventListener('click', () => setOpen(panel.hidden));
+    root.addEventListener('click', (e) => { if ((e.target as Element).closest('[data-chat-close]')) setOpen(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) setOpen(false); });
+
+    const bubble = (text: string, who: 'bot' | 'me') => {
+      const p = document.createElement('p');
+      p.className = `bubble ${who}`; p.textContent = text;
+      log.append(p); log.scrollTop = log.scrollHeight;
+      return p;
+    };
+    const botSays = (text: string) => {
+      const typing = bubble('…', 'bot'); typing.classList.add('typing'); typing.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { typing.remove(); bubble(text, 'bot'); }, 450);
+    };
+
+    // FAQ chips: answered on the page.
+    root.addEventListener('click', (e) => {
+      const chip = (e.target as Element).closest<HTMLButtonElement>('[data-faq]');
+      if (!chip) return;
+      const q = faqs[Number(chip.dataset.faq)];
+      bubble(q.question, 'me');
+      botSays(q.answer);
+      track('chat_faq', q.question);
+    });
+
+    // Hand a typed message to the chosen channel.
+    function handoff(text: string) {
+      const page = `\n\n(Sent from ${location.href})`;
+      if (cfg.channel === 'whatsapp') return `https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(text + page)}`;
+      if (cfg.channel === 'telegram') return `https://t.me/${cfg.telegram}`;
+      return `mailto:${cfg.email}?subject=${encodeURIComponent(`Chat from the site`)}&body=${encodeURIComponent(text + page)}`;
+    }
+    const form = $<HTMLFormElement>('form.chat-compose');
+    const input = $<HTMLTextAreaElement>('#chat-input');
+    if (form && input) {
+      // Grow with the text, up to a few lines; Enter sends, Shift+Enter adds a line.
+      input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, 120)}px`; });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        bubble(text, 'me');
+        input.value = ''; input.style.height = '';
+        const url = handoff(text);
+        if (cfg.channel === 'telegram') {
+          // Telegram links can't carry a message, so copy it for pasting.
+          try { await navigator.clipboard.writeText(text); botSays('Copied your message. Paste it into the Telegram chat that just opened.'); }
+          catch { botSays('Telegram is opening. Paste or retype your message there.'); }
+        } else {
+          botSays(cfg.channel === 'whatsapp' ? 'Opening WhatsApp with your message. Press send there and it reaches me directly.' : 'Opening your email app with your message. Press Send and it reaches me directly.');
+        }
+        track('chat_message', cfg.channel, { length: String(text.length) });
+        if (cfg.channel === 'email') window.location.href = url; else window.open(url, '_blank', 'noopener');
+      });
+    }
+
+    // Tawk.to: load only when asked for, hide its own bubble, open its window.
+    const live = $<HTMLButtonElement>('[data-chat-live]');
+    live?.addEventListener('click', () => {
+      track('chat_live_start', 'tawk');
+      const w = window as any;
+      if (w.Tawk_API?.maximize) { w.Tawk_API.showWidget(); w.Tawk_API.maximize(); setOpen(false); return; }
+      live.disabled = true; live.textContent = 'Connecting…';
+      w.Tawk_API = w.Tawk_API || {}; w.Tawk_LoadStart = new Date();
+      w.Tawk_API.onLoad = () => { w.Tawk_API.maximize(); setOpen(false); live.disabled = false; live.textContent = 'Start a live chat'; };
+      w.Tawk_API.onChatMinimized = () => w.Tawk_API.hideWidget();
+      w.Tawk_API.onChatMessageVisitor = () => track('chat_message', 'tawk');
+      w.Tawk_API.onChatStarted = () => track('chat_live_connected', 'tawk');
+      const s = document.createElement('script');
+      s.async = true; s.src = `https://embed.tawk.to/${cfg.tawk}`; s.charset = 'UTF-8'; s.setAttribute('crossorigin', '*');
+      s.onerror = () => { live.disabled = false; live.textContent = 'Start a live chat'; botSays("Live chat couldn't load. Please try the Let's Talk section instead."); };
+      document.head.append(s);
+    });
+  }
+</script>

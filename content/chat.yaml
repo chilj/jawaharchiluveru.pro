@@ -1,0 +1,22 @@
+enabled: true
+button_label: Chat
+title: Chat with Jawahar
+status: Usually replies within a day
+greeting: "Hi! 👋 I'm Jawahar's assistant. Pick a question below, or send a message and it goes straight to Jawahar."
+# How "send a message" reaches you: email (default), whatsapp, telegram or tawk (live chat app).
+channel: email
+whatsapp_number: ''
+telegram_username: ''
+tawk_property_id: ''
+tawk_widget_id: ''
+input_placeholder: Type a message…
+handoff_note: Your message opens in {channel}, ready to send.
+faqs:
+  - question: What roles are you open to?
+    answer: Platform, Technical Product Management and Product Owner roles. The Career section shows the work behind that, and the Toolkit maps skills to roles.
+  - question: Where are you based?
+    answer: Dallas–Fort Worth, Texas, and open to remote work across US time zones.
+  - question: How do I set up a call?
+    answer: Use the Request a meeting form in Let's Talk. Pick a time and it writes the email for you.
+  - question: Can I get your résumé?
+    answer: Yes. The Résumé button at the top of the home page always has the latest PDF.
