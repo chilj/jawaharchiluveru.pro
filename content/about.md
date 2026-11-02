@@ -26,13 +26,19 @@ Skilled in all stages of the software product lifecycle — from project resourc
 
 I'm meticulous about tracking and reporting on every facet of a project: status, cost, and issue resolution, so stakeholders always have a clear line of sight into delivery health.
 
-**Industry experience:**
-Retail / E-commerce / Omnichannel (\~8 yrs) - Catalyst Brands, Levi Strauss & Co., 7-Eleven, Advance Auto Parts
-Financial Services / Fintech / Insurance(\~4 yrs) - Mr. Cooper, PayPal/Braintree, Wells Fargo Advisors, State Farm
-Media / Logistics / Publishing (\~4 yrs) - RR Donnelley, Progressive Digital Media
-
 I bring a techno-functional lens to every engagement — architectural literacy across AWS/EKS, GitLab CI/CD, Dynatrace, Datadog, and Spring Boot, paired with metric-driven program management using DORA, SPACE, and DX Core 4 frameworks. 
 
 I'm known for evidence-forward, steering-committee-grade deliverables: ROI models, executive white papers, ROI calculators, and clear GO/NO-GO recommendations grounded in real data — not manufactured causation.
 
 Master's Degrees in Engineering Management from The University of Texas at Arlington, Texas, and Business Administration from the National Institute of Technology, Warangal, India.
+
+### Industry Experience
+
+**Retail, E-commerce & Omnichannel** (\~8 years)
+Catalyst Brands · Levi Strauss & Co. · 7-Eleven · Advance Auto Parts
+
+**Financial Services, Fintech & Insurance** (\~4 years)
+Mr. Cooper · PayPal / Braintree · Wells Fargo Advisors · State Farm
+
+**Media, Logistics & Publishing** (\~4 years)
+RR Donnelley · Progressive Digital Media
