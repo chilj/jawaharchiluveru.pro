@@ -185,6 +185,35 @@ const analytics = defineCollection({
   }),
 });
 
+const askField = z.enum(['hidden', 'optional', 'required']).default('optional');
+const feedback = defineCollection({
+  loader: file(`${CONTENT}/feedback.yaml`, { parser: (text) => [{ id: 'feedback', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    enabled: z.boolean().default(true),
+    delivery: z.enum(['email_app', 'web3forms', 'formspree']).default('email_app'),
+    service_key: z.string().optional(),
+    button_label: z.string().default('Feedback'),
+    floating_button: z.boolean().default(true),
+    heading: z.string().default('Share feedback'),
+    intro: z.string().optional(),
+    rating: z.object({
+      show: z.boolean().default(true),
+      label: z.string().default('How useful was this site?'),
+      low: z.string().default('Not useful'),
+      high: z.string().default('Very useful'),
+    }).default({}),
+    topic_label: z.string().default('Topic'),
+    topics: z.array(z.string()).default([]),
+    message_label: z.string().default('Your feedback'),
+    message_placeholder: z.string().optional(),
+    ask_name: askField,
+    ask_email: askField,
+    submit_label: z.string().default('Send feedback'),
+    success_message: z.string().default('Thank you! Your feedback is on its way.'),
+    subject: z.string().default('Site feedback'),
+  }),
+});
+
 const privacy = defineCollection({
   loader: glob({ base: CONTENT, pattern: 'privacy.md' }),
   schema: z.object({ title: z.string().default('Privacy') }),
@@ -220,7 +249,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
-  resume, analytics, privacy,
+  resume, analytics, privacy, feedback,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

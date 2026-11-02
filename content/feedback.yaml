@@ -1,0 +1,26 @@
+enabled: true
+delivery: email_app
+service_key: ''
+button_label: Feedback
+floating_button: true
+heading: Share feedback
+intro: What worked, what didn't, what's missing? I read every message.
+rating:
+  show: true
+  label: How useful was this site?
+  low: Not useful
+  high: Very useful
+topic_label: Topic
+topics:
+  - General
+  - Design
+  - Content
+  - Something broken
+  - Accessibility
+message_label: Your feedback
+message_placeholder: Tell me what you noticed.
+ask_name: optional
+ask_email: optional
+submit_label: Send feedback
+success_message: Thank you! Your feedback is on its way to me.
+subject: Site feedback

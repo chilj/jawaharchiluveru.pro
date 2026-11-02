@@ -22,6 +22,7 @@ content/                  ← everything you edit
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── resume.yaml           Résumé button: PDF, button text, download name, last updated
 ├── analytics.yaml        Analytics: Microsoft Clarity, Google Analytics 4, Cloudflare Web Analytics IDs
+├── feedback.yaml         Feedback form: delivery, wording, rating, topics, which fields to ask for
 ├── privacy.md            Privacy page (/privacy/)
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
@@ -105,6 +106,13 @@ A section with nothing published shows a "coming soon" note on the live site.
 
 To add an entry, use **New** in the content editor, or copy a file from `content/_templates/`
 into the section's folder. Flip `status` to `published` when it's ready.
+
+**Feedback form:** every page has a **Feedback** link in the footer (and, optionally, a floating
+button). Set it up under Profile & settings → Feedback form. By default it opens the visitor's email
+app addressed to the email in Let's Talk. To have feedback arrive in your inbox without that step,
+choose **Web3Forms** and paste the free access key from web3forms.com (or **Formspree** and a form
+ID). If the service can't be reached, visitors are offered their email app instead. Submissions
+send a `feedback_submit` analytics event with the topic and rating.
 
 **Meeting requests:** the form in Let's Talk offers open slots from the availability under
 Profile & settings → Let's Talk → Meeting request form (time zone, days, hours, length, notice,

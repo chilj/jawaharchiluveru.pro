@@ -10,6 +10,10 @@ If analytics is on and you've allowed it (visitors in Europe are asked first), M
 
 Visitors with **Do Not Track** or **Global Privacy Control** turned on in their browser aren't tracked at all.
 
+## Feedback
+
+If you use the feedback form, what you write, the page you were on, and your name and email if you add them come to me by email. Depending on how the form is set up, they're delivered through your own email app or through a form service (Web3Forms or Formspree). I use them only to improve the site and to reply to you.
+
 ## Your choices
 
 Use **Cookie settings** at the bottom of any page to accept or decline analytics cookies, or to change your mind later.

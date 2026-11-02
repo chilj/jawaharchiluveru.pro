@@ -1,0 +1,177 @@
+---
+// Site feedback form, configured in content/feedback.yaml (editor: Profile & settings → Feedback form).
+// Opens from the footer link or the floating button on every page. Delivery:
+//   email_app  - opens the visitor's email app with the feedback filled in (no setup)
+//   web3forms  - sends straight to your inbox through Web3Forms (free access key)
+//   formspree  - sends straight to your inbox through Formspree (form ID)
+import { getEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+const f = (await getEntry('feedback', 'feedback'))?.data;
+const email = (await getEntry('connect', 'connect'))?.data.email;
+const key = f?.service_key?.trim() ?? '';
+// A service without a key falls back to the email app, so the form always works.
+const delivery = f && f.delivery !== 'email_app' && key ? f.delivery : 'email_app';
+if (f?.enabled && f.delivery !== 'email_app' && !key) console.warn(`[feedback] ${f.delivery} has no key; using the email app instead.`);
+const show = !!f?.enabled && (delivery !== 'email_app' || !!email);
+const config = show ? { delivery, key, email, subject: f!.subject, success: f!.success_message } : null;
+const ask = (v: string) => v !== 'hidden';
+---
+{show && f && (
+  <>
+    {f.floating_button && (
+      <button type="button" class="feedback-fab" data-feedback-open aria-haspopup="dialog">
+        <Icon name="message-square-text" />{f.button_label}
+      </button>
+    )}
+    <dialog class="feedback" aria-labelledby="fb-heading" data-feedback={JSON.stringify(config)}>
+      <div class="feedback-head">
+        <h2 id="fb-heading">{f.heading}</h2>
+        <button type="button" class="feedback-close" data-feedback-close aria-label="Close"><Icon name="x" /></button>
+      </div>
+      <form class="feedback-form" novalidate>
+        {f.intro && <p class="feedback-intro">{f.intro}</p>}
+        {f.rating.show && (
+          <fieldset class="field rating">
+            <legend>{f.rating.label} <span class="optional">(optional)</span></legend>
+            <div class="rating-scale">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <label><input type="radio" name="rating" value={n} /><span>{n}</span></label>
+              ))}
+            </div>
+            <div class="rating-ends" aria-hidden="true"><span>{f.rating.low}</span><span>{f.rating.high}</span></div>
+          </fieldset>
+        )}
+        {f.topics.length > 0 && (
+          <div class="field">
+            <label for="fb-topic">{f.topic_label}</label>
+            <select id="fb-topic" name="topic">{f.topics.map((t) => <option>{t}</option>)}</select>
+          </div>
+        )}
+        <div class="field">
+          <label for="fb-message">{f.message_label}</label>
+          <textarea id="fb-message" name="message" rows="5" required placeholder={f.message_placeholder}></textarea>
+        </div>
+        {ask(f.ask_name) && (
+          <div class="field">
+            <label for="fb-name">Your name {f.ask_name === 'optional' && <span class="optional">(optional)</span>}</label>
+            <input id="fb-name" name="name" autocomplete="name" required={f.ask_name === 'required'} />
+          </div>
+        )}
+        {ask(f.ask_email) && (
+          <div class="field">
+            <label for="fb-email">Your email {f.ask_email === 'optional' && <span class="optional">(optional, if you'd like a reply)</span>}</label>
+            <input id="fb-email" name="email" type="email" autocomplete="email" required={f.ask_email === 'required'} />
+          </div>
+        )}
+        <!-- Spam trap: hidden from people, filled in by bots. -->
+        <div class="feedback-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <p class="meeting-error" role="alert" hidden></p>
+        <div class="feedback-actions">
+          <button type="submit" class="btn primary">{f.submit_label}</button>
+          {delivery === 'email_app' && <span class="feedback-note">Opens your email app with your message ready to send.</span>}
+        </div>
+      </form>
+      <div class="feedback-done" hidden aria-live="polite">
+        <p class="feedback-thanks"></p>
+        <p class="feedback-fallback" hidden>If nothing opened, <a data-feedback-mailto href="#">try again</a> or email <span class="selectable" data-feedback-email></span>.</p>
+        <button type="button" class="btn" data-feedback-close>Close</button>
+      </div>
+    </dialog>
+  </>
+)}
+
+<script>
+  type Cfg = { delivery: 'email_app' | 'web3forms' | 'formspree'; key: string; email?: string; subject: string; success: string };
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.feedback');
+  if (dialog) {
+    const cfg: Cfg = JSON.parse(dialog.dataset.feedback!);
+    const $ = <T extends HTMLElement>(sel: string) => dialog.querySelector<T>(sel)!;
+    const form = $<HTMLFormElement>('.feedback-form');
+    const error = $('.meeting-error');
+    const done = $('.feedback-done');
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const submitLabel = submit.textContent;
+
+    const open = () => {
+      form.hidden = false; done.hidden = true; error.hidden = true;
+      dialog.showModal();
+      (window as any).jcTrack?.('feedback_open', location.pathname);
+    };
+    document.addEventListener('click', (e) => {
+      const t = e.target as Element;
+      if (t.closest?.('[data-feedback-open]')) { e.preventDefault(); open(); }
+      if (t.closest?.('[data-feedback-close]')) dialog.close();
+    });
+    // Click on the backdrop closes the dialog.
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    form.addEventListener('input', () => { error.hidden = true; });
+
+    const finish = (fallbackMailto?: string) => {
+      $('.feedback-thanks').textContent = cfg.delivery === 'email_app'
+        ? 'Your email app should now be open with your feedback. Press Send to deliver it.'
+        : cfg.success;
+      const fb = $('.feedback-fallback');
+      fb.hidden = !fallbackMailto;
+      if (fallbackMailto) {
+        $<HTMLAnchorElement>('[data-feedback-mailto]').href = fallbackMailto;
+        $('[data-feedback-email]').textContent = cfg.email ?? '';
+      }
+      form.reset(); form.hidden = true; done.hidden = false;
+      done.querySelector<HTMLButtonElement>('button')!.focus();
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const get = (k: string) => String(data.get(k) ?? '').trim();
+      const problems: string[] = [];
+      if (!get('message')) problems.push('your feedback');
+      const name = form.querySelector<HTMLInputElement>('[name="name"]');
+      if (name?.required && !get('name')) problems.push('your name');
+      const email = form.querySelector<HTMLInputElement>('[name="email"]');
+      if (email && ((email.required && !get('email')) || !email.checkValidity())) problems.push('a valid email address');
+      if (problems.length) { error.textContent = `Please add ${problems.join(', ')}.`; error.hidden = false; return; }
+      if (get('website')) { finish(); return; } // bot: pretend it worked
+
+      const fields: [string, string][] = [
+        ['Rating', get('rating') ? `${get('rating')} / 5` : ''],
+        ['Topic', get('topic')],
+        ['Name', get('name')],
+        ['Email', get('email')],
+        ['Page', `${document.title} (${location.href})`],
+      ];
+      const subject = `${cfg.subject}${get('topic') ? `: ${get('topic')}` : ''}`;
+      const text = [get('message'), '', ...fields.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`)].join('\n');
+      const mailto = cfg.email ? `mailto:${cfg.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}` : '';
+      const track = () => (window as any).jcTrack?.('feedback_submit', get('topic') || 'feedback', { rating: get('rating') || 'none', delivery: cfg.delivery });
+
+      if (cfg.delivery === 'email_app') { track(); finish(mailto); window.location.href = mailto; return; }
+
+      submit.disabled = true; submit.textContent = 'Sending…';
+      try {
+        const common = { subject, name: get('name'), email: get('email'), message: get('message'), rating: get('rating'), topic: get('topic'), page: location.href };
+        const res = cfg.delivery === 'web3forms'
+          ? await fetch('https://api.web3forms.com/submit', {
+              method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ access_key: cfg.key, from_name: 'Site feedback', ...common }),
+            })
+          : await fetch(`https://formspree.io/f/${encodeURIComponent(cfg.key)}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ _subject: subject, ...common }),
+            });
+        if (!res.ok) throw new Error(String(res.status));
+        track(); finish();
+      } catch {
+        error.textContent = mailto ? "Sorry, that didn't send. " : "Sorry, that didn't send. Please try again in a moment.";
+        if (mailto) {
+          const a = document.createElement('a'); a.href = mailto; a.textContent = 'Send it from your email app instead';
+          error.append(a, '.');
+        }
+        error.hidden = false;
+      } finally {
+        submit.disabled = false; submit.textContent = submitLabel;
+      }
+    });
+  }
+</script>

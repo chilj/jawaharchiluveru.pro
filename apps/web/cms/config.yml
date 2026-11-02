@@ -126,6 +126,44 @@ collections:
           - { name: consent_accept, label: Accept button, widget: string, default: Accept }
           - { name: consent_decline, label: Decline button, widget: string, default: Decline }
 
+      - name: feedback
+        label: Feedback form
+        file: content/feedback.yaml
+        fields:
+          - { name: enabled, label: Show the feedback form, widget: boolean, default: true }
+          - name: delivery
+            label: How feedback reaches you
+            widget: select
+            default: email_app
+            options:
+              - { label: "Visitor's email app (no setup; they press Send)", value: email_app }
+              - { label: "Web3Forms (sent straight to your inbox; free access key)", value: web3forms }
+              - { label: "Formspree (sent straight to your inbox; form ID)", value: formspree }
+            hint: "The email app option sends to the email in Let's Talk. For Web3Forms, get a free access key at web3forms.com (it is emailed to you, and feedback goes to that address). For Formspree, create a form at formspree.io and use its ID (the part after /f/)."
+          - { name: service_key, label: Web3Forms access key or Formspree form ID, widget: string, required: false, hint: "Leave empty for the email app option. Without a key, the form falls back to the email app." }
+          - { name: button_label, label: Button text, widget: string, default: Feedback, hint: "Used for the footer link and the floating button." }
+          - { name: floating_button, label: Show a floating Feedback button, widget: boolean, default: true, hint: "Bottom-right corner of every page. The footer link is always there." }
+          - { name: heading, label: Form heading, widget: string, default: Share feedback }
+          - { name: intro, label: Intro, widget: text, required: false }
+          - name: rating
+            label: Rating
+            widget: object
+            collapsed: true
+            fields:
+              - { name: show, label: Ask for a 1–5 rating, widget: boolean, default: true }
+              - { name: label, label: Question, widget: string, default: How useful was this site? }
+              - { name: low, label: Label for 1, widget: string, default: Not useful }
+              - { name: high, label: Label for 5, widget: string, default: Very useful }
+          - { name: topic_label, label: Topic question, widget: string, default: Topic }
+          - { name: topics, label: Topics, widget: list, required: false, hint: "Choices visitors pick from. Leave empty to hide the topic menu." }
+          - { name: message_label, label: Message label, widget: string, default: Your feedback }
+          - { name: message_placeholder, label: Message placeholder, widget: string, required: false }
+          - { name: ask_name, label: Ask for their name, widget: select, default: optional, options: [{ label: Optional, value: optional }, { label: Required, value: required }, { label: "Don't ask", value: hidden }] }
+          - { name: ask_email, label: Ask for their email, widget: select, default: optional, options: [{ label: Optional, value: optional }, { label: Required, value: required }, { label: "Don't ask", value: hidden }] }
+          - { name: submit_label, label: Send button text, widget: string, default: Send feedback }
+          - { name: success_message, label: Thank-you message, widget: string, hint: "Shown after feedback is sent through Web3Forms or Formspree. With the email app option, visitors are told to press Send instead." }
+          - { name: subject, label: Email subject, widget: string, default: Site feedback, hint: "The topic is added after it, e.g. Site feedback: Design." }
+
       - name: privacy
         label: Privacy page
         file: content/privacy.md
