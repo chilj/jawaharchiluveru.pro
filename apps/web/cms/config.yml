@@ -96,6 +96,15 @@ collections:
                   - { name: accent, label: 'Accent (links, buttons, headings)', widget: color, allowInput: true, required: false }
                   - { name: secondary, label: 'Secondary (gradients, highlights)', widget: color, allowInput: true, required: false }
 
+      - name: analytics
+        label: Analytics
+        file: content/analytics.yaml
+        fields:
+          - { name: clarity_id, label: Microsoft Clarity project ID, widget: string, required: false, pattern: ['^([a-zA-Z0-9]{6,20})?$', 'Letters and numbers only, e.g. abc123xyz9'], hint: 'Visits, heatmaps, session recordings and events. clarity.microsoft.com → your project → Settings → Overview → Project ID.' }
+          - { name: ga4_id, label: Google Analytics 4 measurement ID, widget: string, required: false, pattern: ['^(G-[A-Za-z0-9]{4,15})?$', 'Starts with G-, e.g. G-ABC123XYZ'], hint: 'Optional. analytics.google.com → Admin → Data streams → your web stream → Measurement ID.' }
+          - { name: cloudflare_token, label: Cloudflare Web Analytics token, widget: string, required: false, pattern: ['^([a-fA-F0-9]{32})?$', '32 letters and numbers'], hint: 'Optional, cookie-free visit counts. Cloudflare → Analytics & Logs → Web Analytics → your site → the token in the JS snippet.' }
+          - { name: respect_privacy_signals, label: Skip visitors with Do Not Track or Global Privacy Control, widget: boolean, default: true }
+
       - name: sections
         label: Section names & order
         file: content/sections.yaml

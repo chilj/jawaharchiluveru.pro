@@ -18,6 +18,7 @@ content/                  ← everything you edit
 ├── theme.yaml            Theme & colours: preset palette or custom accent/secondary per mode
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── resume.yaml           Résumé button: PDF, button text, download name, last updated
+├── analytics.yaml        Analytics: Microsoft Clarity, Google Analytics 4, Cloudflare Web Analytics IDs
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
 └── _templates/           starting points for new entries when editing files by hand
@@ -63,6 +64,13 @@ Things to know:
   always at **jawaharchiluveru.pro/resume.pdf** (a permanent link for LinkedIn or email
   signatures) and at `/<File name for visitors>`. If the file goes missing, the button hides
   instead of linking to a dead file.
+- **Analytics** (Profile & settings): paste a Microsoft Clarity project ID (visits, heatmaps,
+  recordings), and optionally a Google Analytics 4 measurement ID and a Cloudflare Web Analytics
+  token. Each switches on when its ID is set and loads after the page renders. Every tappable
+  control sends `ui_click` (label, section, and open/close state for collapsible headers). Named
+  events on top: `resume_download`, `contact_click` (email, LinkedIn, booking), `case_study_open`,
+  `playbook_open`, `playbook_download`, `file_download`, `outbound_click`, `skill_search`.
+  Visitors with Do Not Track or Global Privacy Control get no analytics (switchable).
 
 ## Workflow
 

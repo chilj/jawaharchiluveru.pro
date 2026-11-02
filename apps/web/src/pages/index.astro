@@ -109,12 +109,12 @@ const section = (id: string) => ({
     <p class="lede">{about.tagline}</p>
     <div class="cta">
       {show('connect') && (
-        <a class="btn primary" href={booking ?? '#connect'}>
+        <a class="btn primary" href={booking ?? '#connect'} data-track={booking ? 'contact_click' : 'nav_click'} data-track-label={booking ? 'booking' : 'lets-talk'}>
           <Icon name="calendar" />{booking ? connect.booking.label : section('connect').title}
         </a>
       )}
       {connect.links.map((l) => <a class="btn" href={l.url} rel="noopener" target="_blank">{l.label}<Icon name="external-link" /></a>)}
-      {resume && <a class="btn" href={withBase(resume.href)} title={resumeTitle} target="_blank" rel="noopener"><Icon name="file-text" />{resume.label}</a>}
+      {resume && <a class="btn" href={withBase(resume.href)} title={resumeTitle} target="_blank" rel="noopener" data-track="resume_download" data-track-label="hero"><Icon name="file-text" />{resume.label}</a>}
     </div>
     {about.stats.length > 0 && (
       <dl class="stats">
@@ -359,10 +359,10 @@ const section = (id: string) => ({
       )}
       <div class="cta">
         {booking
-          ? <a class="btn primary" href={booking} rel="noopener" target="_blank"><Icon name="calendar" />{connect.booking.label}</a>
+          ? <a class="btn primary" href={booking} rel="noopener" target="_blank" data-track="contact_click" data-track-label="booking"><Icon name="calendar" />{connect.booking.label}</a>
           : showUnpublished && <span class="btn disabled"><Icon name="calendar" />{connect.booking.label} <Status status="planned" /></span>}
         {connect.email && <a class="btn" href={`mailto:${connect.email}`}><Icon name="mail" />{connect.email}</a>}
-        {resume && <a class="btn" href={withBase(resume.href)} title={resumeTitle} target="_blank" rel="noopener"><Icon name="file-text" />{resume.label}</a>}
+        {resume && <a class="btn" href={withBase(resume.href)} title={resumeTitle} target="_blank" rel="noopener" data-track="resume_download" data-track-label="lets-talk"><Icon name="file-text" />{resume.label}</a>}
       </div>
     </Section>
   )}

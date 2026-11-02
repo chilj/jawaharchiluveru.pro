@@ -2,6 +2,7 @@
 import { getEntry } from 'astro:content';
 import { getSections, withBase } from '../lib/content';
 import Icon from '../components/Icon.astro';
+import Analytics from '../components/Analytics.astro';
 import { buildTheme } from '../lib/theme';
 // Self-hosted fonts: no render-blocking request to a third-party host.
 // One variable file per family covers every weight used (two downloads instead of five).
@@ -52,6 +53,7 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <meta name="theme-color" content={theme.light['--accent']} media="(prefers-color-scheme: light)">
   <meta name="theme-color" content={theme.dark['--accent']} media="(prefers-color-scheme: dark)">
   <style is:inline set:html={theme.css}></style>
+  <Analytics />
   <link rel="sitemap" href={`${home}sitemap.xml`}>
   <slot name="head" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232f5bd3'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='28' font-weight='700' fill='white'>JC</text></svg>">

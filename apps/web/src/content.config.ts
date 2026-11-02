@@ -159,6 +159,16 @@ const resume = defineCollection({
   }),
 });
 
+const analytics = defineCollection({
+  loader: file(`${CONTENT}/analytics.yaml`, { parser: (text) => [{ id: 'analytics', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    clarity_id: z.string().optional(),
+    ga4_id: z.string().optional(),
+    cloudflare_token: z.string().optional(),
+    respect_privacy_signals: z.boolean().default(true),
+  }),
+});
+
 const connect = defineCollection({
   loader: glob({ base: CONTENT, pattern: 'connect.md' }),
   schema: z.object({
@@ -176,7 +186,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
-  resume,
+  resume, analytics,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

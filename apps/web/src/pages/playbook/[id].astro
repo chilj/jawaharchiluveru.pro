@@ -19,7 +19,7 @@ const { Content } = await render(entry);
     <p class="eyebrow">{p.kind}</p>
     <h1>{p.title} <Status status={p.status} /></h1>
     {!isPlaceholder(p.summary) && <p class="lede">{p.summary}</p>}
-    {p.file && <p><a class="btn primary" href={withBase(p.file)} download>Download</a></p>}
+    {p.file && <p><a class="btn primary" href={withBase(p.file)} download data-track="playbook_download" data-track-label={entry.id}>Download</a></p>}
     <div class="prose"><Content /></div>
   </article>
 </Base>

@@ -1,0 +1,96 @@
+---
+// Loads whichever analytics services have an ID in content/analytics.yaml, after the page has
+// rendered (so they never slow it down), and records key actions as events in all of them.
+import { getEntry } from 'astro:content';
+
+const a = (await getEntry('analytics', 'analytics'))?.data;
+const valid = {
+  clarity: a?.clarity_id && /^[a-z0-9]{6,20}$/i.test(a.clarity_id.trim()) ? a.clarity_id.trim() : '',
+  ga4: a?.ga4_id && /^G-[A-Z0-9]{4,15}$/i.test(a.ga4_id.trim()) ? a.ga4_id.trim().toUpperCase() : '',
+  cloudflare: a?.cloudflare_token && /^[a-f0-9]{32}$/i.test(a.cloudflare_token.trim()) ? a.cloudflare_token.trim() : '',
+};
+for (const [k, v] of Object.entries({ clarity: a?.clarity_id, ga4: a?.ga4_id, cloudflare: a?.cloudflare_token })) {
+  if (v?.trim() && !valid[k as keyof typeof valid]) console.warn(`[analytics] ${k} ID "${v}" doesn't look valid; ${k} stays off.`);
+}
+const enabled = Object.values(valid).some(Boolean);
+const config = { ...valid, respectPrivacy: a?.respect_privacy_signals ?? true };
+---
+{enabled && (
+  <script is:inline define:vars={{ config }}>
+    (function () {
+      var nav = navigator;
+      if (config.respectPrivacy && (nav.doNotTrack === '1' || window.doNotTrack === '1' || nav.globalPrivacyControl === true)) return;
+
+      // Queue events until the services load.
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+      window.jcTrack = function (name, label, extra) {
+        var params = Object.assign(label ? { label: String(label).slice(0, 100) } : {}, extra || {});
+        if (config.ga4) window.gtag('event', name, params);
+        if (config.clarity) {
+          window.clarity('event', name);
+          for (var k in params) window.clarity('set', name + '_' + k, String(params[k]).slice(0, 100));
+        }
+      };
+
+      function add(src, attrs) {
+        var s = document.createElement('script'); s.async = true; s.src = src;
+        for (var k in attrs || {}) s.setAttribute(k, attrs[k]);
+        document.head.appendChild(s);
+      }
+      function load() {
+        if (config.ga4) { add('https://www.googletagmanager.com/gtag/js?id=' + config.ga4); window.gtag('js', new Date()); window.gtag('config', config.ga4); }
+        if (config.clarity) add('https://www.clarity.ms/tag/' + config.clarity);
+        if (config.cloudflare) add('https://static.cloudflareinsights.com/beacon.min.js', { defer: '', 'data-cf-beacon': JSON.stringify({ token: config.cloudflare }) });
+      }
+      if (document.readyState === 'complete') setTimeout(load, 0); else addEventListener('load', function () { setTimeout(load, 0); });
+
+      // Every tappable control sends `ui_click` (label + section); key actions also get a named event.
+      var TAPPABLE = 'a[href], button, summary, [role="button"], [data-track]';
+      var clean = function (t) { return (t || '').replace(/\s+/g, ' ').trim(); };
+      function labelOf(el) {
+        if (el.tagName === 'SUMMARY') {
+          // Collapsible headers: use the heading, plus the company for career roles.
+          var title = el.querySelector('.role-title, .group-name, h2, h3, h4');
+          var org = el.querySelector('.role-org');
+          if (title) return (clean(title.textContent) + (org ? ' · ' + clean(org.firstChild && org.firstChild.textContent) : '')).slice(0, 60);
+        }
+        return (clean(el.getAttribute('aria-label')) || clean(el.textContent) || el.tagName.toLowerCase()).slice(0, 60);
+      }
+      function named(el) {
+        if (el.dataset.track) return [el.dataset.track, el.dataset.trackLabel];
+        var href = el.getAttribute('href') || '';
+        if (!href) return null;
+        if (href.indexOf('mailto:') === 0) return ['contact_click', 'email'];
+        if (/\.pdf($|\?)/i.test(href)) return ['file_download', href.split('/').pop()];
+        if (/\/case-studies\/[^/]+\/?$/.test(href)) return ['case_study_open', href.split('/').filter(Boolean).pop()];
+        if (/\/playbook\/[^/]+\/?$/.test(href)) return ['playbook_open', href.split('/').filter(Boolean).pop()];
+        if (/^https?:\/\//.test(href) && el.host !== location.host) return /linkedin\.com/.test(href) ? ['contact_click', 'linkedin'] : ['outbound_click', el.host];
+        return null;
+      }
+      document.addEventListener('click', function (e) {
+        var el = e.target.closest && e.target.closest(TAPPABLE);
+        if (!el) return;
+        var section = el.closest('section[id]'), extra = { section: section ? section.id : (el.closest('header') ? 'header' : 'page') };
+        if (el.tagName === 'SUMMARY' && el.parentElement) extra.state = el.parentElement.open ? 'close' : 'open';
+        if (el.classList.contains('ev-cell')) { extra.skill = el.dataset.skill || ''; extra.role = el.dataset.role || ''; }
+        if (el.hasAttribute('aria-pressed')) extra.pressed = el.getAttribute('aria-pressed') === 'true' ? 'off' : 'on';
+        var ui = el.classList.contains('ev-cell') ? 'evidence cell' : labelOf(el);
+        window.jcTrack('ui_click', ui, extra);
+        var n = named(el);
+        if (n) window.jcTrack(n[0], n[1]);
+      }, true);
+
+      // Skill grid searches, once the visitor pauses typing.
+      // (Listens on the document: this script runs before the search box exists.)
+      var timer;
+      document.addEventListener('input', function (e) {
+        if (!e.target || e.target.id !== 'skill-search') return;
+        clearTimeout(timer);
+        var box = e.target;
+        timer = setTimeout(function () { var q = box.value.trim().toLowerCase(); if (q.length >= 2) window.jcTrack('skill_search', q); }, 1500);
+      });
+    })();
+  </script>
+)}
