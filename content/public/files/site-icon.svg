@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#173a80"/><stop offset="0.55" stop-color="#0b2257"/><stop offset="1" stop-color="#06143a"/></linearGradient>
+    <radialGradient id="glow" cx="0.55" cy="0.5" r="0.55"><stop offset="0" stop-color="#2563eb" stop-opacity="0.35"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset="0.5" stop-color="#22a6f5"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+    <linearGradient id="loop" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <!-- blueprint: thin construction lines and an arc, right side -->
+  <g fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.7">
+    <path d="M330 92h120M380 150h92M380 340h92M330 412h120"/>
+    <path d="M452 80v352M420 300v120"/>
+    <path d="M360 86a190 190 0 0 1 0 340"/>
+  </g>
+  <g fill="#22d3ee"><rect x="446" y="144" width="12" height="12"/><rect x="446" y="334" width="12" height="12"/><rect x="414" y="406" width="12" height="12"/></g>
+  <!-- platform layers in the opening of the C -->
+  <g fill="none" stroke="#e0f2fe" stroke-width="5" stroke-linejoin="round">
+    <path d="M456 186l30 17-30 17-30-17z" fill="#0b2257"/>
+    <path d="M426 222l30 17 30-17" opacity="0.85"/>
+    <path d="M426 240l30 17 30-17" opacity="0.6"/>
+  </g>
+  <!-- integration network, left side -->
+  <g stroke="#22d3ee" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M56 220l20 12h10l16 42"/><path d="M42 290h62"/><path d="M56 356l20-16h10l16-34"/>
+  </g>
+  <g fill="#0b2257" stroke="#22d3ee" stroke-width="7">
+    <circle cx="48" cy="212" r="12"/><circle cx="38" cy="290" r="12"/><circle cx="50" cy="364" r="12"/>
+  </g>
+  <circle cx="114" cy="290" r="20" fill="#0b2257" stroke="#22d3ee" stroke-width="8"/>
+  <circle cx="114" cy="290" r="7" fill="#67e8f9"/>
+  <!-- JC -->
+  <g fill="none" stroke="url(#ink)" stroke-width="48">
+    <path d="M212 112h96M264 112v108a50 50 0 0 1-94 24" stroke-linecap="butt" stroke-linejoin="miter"/>
+    <path d="M420 144a86 86 0 1 0 0 116" stroke-linecap="butt"/>
+  </g>
+  <!-- delivery loop (infinity) with direction arrows -->
+  <path d="M282 396C312 356 342 346 372 346C402 346 426 368 426 396C426 424 402 446 372 446C342 446 312 436 282 396C252 356 222 346 192 346C162 346 138 368 138 396C138 424 162 446 192 446C222 446 252 436 282 396Z"
+    fill="none" stroke="url(#loop)" stroke-width="26" stroke-linejoin="round"/>
+  <g fill="#67e8f9"><path d="M150 438l-26 2 14-24z"/><path d="M414 354l26-2-14 24z"/></g>
+</svg>

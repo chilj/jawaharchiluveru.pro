@@ -6,7 +6,7 @@ tagline: Technical Product Manager with 16+ years delivering scalable digital pl
 seo_title: Jawahar Chiluveru | Senior Technical PM, Platform & Loyalty
 description: Senior Technical Product Manager in Dallas–Fort Worth. 16+ years building loyalty, omnichannel and developer platforms for Levi's, 7-Eleven and PayPal.
 social_image: ''
-site_icon: /files/site-icon.png
+site_icon: /files/site-icon.svg
 site_icon_small: /files/site-icon-small.svg
 social_image_alt: 'Jawahar Chiluveru, Senior Technical Product Manager in Dallas–Fort Worth: 16+ years, 25M+ loyalty members served, 25+ major platform releases led.'
 stats:
