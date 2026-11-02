@@ -2,15 +2,18 @@
 # Fields: name, detail (issuing body), year (optional), logo (Simple Icons slug)
 # or mark (initials for the tile when there's no logo).
 items:
-- name: Certified ScrumMaster
-  detail: Scrum Alliance
-  mark: CSM
-- name: Certified Scrum Product Owner
-  detail: Scrum Alliance
-  mark: CSPO
+- name: Generative AI Fundamentals
+  detail: Databricks
+  logo: databricks
 - name: SAFe 6 Product Owner / Product Manager
   detail: Scaled Agile
   mark: SAFe
+- name: Certified Scrum Product Owner
+  detail: Scrum Alliance
+  mark: CSPO
+- name: Certified ScrumMaster
+  detail: Scrum Alliance
+  mark: CSM
 - name: SQL Fundamentals
   detail: SoloLearn
   logo: sololearn
