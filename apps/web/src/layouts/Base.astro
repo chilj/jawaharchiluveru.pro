@@ -1,6 +1,7 @@
 ---
 import { getEntry } from 'astro:content';
 import { getSections, withBase } from '../lib/content';
+import Icon from '../components/Icon.astro';
 // Self-hosted fonts: no render-blocking request to a third-party host.
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
@@ -56,7 +57,10 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <header class="site-header">
     <div class="wrap nav">
       <a class="brand" href={home} aria-label="Home">JC</a>
-      <nav aria-label="Primary">
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <Icon name="menu" />Menu
+      </button>
+      <nav id="site-nav" aria-label="Primary">
         {nav.filter((s) => s.id !== 'about').map((s) => <a href={`${home}#${s.id}`}>{s.label}</a>)}
       </nav>
     </div>
@@ -86,6 +90,16 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
     };
     reveal();
     addEventListener('hashchange', reveal);
+    // Phone menu: toggles the nav panel; closes after a link is chosen.
+    const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+    const header = document.querySelector('.site-header');
+    const setMenu = (open: boolean) => {
+      header?.classList.toggle('menu-open', open);
+      toggle?.setAttribute('aria-expanded', String(open));
+    };
+    toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.querySelectorAll('#site-nav a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-fold-all]')) {
       b.addEventListener('click', () => {
         const open = b.dataset.foldAll === 'open';
