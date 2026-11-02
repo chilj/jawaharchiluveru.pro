@@ -13,7 +13,9 @@ content/                  ← everything you edit
 ├── career/               Career: one file per role
 ├── case-studies/         Case Studies: one file per story
 ├── playbook/             Playbook: TPM artifacts
-├── toolkit.yaml          Toolkit: skills, tools, certifications, education
+├── education.yaml        Education: degrees and institutions
+├── certifications.yaml   Certifications
+├── toolkit.yaml          Toolkit: skills and tools
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
 └── _templates/           starting points for new entries when editing files by hand

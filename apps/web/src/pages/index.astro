@@ -26,6 +26,12 @@ const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status
 const toolkit = (await getCollection('toolkit')).sort(byOrder)
   .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i.name) || showUnpublished) }))
   .filter((g) => g.items.length);
+const education = (await getCollection('education')).sort(byOrder).map((e) => e.data);
+const certifications = (await getCollection('certifications')).sort(byOrder).map((e) => e.data);
+const credentialSections = [
+  { id: 'education', items: education },
+  { id: 'certifications', items: certifications },
+].filter((c) => c.items.length > 0);
 const connect = (await getEntry('connect', 'connect'))!.data;
 const booking = connect.booking.url && !isPlaceholder(connect.booking.url) ? connect.booking.url : undefined;
 
@@ -33,7 +39,6 @@ const show = (id: string) => nav.some((s) => s.id === id);
 
 // Structured data (schema.org Person) so search engines can connect the name, role and profiles.
 const current = roles.find((r) => !r.data.end)?.data;
-const group = (id: string) => toolkit.find((g) => g.id === id)?.items ?? [];
 const siteUrl = new URL(import.meta.env.BASE_URL, Astro.site).href;
 const person = {
   '@context': 'https://schema.org',
@@ -45,8 +50,8 @@ const person = {
   description: about.description,
   ...(about.location && { homeLocation: { '@type': 'Place', name: about.location } }),
   ...(current && { worksFor: { '@type': 'Organization', name: current.org } }),
-  alumniOf: group('education').map((i) => ({ '@type': 'CollegeOrUniversity', name: i.detail ?? i.name })),
-  hasCredential: group('credentials').map((i) => ({
+  alumniOf: education.map((i) => ({ '@type': 'CollegeOrUniversity', name: i.detail ?? i.name })),
+  hasCredential: certifications.map((i) => ({
     '@type': 'EducationalOccupationalCredential', name: i.name, ...(i.detail && { recognizedBy: { '@type': 'Organization', name: i.detail } }),
   })),
   knowsAbout: toolkit.filter((g) => g.data.layout === 'chips').flatMap((g) => g.items.map((i) => i.name)).filter((n) => !isPlaceholder(n)),
@@ -150,6 +155,22 @@ const section = (id: string) => ({
       </ol>
     </Section>
   )}
+
+  {credentialSections.filter((c) => show(c.id)).map(({ id, items }) => (
+    <Section {...section(id)} count={`${items.length}`}>
+      <ul class="credentials">
+        {items.map((i) => (
+          <li class="credential">
+            <LogoTile name={i.detail ?? i.name} logo={i.logo} mark={i.mark} icon={section(id).icon} />
+            <span class="credential-text">
+              <h3 class="credential-name">{i.name}</h3>
+              {(i.detail || i.year) && <span class="meta">{[i.detail, i.year].filter(Boolean).join(' · ')}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  ))}
 
   {show('case-studies') && (
     <Section {...section('case-studies')} count={caseStudies.length ? `${caseStudies.length}` : undefined}>

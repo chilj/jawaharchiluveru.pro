@@ -100,6 +100,21 @@ const toolkit = defineCollection({
   }),
 });
 
+// education.yaml and certifications.yaml hold `items: [...]`; list position sets display order.
+const credentialList = (name: string) => defineCollection({
+  loader: file(`${CONTENT}/${name}.yaml`, {
+    parser: (text) => (parseYaml(text).items ?? []).map((item: Record<string, unknown>, i: number) => ({ id: `${i}`, order: i, ...item })),
+  }),
+  schema: z.object({
+    name: z.string(),
+    detail: z.string().optional(),
+    year: z.union([z.string(), z.number()]).transform(String).optional(),
+    logo: z.string().optional(),
+    mark: z.string().optional(),
+    order: z.number(),
+  }),
+});
+
 const connect = defineCollection({
   loader: glob({ base: CONTENT, pattern: 'connect.md' }),
   schema: z.object({
@@ -117,4 +132,5 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
+  education: credentialList('education'), certifications: credentialList('certifications'),
 };

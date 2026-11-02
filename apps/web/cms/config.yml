@@ -87,6 +87,26 @@ collections:
               - { name: order, label: Order, widget: number, value_type: int }
               - { name: enabled, label: Show on site, widget: boolean, default: true }
               - { name: collapsed, label: Start collapsed, widget: boolean, default: false }
+          - name: education
+            label: "Education"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: icon, label: Icon, widget: string, hint: 'Any icon name from https://lucide.dev/icons' }
+              - { name: order, label: Order, widget: number, value_type: int }
+              - { name: enabled, label: Show on site, widget: boolean, default: true }
+              - { name: collapsed, label: Start collapsed, widget: boolean, default: false }
+          - name: certifications
+            label: "Certifications"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: icon, label: Icon, widget: string, hint: 'Any icon name from https://lucide.dev/icons' }
+              - { name: order, label: Order, widget: number, value_type: int }
+              - { name: enabled, label: Show on site, widget: boolean, default: true }
+              - { name: collapsed, label: Start collapsed, widget: boolean, default: false }
           - name: case-studies
             label: "Case Studies"
             widget: object
@@ -127,6 +147,38 @@ collections:
               - { name: order, label: Order, widget: number, value_type: int }
               - { name: enabled, label: Show on site, widget: boolean, default: true }
               - { name: collapsed, label: Start collapsed, widget: boolean, default: false }
+
+      - name: education
+        label: Education
+        file: content/education.yaml
+        fields:
+          - name: items
+            label: Items
+            label_singular: Item
+            widget: list
+            summary: '{{fields.name}}'
+            fields:
+              - { name: name, label: Degree, widget: string }
+              - { name: detail, label: Institution, widget: string, required: false }
+              - { name: year, label: Year, widget: string, required: false }
+              - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org. Leave empty for a monogram.' }
+              - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials for the tile, e.g. UTA.' }
+
+      - name: certifications
+        label: Certifications
+        file: content/certifications.yaml
+        fields:
+          - name: items
+            label: Items
+            label_singular: Item
+            widget: list
+            summary: '{{fields.name}}'
+            fields:
+              - { name: name, label: Certification, widget: string }
+              - { name: detail, label: Issued by, widget: string, required: false }
+              - { name: year, label: Year, widget: string, required: false }
+              - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org. Leave empty for a monogram.' }
+              - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials for the tile, e.g. UTA.' }
 
       - name: toolkit
         label: Toolkit

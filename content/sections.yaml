@@ -12,23 +12,33 @@ career:
   icon: route
   order: 2
   enabled: true
+education:
+  label: Education
+  icon: graduation-cap
+  order: 3
+  enabled: true
+certifications:
+  label: Certifications
+  icon: award
+  order: 4
+  enabled: true
 case-studies:
   label: Case Studies
   icon: book-open
-  order: 3
+  order: 5
   enabled: true
 playbook:
   label: Playbook
   icon: clipboard-list
-  order: 4
+  order: 6
   enabled: true
 toolkit:
   label: Toolkit
   icon: toolbox
-  order: 5
+  order: 7
   enabled: true
 connect:
   label: Let's Talk
   icon: messages-square
-  order: 6
+  order: 8
   enabled: true

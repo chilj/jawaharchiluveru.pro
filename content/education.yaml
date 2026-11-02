@@ -1,0 +1,13 @@
+# Education section, shown in this order. Edit here or in the site editor at /admin.
+# Fields: name (degree), detail (institution), year (optional), logo (Simple Icons slug)
+# or mark (initials for the tile when there's no logo).
+items:
+- name: M.S., Engineering / Industrial Management
+  detail: The University of Texas at Arlington
+  mark: UTA
+- name: MBA, Information Technology & Marketing
+  detail: National Institute of Technology, Warangal
+  mark: NITW
+- name: B.Tech, Biomedical Engineering
+  detail: JNTU Hyderabad
+  mark: JNTU

@@ -1,0 +1,16 @@
+# Certifications section, shown in this order. Edit here or in the site editor at /admin.
+# Fields: name, detail (issuing body), year (optional), logo (Simple Icons slug)
+# or mark (initials for the tile when there's no logo).
+items:
+- name: Certified ScrumMaster
+  detail: Scrum Alliance
+  mark: CSM
+- name: Certified Scrum Product Owner
+  detail: Scrum Alliance
+  mark: CSPO
+- name: SAFe 6 Product Owner / Product Manager
+  detail: Scaled Agile
+  mark: SAFe
+- name: SQL Fundamentals
+  detail: SoloLearn
+  logo: sololearn
