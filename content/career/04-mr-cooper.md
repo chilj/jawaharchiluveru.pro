@@ -6,7 +6,13 @@ product: Debenture Interest Tracking Tool
 start: 2018-12
 end: 2019-10
 location: Irving, TX
+logo: ''
+mark: ''
+earlier: false
 status: published
 highlights:
-  - "Defined business rules and prioritized the backlog, managed the MVP roadmap and release plans, and automated a charge-off approval process with PowerApps."
+  - Developed the Debenture Interest (DI) Tracking and Management Tool, enabling users to track curtailment events on defaulted loans and reduce financial risk.
+  - Partnered with SMEs to define business rules and create prioritized product backlog items. Managed MVP roadmap, release plans, and sprint backlogs using VSTS, improving delivery efficiency.
+  - Prioritized bugs and enhancements, ensuring alignment with product objectives and business priorities.
+to_verify: []
 ---
