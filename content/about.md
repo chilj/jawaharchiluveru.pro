@@ -11,7 +11,7 @@ stats:
   - value: 16+
     label: years in product & delivery
   - value: 20+
-    label: multimillion projects delivered
+    label: multi-million dollar projects delivered across industries
   - value: 25+
     label: major platform releases led
 ---
