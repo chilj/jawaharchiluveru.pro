@@ -62,3 +62,18 @@ export async function iconIco(sizes = [16, 32, 48]) {
   });
   return Buffer.concat([header, ...pngs]);
 }
+
+/** The header logo (About → Header logo): an image or the small site icon, inlined if SVG; undefined means the text tile. */
+export async function brandMark(): Promise<{ svg?: string; src?: string } | undefined> {
+  const about = (await getEntry('about', 'about'))!.data;
+  if (about.header_logo === 'initials') return undefined;
+  const own = about.header_logo === 'image' ? about.header_logo_image?.trim() : undefined;
+  const small = own || (await settings()).small;
+  if (!small) return undefined;
+  if (!small.endsWith('.svg')) return { src: small };
+  // Prefix ids so the inlined icon's gradients can't clash with anything else on the page.
+  const svg = (await read(small)).toString()
+    .replace(/\bid="([^"]+)"/g, 'id="brand-$1"').replace(/url\(#([^)]+)\)/g, 'url(#brand-$1)')
+    .replace('<svg', '<svg aria-hidden="true" focusable="false"');
+  return { svg };
+}

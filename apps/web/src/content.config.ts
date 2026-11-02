@@ -34,6 +34,9 @@ const about = defineCollection({
     social_image_alt: z.string().optional(),
     site_icon: z.string().optional(),        // detailed square icon, used at 180px and up
     site_icon_small: z.string().optional(),  // simple version for browser tabs and search results (SVG or PNG)
+    header_logo: z.enum(['site_icon', 'image', 'initials']).default('site_icon'),
+    header_logo_image: z.string().optional(),
+    header_initials: z.string().default('JC'),
     stats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
   }),
 });

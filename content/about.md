@@ -8,6 +8,8 @@ description: Senior Technical Product Manager in Dallas–Fort Worth. 16+ years 
 social_image: ''
 site_icon: /files/site-icon.svg
 site_icon_small: /files/site-icon-small.svg
+header_logo: site_icon
+header_initials: JC
 social_image_alt: 'Jawahar Chiluveru, Senior Technical Product Manager in Dallas–Fort Worth: 16+ years, 25M+ loyalty members served, 25+ major platform releases led.'
 stats:
   - value: 16+

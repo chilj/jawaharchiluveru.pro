@@ -34,6 +34,9 @@ collections:
           - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Use 1200×630 pixels (PNG or JPG).' }
           - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe the image for screen readers.' }
           - { name: site_icon, label: Site icon (large), widget: image, required: false, hint: 'Square image, at least 512×512. Used for phone home screens and other large icons. Leave empty to use the JC icon in your theme colors.' }
+          - { name: header_logo, label: Header logo, widget: select, default: site_icon, options: [{ label: 'Site icon (small)', value: site_icon }, { label: 'My own image', value: image }, { label: 'Initials on a color tile', value: initials }], hint: 'The square in the top-left corner of every page.' }
+          - { name: header_logo_image, label: Header logo image, widget: image, required: false, hint: 'Used when Header logo is "My own image". Square, shown at about 36×36 pixels (SVG or PNG at least 72×72).' }
+          - { name: header_initials, label: Header initials, widget: string, default: JC, hint: 'Used when Header logo is "Initials on a color tile". One to three letters.', pattern: ['^.{1,3}$', 'One to three characters'] }
           - { name: site_icon_small, label: Site icon (small), widget: image, required: false, hint: 'A simple version for browser tabs and Google results (shown at 16–48 pixels). SVG is best; fine detail disappears at these sizes. Leave empty to use the large icon.' }
           - name: stats
             label: Headline numbers
