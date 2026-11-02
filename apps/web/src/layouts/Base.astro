@@ -3,15 +3,13 @@ import { getEntry } from 'astro:content';
 import { getSections, withBase } from '../lib/content';
 import Icon from '../components/Icon.astro';
 // Self-hosted fonts: no render-blocking request to a third-party host.
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/sora/600.css';
-import '@fontsource/sora/700.css';
+// One variable file per family covers every weight used (two downloads instead of five).
+import '@fontsource-variable/ibm-plex-sans/wght.css';
+import '@fontsource-variable/sora/wght.css';
 import '../styles/global.css';
-// Preload the faces used above the fold to avoid a layout shift when they swap in.
-import soraBold from '@fontsource/sora/files/sora-latin-700-normal.woff2?url';
-import plexRegular from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url';
+// Preload both font files so they download alongside the HTML instead of after it.
+import soraFont from '@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url';
+import plexFont from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url';
 
 interface Props { title?: string; description?: string }
 const about = (await getEntry('about', 'about'))!.data;
@@ -42,8 +40,8 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   {image && <meta name="twitter:image" content={image}>}
   <meta name="twitter:title" content={title}>
   <meta name="twitter:description" content={description}>
-  <link rel="preload" href={soraBold} as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href={plexRegular} as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href={soraFont} as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href={plexFont} as="font" type="font/woff2" crossorigin>
   <link rel="canonical" href={canonical}>
   <link rel="sitemap" href={`${home}sitemap.xml`}>
   <slot name="head" />

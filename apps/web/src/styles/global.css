@@ -18,8 +18,8 @@
   --glow-c: rgb(233 150 40 / 0.16);
   --radius: 0.875rem;
   --max: 61.25rem;
-  --font-display: "Sora", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Sora Variable", "Sora", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
