@@ -74,6 +74,12 @@ Things to know:
   16–48 pixels, so keep it simple (SVG is best). Leave both empty for a JC icon in your theme colors.
   **Header logo** (same page) sets the top-left square: the small site icon, your own image, or
   initials on a color tile.
+- **Certifications** (Profile & settings → Certifications) use LinkedIn's fields: name, issuing
+  organization, issue and expiration dates, credential ID and URL, skills and media. When the site
+  builds it reads each **Credential URL** for the badge image (Credly, Accredible and most issuers
+  publish one) and each media link for a title and preview image. Pages that can't be read fall
+  back to the issuer logo or monogram; expired credentials are labeled. Clicks send
+  `credential_open` and `credential_media` events.
 - **Résumé** (Profile & settings): upload a new PDF to replace the current one. The live résumé is
   always at **jawaharchiluveru.pro/resume.pdf** (a permanent link for LinkedIn or email
   signatures) and at `/<File name for visitors>`. If the file goes missing, the button hides

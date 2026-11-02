@@ -700,3 +700,22 @@ html.chat-open .feedback-tab { display: none; } /* the open chat panel takes the
 .chat-captcha[hidden] { display: none; }
 .chat-live-row { border-top: 0; padding-top: 0.25rem; }
 form.chat-compose + .chat-live-row .chat-live { background: var(--surface); color: var(--accent); }
+
+/* Certifications (LinkedIn-style): badge, dates, credential link, skills, media */
+.tile-badge { background: var(--surface); padding: 0.125rem; overflow: hidden; }
+.tile-badge img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cert .credential-text { gap: 0.25rem; }
+.cert-expired { color: var(--warn); font-weight: 600; }
+.cert-id { font-size: 0.8125rem; }
+.cert-link { justify-self: start; margin-top: 0.25rem; font-size: 0.8125rem; padding: 0.3rem 0.75rem; gap: 0.35rem; }
+.cert-link .icon { width: 0.875rem; height: 0.875rem; }
+.cert-skills { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.25rem; }
+.cert-skill { font-size: 0.75rem; line-height: 1.3; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.cert-media { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.35rem; }
+.cert-media a { display: grid; gap: 0.25rem; width: 10rem; max-width: 100%; color: var(--text); font-size: 0.8125rem; line-height: 1.3; text-decoration: none; }
+.cert-media a:hover .cert-media-title { text-decoration: underline; }
+.cert-media img, .cert-media-icon { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.5rem; border: 1px solid var(--line); background: var(--surface); }
+.cert-media-icon { display: grid; place-items: center; color: var(--muted); }
+.cert-media-icon .icon { width: 1.5rem; height: 1.5rem; }
+.cert-media-title { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cert { align-items: start; }

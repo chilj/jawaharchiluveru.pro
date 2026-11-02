@@ -154,6 +154,36 @@ const credentialList = (name: string) => defineCollection({
   }),
 });
 
+// certifications.yaml holds `items: [...]`, shaped like LinkedIn's "Licenses & certifications" form.
+// Older entries used `detail` for the issuer and `year` for the issue year; both still work.
+const blank = (v: unknown) => (v === '' || v === null ? undefined : v);
+const month = z.preprocess(blank, z.coerce.number().int().min(1).max(12).optional());
+const year = z.preprocess(blank, z.coerce.number().int().min(1900).max(2100).optional());
+const text = z.preprocess(blank, z.string().optional());
+const certifications = defineCollection({
+  loader: file(`${CONTENT}/certifications.yaml`, {
+    parser: (text) => (parseYaml(text).items ?? []).map((item: Record<string, unknown>, i: number) => ({
+      id: `${i}`, order: i, ...item,
+      issuer: item.issuer ?? item.detail,
+      issue_year: item.issue_year ?? item.year,
+    })),
+  }),
+  schema: z.object({
+    name: z.string(),
+    issuer: z.string(),
+    issue_month: month, issue_year: year,
+    expiry_month: month, expiry_year: year,
+    credential_id: z.preprocess(blank, z.string().max(80).optional()),
+    credential_url: z.preprocess(blank, z.string().url().optional()),
+    skills: z.array(z.string()).default([]),
+    media: z.array(z.object({ url: text, file: text, title: text, description: text })).default([]),
+    badge: text,   // uploaded badge image; otherwise taken from the credential URL
+    logo: text,    // Simple Icons slug for the issuer
+    mark: text,    // monogram when there's no badge or logo
+    order: z.number(),
+  }),
+});
+
 const theme = defineCollection({
   loader: file(`${CONTENT}/theme.yaml`, { parser: (text) => [{ id: 'theme', ...(parseYaml(text) ?? {}) }] }),
   schema: z.object({
@@ -284,6 +314,6 @@ const connect = defineCollection({
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
   resume, analytics, privacy, feedback, chat,
-  education: credentialList('education'), certifications: credentialList('certifications'),
+  education: credentialList('education'), certifications,
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

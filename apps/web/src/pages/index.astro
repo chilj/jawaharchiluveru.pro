@@ -9,6 +9,7 @@ import LevelMeter from '../components/LevelMeter.astro';
 import MeetingRequest from '../components/MeetingRequest.astro';
 import { brandFor } from '../lib/icons';
 import { getResume } from '../lib/resume';
+import { getCertifications } from '../lib/certifications';
 import {
   byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase, LEVELS,
 } from '../lib/content';
@@ -62,10 +63,9 @@ const evSkills = [...new Map(career.flatMap((e) => e.data.skills.map((sk) => [sk
   .sort((a, b) => a.pos - b.pos);
 const evGroups = [...new Set(evSkills.map((r) => r.group))].map((group) => ({ group, rows: evSkills.filter((r) => r.group === group) }));
 const education = (await getCollection('education')).sort(byOrder).map((e) => e.data);
-const certifications = (await getCollection('certifications')).sort(byOrder).map((e) => e.data);
+const certifications = await getCertifications();
 const credentialSections = [
   { id: 'education', items: education },
-  { id: 'certifications', items: certifications },
 ].filter((c) => c.items.length > 0);
 const connect = (await getEntry('connect', 'connect'))!.data;
 const resume = await getResume();
@@ -88,8 +88,11 @@ const person = {
   ...(about.location && { homeLocation: { '@type': 'Place', name: about.location } }),
   ...(current && { worksFor: { '@type': 'Organization', name: current.org } }),
   alumniOf: education.map((i) => ({ '@type': 'CollegeOrUniversity', name: i.detail ?? i.name })),
-  hasCredential: certifications.map((i) => ({
-    '@type': 'EducationalOccupationalCredential', name: i.name, ...(i.detail && { recognizedBy: { '@type': 'Organization', name: i.detail } }),
+  hasCredential: certifications.map((c) => ({
+    '@type': 'EducationalOccupationalCredential', name: c.name, recognizedBy: { '@type': 'Organization', name: c.issuer },
+    ...(c.issuedIso && { dateCreated: c.issuedIso }), ...(c.expiresIso && { expires: c.expiresIso }),
+    ...(c.credential_id && { identifier: c.credential_id }), ...(c.credential_url && { url: c.credential_url }),
+    ...(c.skills.length && { competencyRequired: c.skills }),
   })),
   knowsAbout: [...new Set(allSkills.filter((i) => !i.level || LEVELS[i.level].score >= 3).map((i) => i.name))].filter((n) => !isPlaceholder(n)),
   sameAs: connect.links.map((l) => l.url),
@@ -195,6 +198,50 @@ const section = (id: string) => ({
           </li>
         )}
       </ol>
+    </Section>
+  )}
+
+  {show('certifications') && certifications.length > 0 && (
+    <Section {...section('certifications')} count={`${certifications.length}`}>
+      <ul class="credentials certs">
+        {certifications.map((c) => (
+          <li class="credential cert">
+            {c.badge
+              ? <span class="tile tile-md tile-badge" title={c.issuer}><img src={c.badge} alt="" width="44" height="44" loading="lazy" decoding="async" /></span>
+              : <LogoTile name={c.issuer} logo={c.logo} mark={c.mark} icon={section('certifications').icon} />}
+            <span class="credential-text">
+              <h3 class="credential-name">{c.name}</h3>
+              <span class="meta">{c.issuer}</span>
+              {(c.issued || c.expiresLabel) && (
+                <span class="meta">
+                  {c.issued && <span>Issued {c.issued}</span>}
+                  {c.expiresLabel && <span class={c.expired ? 'cert-expired' : undefined}>{c.expired ? 'Expired' : 'Expires'} {c.expiresLabel}</span>}
+                </span>
+              )}
+              {c.credential_id && <span class="meta cert-id">Credential ID <span class="selectable">{c.credential_id}</span></span>}
+              {c.credential_url && (
+                <a class="btn cert-link" href={c.credential_url} target="_blank" rel="noopener" data-track="credential_open" data-track-label={c.name}>
+                  Show credential<Icon name="external-link" />
+                </a>
+              )}
+              {c.skills.length > 0 && (
+                <span class="cert-skills"><span class="sr-only">Skills: </span>{c.skills.map((s) => <span class="cert-skill">{s}</span>)}</span>
+              )}
+              {c.media.length > 0 && (
+                <span class="cert-media">
+                  {c.media.map((m) => (
+                    <a href={m.href} target="_blank" rel="noopener" title={m.description ?? m.title} data-track="credential_media" data-track-label={m.title}>
+                      {m.thumb ? <img src={m.thumb} alt="" width="160" height="90" loading="lazy" decoding="async" />
+                        : <span class="cert-media-icon"><Icon name={m.kind === 'file' ? 'file-text' : 'link'} /></span>}
+                      <span class="cert-media-title">{m.title}</span>
+                    </a>
+                  ))}
+                </span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
     </Section>
   )}
 

@@ -331,11 +331,34 @@ collections:
             widget: list
             summary: '{{fields.name}}'
             fields:
-              - { name: name, label: Certification, widget: string }
-              - { name: detail, label: Issued by, widget: string, required: false }
-              - { name: year, label: Year, widget: string, required: false }
-              - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org. Leave empty for a monogram.' }
-              - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials for the tile, e.g. UTA.' }
+              - { name: name, label: Name, widget: string, hint: 'e.g. Certified Scrum Product Owner' }
+              - { name: issuer, label: Issuing organization, widget: string, hint: 'e.g. Scrum Alliance' }
+              - { name: issue_month, label: Issue date – month, widget: select, required: false, options: [{ label: January, value: 1 }, { label: February, value: 2 }, { label: March, value: 3 }, { label: April, value: 4 }, { label: May, value: 5 }, { label: June, value: 6 }, { label: July, value: 7 }, { label: August, value: 8 }, { label: September, value: 9 }, { label: October, value: 10 }, { label: November, value: 11 }, { label: December, value: 12 }] }
+              - { name: issue_year, label: Issue date – year, widget: number, value_type: int, required: false, min: 1926, max: 2100 }
+              - { name: expiry_month, label: Expiration date – month, widget: select, required: false, options: [{ label: January, value: 1 }, { label: February, value: 2 }, { label: March, value: 3 }, { label: April, value: 4 }, { label: May, value: 5 }, { label: June, value: 6 }, { label: July, value: 7 }, { label: August, value: 8 }, { label: September, value: 9 }, { label: October, value: 10 }, { label: November, value: 11 }, { label: December, value: 12 }] }
+              - { name: expiry_year, label: Expiration date – year, widget: number, value_type: int, required: false, min: 1926, max: 2100, hint: 'Leave empty if it does not expire. Expired credentials are labeled Expired on the site.' }
+              - { name: credential_id, label: Credential ID, widget: string, required: false, pattern: ['^.{0,80}$', 'Up to 80 characters'] }
+              - { name: credential_url, label: Credential URL, widget: string, required: false, pattern: ['^(https?://.+)?$', 'A full address starting with https://'], hint: 'Adds a Show credential button. When the site builds, it reads this page and uses its badge image (Credly, Accredible and most issuers provide one).' }
+              - { name: skills, label: Skills, widget: list, required: false, hint: 'Skills this credential shows, as on LinkedIn.' }
+              - name: media
+                label: Media
+                label_singular: Media item
+                widget: list
+                required: false
+                summary: '{{fields.title}}{{fields.url}}'
+                hint: 'Links to sites, or uploaded images and documents. For links, the site reads the page for a title and preview image.'
+                fields:
+                  - { name: url, label: Link, widget: string, required: false, pattern: ['^(https?://.+)?$', 'A full address starting with https://'] }
+                  - { name: file, label: Or upload a file, widget: file, required: false, hint: 'Image, PDF or document.' }
+                  - { name: title, label: Title, widget: string, required: false, hint: 'Leave empty to use the linked page title or file name.' }
+                  - { name: description, label: Description, widget: text, required: false }
+              - name: badge
+                label: Badge image
+                widget: image
+                required: false
+                hint: 'Optional. Overrides the badge read from the credential URL.'
+              - { name: logo, label: Issuer logo (Simple Icons slug), widget: string, required: false, hint: 'Used when there is no badge. Slug from https://simpleicons.org, e.g. databricks.' }
+              - { name: mark, label: Monogram, widget: string, required: false, hint: 'Used when there is no badge or logo, e.g. CSPO.' }
 
       - name: toolkit
         label: Toolkit (skill matrix)

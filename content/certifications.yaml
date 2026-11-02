@@ -1,19 +1,21 @@
 # Certifications section, shown in this order. Edit here or in the site editor at /admin.
-# Fields: name, detail (issuing body), year (optional), logo (Simple Icons slug)
-# or mark (initials for the tile when there's no logo).
+# Fields match LinkedIn's "Licenses & certifications": name, issuer, issue_month/issue_year,
+# expiry_month/expiry_year, credential_id, credential_url, skills, media (url or file, title,
+# description). The badge comes from the credential URL when the site builds; logo (Simple Icons
+# slug) or mark (initials) are fallbacks.
 items:
 - name: Generative AI Fundamentals
-  detail: Databricks
+  issuer: Databricks
   logo: databricks
 - name: SAFe 6 Product Owner / Product Manager
-  detail: Scaled Agile
+  issuer: Scaled Agile
   mark: SAFe
 - name: Certified Scrum Product Owner
-  detail: Scrum Alliance
+  issuer: Scrum Alliance
   mark: CSPO
 - name: Certified ScrumMaster
-  detail: Scrum Alliance
+  issuer: Scrum Alliance
   mark: CSM
 - name: SQL Fundamentals
-  detail: SoloLearn
+  issuer: SoloLearn
   logo: sololearn
