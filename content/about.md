@@ -13,7 +13,7 @@ stats:
   - value: 20+
     label: multi-million dollar projects delivered across industries
   - value: 50+
-    label: major platform releases led
+    label: major platform releases led across industries
 ---
 
 I turn complex, cross-functional modernization efforts into measurable business outcomes — the kind of TPM who can sit in an architecture review and a steering committee meeting on the same day and speak both languages fluently.
