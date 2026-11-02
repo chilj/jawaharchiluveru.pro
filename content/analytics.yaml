@@ -1,11 +1,11 @@
 # Analytics. Edit in /admin → Profile & settings → Analytics. Each service switches on when its ID is set.
 clarity_id: "z7873a2i3z"            # Microsoft Clarity project ID: visits, heatmaps, recordings, events
-ga4_id: ""                # Google Analytics 4 measurement ID, e.g. G-ABC123XYZ
+ga4_id: "G-D7JYHET21S"                # Google Analytics 4 measurement ID, e.g. G-ABC123XYZ
 cloudflare_token: ""      # Cloudflare Web Analytics token: cookie-free visit counts
 respect_privacy_signals: true   # skip analytics for visitors with Do Not Track or Global Privacy Control on
 # Cookie consent for Clarity and Google Analytics (Cloudflare is cookie-free and never asks).
 # consent: europe (visitors in EU/UK/European time zones) | everyone | off
 consent: europe
-consent_text: This site uses cookies from Microsoft Clarity to see which content is useful. No ads, and your data isn't sold.
+consent_text: This site uses cookies from Microsoft Clarity and Google Analytics to see which content is useful. No ads, and your data isn't sold.
 consent_accept: Accept
 consent_decline: Decline
