@@ -14,7 +14,9 @@ const key = f?.service_key?.trim() ?? '';
 const delivery = f && f.delivery !== 'email_app' && key ? f.delivery : 'email_app';
 if (f?.enabled && f.delivery !== 'email_app' && !key) console.warn(`[feedback] ${f.delivery} has no key; using the email app instead.`);
 const show = !!f?.enabled && (delivery !== 'email_app' || !!email);
-const config = show ? { delivery, key, email, subject: f!.subject, success: f!.success_message } : null;
+// hCaptcha (Web3Forms only): Web3Forms' client script renders the check; it loads when the form first opens.
+const captcha = show && delivery === 'web3forms' && f!.captcha;
+const config = show ? { delivery, key, email, subject: f!.subject, success: f!.success_message, captcha } : null;
 const ask = (v: string) => v !== 'hidden';
 ---
 {show && f && (
@@ -66,6 +68,7 @@ const ask = (v: string) => v !== 'hidden';
         )}
         <!-- Spam trap: hidden from people, filled in by bots. -->
         <div class="feedback-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        {captcha && <div class="feedback-captcha"><div class="h-captcha" data-captcha="true"></div></div>}
         <p class="meeting-error" role="alert" hidden></p>
         <div class="feedback-actions">
           <button type="submit" class="btn primary">{f.submit_label}</button>
@@ -82,7 +85,8 @@ const ask = (v: string) => v !== 'hidden';
 )}
 
 <script>
-  type Cfg = { delivery: 'email_app' | 'web3forms' | 'formspree'; key: string; email?: string; subject: string; success: string };
+  import { loadCaptcha, captchaToken, resetCaptcha } from '../lib/captcha';
+  type Cfg = { delivery: 'email_app' | 'web3forms' | 'formspree'; key: string; email?: string; subject: string; success: string; captcha: boolean };
   const dialog = document.querySelector<HTMLDialogElement>('dialog.feedback');
   if (dialog) {
     const cfg: Cfg = JSON.parse(dialog.dataset.feedback!);
@@ -93,7 +97,12 @@ const ask = (v: string) => v !== 'hidden';
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const submitLabel = submit.textContent;
 
+    // The captcha loads only when someone opens the form, so pages stay fast for everyone else.
+    const captchaBox = form.querySelector('.h-captcha');
+    let captchaFailed = false;
+    const loadCaptchaOnce = () => { if (cfg.captcha) loadCaptcha().then((ok) => { captchaFailed = !ok; }); };
     const open = () => {
+      loadCaptchaOnce();
       form.hidden = false; done.hidden = true; error.hidden = true;
       dialog.showModal();
       (window as any).jcTrack?.('feedback_open', location.pathname);
@@ -148,13 +157,27 @@ const ask = (v: string) => v !== 'hidden';
 
       if (cfg.delivery === 'email_app') { track(); finish(mailto); window.location.href = mailto; return; }
 
+      const fail = (msg: string) => {
+        error.textContent = msg + (mailto ? ' ' : '');
+        if (mailto) {
+          const a = document.createElement('a'); a.href = mailto; a.textContent = 'Send it from your email app instead';
+          error.append(a, '.');
+        }
+        error.hidden = false;
+      };
+      if (cfg.captcha && !captchaToken(captchaBox)) {
+        if (captchaFailed) fail("The spam check couldn't load (an ad blocker may be stopping it).");
+        else { error.textContent = 'Please complete the "I am human" check.'; error.hidden = false; }
+        return;
+      }
+
       submit.disabled = true; submit.textContent = 'Sending…';
       try {
         const common = { subject, name: get('name'), email: get('email'), message: get('message'), rating: get('rating'), topic: get('topic'), page: location.href };
         const res = cfg.delivery === 'web3forms'
           ? await fetch('https://api.web3forms.com/submit', {
               method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-              body: JSON.stringify({ access_key: cfg.key, from_name: 'Site feedback', ...common }),
+              body: JSON.stringify({ access_key: cfg.key, from_name: 'Site feedback', ...common, ...(cfg.captcha && { 'h-captcha-response': captchaToken(captchaBox) }) }),
             })
           : await fetch(`https://formspree.io/f/${encodeURIComponent(cfg.key)}`, {
               method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -163,14 +186,10 @@ const ask = (v: string) => v !== 'hidden';
         if (!res.ok) throw new Error(String(res.status));
         track(); finish();
       } catch {
-        error.textContent = mailto ? "Sorry, that didn't send. " : "Sorry, that didn't send. Please try again in a moment.";
-        if (mailto) {
-          const a = document.createElement('a'); a.href = mailto; a.textContent = 'Send it from your email app instead';
-          error.append(a, '.');
-        }
-        error.hidden = false;
+        fail(mailto ? "Sorry, that didn't send." : "Sorry, that didn't send. Please try again in a moment.");
       } finally {
         submit.disabled = false; submit.textContent = submitLabel;
+        if (cfg.captcha) resetCaptcha(captchaBox); // each token works once
       }
     });
   }

@@ -686,3 +686,15 @@ html.chat-open .feedback-tab { display: none; } /* the open chat panel takes the
   .chat-panel { left: 0.5rem; right: 0.5rem; width: auto; bottom: calc(4.75rem + var(--dock-lift) + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 6.5rem - var(--dock-lift)); }
 }
 .bubble-link { display: inline-block; margin-top: 0.45rem; font-weight: 600; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.feedback-captcha { min-height: 78px; } /* room for the hCaptcha box so the form doesn't jump */
+.chat-compose { flex-wrap: wrap; }
+.chat-email, .chat-captcha { flex: 1 1 100%; }
+.chat-email input {
+  width: 100%; font: inherit; font-size: 0.875rem; color: var(--text); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 0.6rem; padding: 0.45rem 0.75rem;
+}
+.chat-email input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.chat-captcha { min-height: 78px; overflow-x: auto; }
+.chat-captcha[hidden] { display: none; }
+.chat-live-row { border-top: 0; padding-top: 0.25rem; }
+form.chat-compose + .chat-live-row .chat-live { background: var(--surface); color: var(--accent); }

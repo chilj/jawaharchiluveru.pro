@@ -141,6 +141,7 @@ collections:
               - { label: "Formspree (sent straight to your inbox; form ID)", value: formspree }
             hint: "The email app option sends to the email in Let's Talk. For Web3Forms, get a free access key at web3forms.com (it is emailed to you, and feedback goes to that address). For Formspree, create a form at formspree.io and use its ID (the part after /f/)."
           - { name: service_key, label: Web3Forms access key or Formspree form ID, widget: string, required: false, hint: "Leave empty for the email app option. Without a key, the form falls back to the email app." }
+          - { name: captcha, label: Spam check (hCaptcha), widget: boolean, default: false, hint: "Web3Forms only. Adds an \"I am human\" check that must be passed before feedback sends. It loads only when someone opens the form." }
           - { name: button_label, label: Button text, widget: string, default: Feedback, hint: "Used for the footer link and the bottom tab." }
           - { name: bottom_tab, label: Show the Feedback tab at the bottom of every page, widget: boolean, default: true, hint: "Pinned to the bottom-left edge. The footer link is always there." }
           - { name: heading, label: Form heading, widget: string, default: Share feedback }
@@ -191,12 +192,16 @@ collections:
             widget: select
             default: email
             options:
+              - { label: "Web3Forms (sent straight to your inbox; visitors add their email for your reply)", value: web3forms }
               - { label: "Email (your email app opens with the message; uses the email in Let's Talk)", value: email }
               - { label: "WhatsApp to my phone (your number becomes visible in the page)", value: whatsapp }
               - { label: "Telegram (your number stays private; uses your Telegram username)", value: telegram }
-              - { label: "Tawk.to live chat (reply from the Tawk app on your phone; number stays private)", value: tawk }
+              - { label: "Tawk.to live chat (reply from the Tawk app on your phone; with a Web3Forms key, visitors can also leave a message for your inbox)", value: tawk }
             hint: "If the setting for the chosen option is empty, the chat uses email."
-          - { name: whatsapp_number, label: WhatsApp number, widget: string, required: false, hint: "With country code, e.g. +1 214 555 0100. Anyone can see this number in the page source.", pattern: ['^[+0-9 ()-]*$', 'Digits, spaces, +, - and brackets only'] }
+          - { name: web3forms_key, label: Web3Forms access key, widget: string, required: false, hint: "Leave empty to use the key from the Feedback form." }
+          - { name: ask_email, label: "Visitor's email (Web3Forms)", widget: select, default: required, options: [{ label: Required, value: required }, { label: Optional, value: optional }], hint: "Needed for you to reply." }
+          - { name: captcha, label: "Spam check (hCaptcha, Web3Forms)", widget: boolean, default: true, hint: "Appears once a visitor starts typing a message." }
+          - { name: whatsapp_number, label: WhatsApp number, widget: string, required: false, hint: "With country code. Only used when WhatsApp is chosen above, and then anyone can see it in the page source. This file is also visible in your public GitHub repository, so leave it empty unless you use WhatsApp.", pattern: ['^[+0-9 ()-]*$', 'Digits, spaces, +, - and brackets only'] }
           - { name: telegram_username, label: Telegram username, widget: string, required: false, hint: "Telegram → Settings → Username (e.g. @jawahar). Set Phone number privacy to Nobody to keep your number hidden.", pattern: ['^@?([A-Za-z0-9_]{5,32})?$', '5–32 letters, numbers or underscores'] }
           - { name: tawk_property_id, label: Tawk.to property ID, widget: string, required: false, hint: "tawk.to → Administration → Chat Widget → the Direct Chat Link is tawk.to/chat/<property ID>/<widget ID>." }
           - { name: tawk_widget_id, label: Tawk.to widget ID, widget: string, required: false }

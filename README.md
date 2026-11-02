@@ -113,18 +113,20 @@ into the section's folder. Flip `status` to `published` when it's ready.
 tab pinned to the bottom-left edge. Set it up under Profile & settings → Feedback form. By default it opens the visitor's email
 app addressed to the email in Let's Talk. To have feedback arrive in your inbox without that step,
 choose **Web3Forms** and paste the free access key from web3forms.com (or **Formspree** and a form
-ID). If the service can't be reached, visitors are offered their email app instead. Submissions
+ID). If the service can't be reached, visitors are offered their email app instead. Turn on **Spam check
+(hCaptcha)** to require an "I am human" check before Web3Forms sends; it loads only when the form opens. Submissions
 send a `feedback_submit` analytics event with the topic and rating.
 
 **Chat:** a floating **Chat** button at the bottom-right of every page (set it up under Profile &
 settings → Chat). It answers your suggested questions on the page (add, edit, reorder or hide them
 under **Suggested questions**; each answer can have a link button, e.g. to #connect or /resume.pdf), and a typed message goes to the
-channel you choose: email (default), WhatsApp (your number becomes visible in the page), Telegram
+channel you choose: Web3Forms (straight to your inbox; uses the Feedback form's key unless you set
+one, asks for the visitor's email, and has an hCaptcha check), email (the visitor's email app), WhatsApp (your number becomes visible in the page), Telegram
 (your username; number stays private) or Tawk.to live chat (reply from the Tawk app on your phone;
-it loads only when a visitor starts a chat). The Feedback tab and Chat button never overlap, hide
+it loads only when a visitor starts a chat; with a Web3Forms key, visitors can also leave a message). The Feedback tab and Chat button never overlap, hide
 behind the cookie banner, or cover the end of a page. Events: `chat_open`, `chat_reopen`,
 `chat_close`, `chat_faq` (the question), `chat_faq_link`, `chat_message` (the channel), `chat_live_start`,
-`chat_live_connected`.
+`chat_live_connected`, `chat_message_failed`.
 
 **Meeting requests:** the form in Let's Talk offers open slots from the availability under
 Profile & settings → Let's Talk → Meeting request form (time zone, days, hours, length, notice,

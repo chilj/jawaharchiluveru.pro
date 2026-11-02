@@ -1,6 +1,7 @@
 enabled: true
 delivery: web3forms
 service_key: a92ff3ec-1c35-4471-a610-fabc3a77fa1e
+captcha: true
 button_label: Feedback
 bottom_tab: true
 heading: Share feedback

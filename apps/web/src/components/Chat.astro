@@ -13,7 +13,9 @@ const email = (await getEntry('connect', 'connect'))?.data.email;
 const digits = c?.whatsapp_number?.replace(/\D/g, '') ?? '';
 const tg = c?.telegram_username?.trim().replace(/^@/, '') ?? '';
 const tawk = c?.tawk_property_id?.trim() && c?.tawk_widget_id?.trim() ? `${c.tawk_property_id.trim()}/${c.tawk_widget_id.trim()}` : '';
-const ready = { email: !!email, whatsapp: digits.length >= 8, telegram: /^[A-Za-z0-9_]{5,32}$/.test(tg), tawk: !!tawk };
+const fb = (await getEntry('feedback', 'feedback'))?.data;
+const w3fKey = c?.web3forms_key?.trim() || (fb?.delivery === 'web3forms' ? fb.service_key?.trim() : '') || '';
+const ready = { web3forms: !!w3fKey, email: !!email, whatsapp: digits.length >= 8, telegram: /^[A-Za-z0-9_]{5,32}$/.test(tg), tawk: !!tawk };
 // A channel without its setting falls back to email, so the chat always works.
 let channel = c?.channel ?? 'email';
 if (c?.enabled && !ready[channel]) {
@@ -33,10 +35,19 @@ const href = (l?: string) => {
 const faqs = (c?.faqs ?? []).filter((q) => q.show).map((q) => ({
   question: q.question, answer: q.answer, link: href(q.link), label: q.link_label?.trim() || (href(q.link) ? 'Open' : undefined),
 }));
-const channelName = { email: 'your email app', whatsapp: 'WhatsApp', telegram: 'Telegram', tawk: 'live chat' }[channel];
+// Tawk.to live chat can sit alongside a Web3Forms message box (when a Web3Forms key is available).
+const live = channel === 'tawk';
+const send = live ? (ready.web3forms ? 'web3forms' : null) : channel; // where typed messages go
+const channelName = { web3forms: 'my inbox', email: 'your email app', whatsapp: 'WhatsApp', telegram: 'Telegram', tawk: 'live chat' }[send ?? 'tawk'];
+const captcha = send === 'web3forms' && c!.captcha;
+// Only the active channel's details go into the page: an unused WhatsApp number or key stays out of it.
 const config = show ? {
-  channel, email, whatsapp: digits, telegram: tg, tawk, title: c!.title,
-  note: c!.handoff_note.replace('{channel}', channelName),
+  channel: send ?? 'tawk', live, email, title: c!.title, captcha,
+  whatsapp: send === 'whatsapp' ? digits : '',
+  telegram: send === 'telegram' ? tg : '',
+  tawk: live ? tawk : '',
+  w3fKey: send === 'web3forms' ? w3fKey : '',
+  note: live && send ? 'Send a message to my inbox, or start a live chat.' : c!.handoff_note.replace('{channel}', channelName),
 } : null;
 ---
 {show && c && (
@@ -58,16 +69,25 @@ const config = show ? {
           {faqs.map((q, i) => <button type="button" class="chip" data-faq={i}>{q.question}</button>)}
         </div>
       )}
-      {channel === 'tawk' ? (
-        <div class="chat-compose">
-          <button type="button" class="btn primary chat-live" data-chat-live>Start a live chat</button>
-        </div>
-      ) : (
-        <form class="chat-compose">
+      {send && (
+        <form class="chat-compose" novalidate>
+          {send === 'web3forms' && (
+            <div class="chat-email">
+              <label class="sr-only" for="chat-email">Your email</label>
+              <input id="chat-email" type="email" autocomplete="email" required={c.ask_email === 'required'}
+                placeholder={c.ask_email === 'required' ? 'Your email, so I can reply' : 'Your email (optional, for a reply)'} />
+            </div>
+          )}
+          {captcha && <div class="chat-captcha" hidden><div class="h-captcha" data-captcha="true"></div></div>}
           <label class="sr-only" for="chat-input">Message</label>
           <textarea id="chat-input" rows="1" placeholder={c.input_placeholder} required></textarea>
           <button type="submit" class="chat-send" aria-label="Send"><Icon name="send" /></button>
         </form>
+      )}
+      {live && (
+        <div class="chat-compose chat-live-row">
+          <button type="button" class="btn primary chat-live" data-chat-live>Start a live chat</button>
+        </div>
       )}
       <p class="chat-note">{config!.note}</p>
       <script type="application/json" data-chat-faqs set:html={JSON.stringify(faqs).replace(/</g, '\\u003c')} />
@@ -79,7 +99,8 @@ const config = show ? {
 )}
 
 <script>
-  type Cfg = { channel: 'email' | 'whatsapp' | 'telegram' | 'tawk'; email?: string; whatsapp: string; telegram: string; tawk: string; title: string; note: string };
+  import { loadCaptcha, captchaToken, resetCaptcha } from '../lib/captcha';
+  type Cfg = { channel: 'web3forms' | 'email' | 'whatsapp' | 'telegram' | 'tawk'; live: boolean; w3fKey: string; captcha: boolean; email?: string; whatsapp: string; telegram: string; tawk: string; title: string; note: string };
   const root = document.querySelector<HTMLElement>('.chat[data-chat]');
   if (root) {
     const cfg: Cfg = JSON.parse(root.dataset.chat!);
@@ -156,10 +177,23 @@ const config = show ? {
       // Grow with the text, up to a few lines; Enter sends, Shift+Enter adds a line.
       input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, 120)}px`; });
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+      const emailBox = $<HTMLInputElement>('#chat-email');
+      const captchaWrap = $<HTMLElement>('.chat-captcha');
+      const captchaBox = captchaWrap?.querySelector('.h-captcha') ?? null;
+      let captchaFailed = false;
+      // The spam check appears (and loads) once the visitor starts typing.
+      input.addEventListener('input', () => {
+        if (captchaWrap && captchaWrap.hidden && input.value.trim()) {
+          captchaWrap.hidden = false;
+          loadCaptcha().then((ok) => { captchaFailed = !ok; log.scrollTop = log.scrollHeight; });
+        }
+      });
+      const warn = (msg: string) => { botSays(msg); };
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const text = input.value.trim();
         if (!text) return;
+        if (cfg.channel === 'web3forms') { await sendToInbox(text); return; }
         bubble(text, 'me');
         input.value = ''; input.style.height = '';
         const url = handoff(text);
@@ -173,6 +207,48 @@ const config = show ? {
         track('chat_message', cfg.channel, { length: String(text.length) });
         if (cfg.channel === 'email') window.location.href = url; else window.open(url, '_blank', 'noopener');
       });
+
+      // Web3Forms: the message goes straight to Jawahar's inbox; the visitor's email is the reply-to.
+      let sending = false;
+      async function sendToInbox(text: string) {
+        if (sending) return;
+        const email = emailBox?.value.trim() ?? '';
+        if ((emailBox?.required && !email) || (email && !emailBox!.checkValidity())) {
+          warn('Please add a valid email address above so I can reply.'); emailBox?.focus(); return;
+        }
+        if (cfg.captcha && !captchaToken(captchaBox)) {
+          if (captchaFailed) fallback(text, "The spam check couldn't load (an ad blocker may be stopping it).");
+          else warn('Please tick the "I am human" check, then press send again.');
+          return;
+        }
+        sending = true;
+        bubble(text, 'me');
+        input.value = ''; input.style.height = '';
+        try {
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: cfg.w3fKey, subject: 'Chat message from the site', from_name: 'Site chat',
+              email, message: text, page: location.href,
+              ...(cfg.captcha && { 'h-captcha-response': captchaToken(captchaBox) }),
+            }),
+          });
+          if (!res.ok) throw new Error(String(res.status));
+          botSays(email ? `Sent! Jawahar will reply to ${email}.` : 'Sent! Thanks for the message.');
+          track('chat_message', 'web3forms', { length: String(text.length), with_email: email ? 'yes' : 'no' });
+        } catch {
+          fallback(text, "Sorry, that didn't send.");
+          track('chat_message_failed', 'web3forms');
+        } finally {
+          sending = false;
+          if (cfg.captcha) resetCaptcha(captchaBox);
+        }
+      }
+      function fallback(text: string, why: string) {
+        if (!cfg.email) { warn(`${why} Please try again in a moment.`); return; }
+        // handoff() builds the email-app link for any channel other than WhatsApp/Telegram.
+        botSays(`${why} You can send it from your email app instead.`, { href: handoff(text), label: 'Open my email app', question: 'chat-fallback' });
+      }
     }
 
     // Tawk.to: load only when asked for, hide its own bubble, open its window.

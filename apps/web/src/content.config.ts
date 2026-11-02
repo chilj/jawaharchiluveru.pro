@@ -193,7 +193,10 @@ const chat = defineCollection({
     title: z.string().default('Chat'),
     status: z.string().optional(),
     greeting: z.string(),
-    channel: z.enum(['email', 'whatsapp', 'telegram', 'tawk']).default('email'),
+    channel: z.enum(['web3forms', 'email', 'whatsapp', 'telegram', 'tawk']).default('email'),
+    web3forms_key: z.string().optional(),           // empty: reuse the feedback form's Web3Forms key
+    captcha: z.boolean().default(true),             // hCaptcha before a Web3Forms message sends
+    ask_email: z.enum(['required', 'optional']).default('required'),
     whatsapp_number: z.string().optional(),
     telegram_username: z.string().optional(),
     tawk_property_id: z.string().optional(),
@@ -217,6 +220,7 @@ const feedback = defineCollection({
     enabled: z.boolean().default(true),
     delivery: z.enum(['email_app', 'web3forms', 'formspree']).default('email_app'),
     service_key: z.string().optional(),
+    captcha: z.boolean().default(false),   // hCaptcha check (Web3Forms only)
     button_label: z.string().default('Feedback'),
     bottom_tab: z.boolean().default(true),
     heading: z.string().default('Share feedback'),
