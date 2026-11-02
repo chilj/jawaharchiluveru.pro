@@ -25,7 +25,10 @@ faqs:
     link: /resume.pdf
     show: true
 channel: tawk
-whatsapp_number: +1 6186450010
+web3forms_key: a92ff3ec-1c35-4471-a610-fabc3a77fa1e
+ask_email: required
+captcha: true
+whatsapp_number: ''
 telegram_username: ''
 tawk_property_id: 6ae8bc9dee2a573c33d329c9
 tawk_widget_id: 1k6ei1i18
