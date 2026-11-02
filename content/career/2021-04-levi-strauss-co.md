@@ -7,7 +7,7 @@ start: 2021-04
 end: 2026-04
 location: Remote & Onsite
 logo: ''
-mark: ''
+mark: LSCo
 earlier: false
 status: published
 highlights:
@@ -21,30 +21,30 @@ highlights:
   - Supported high-visibility marketing and loyalty campaigns by coordinating bot monitoring, traffic analysis (Adobe Analytics, Quantum Metric), incident response, and operational readiness planning.
   - Streamlined escalations by authoring troubleshooting runbooks, SOPs, delivery metrics, and executive-ready platform health summaries that gave leadership clear visibility. Facilitated Developer Squad health initiatives and retrospectives, converting feedback into concrete improvements.
 to_verify: []
-short: "Levi's"
+short: Levi's
 skills:
-  - name: "KPI / Success Metrics"
-    evidence: "Delivery metrics and executive-ready platform health summaries"
-  - name: "Release Governance"
-    evidence: "Executed 25+ loyalty platform releases and governed the release process"
-  - name: "Omnichannel Messaging"
-    evidence: "Onboarded Cordial as the global email, SMS and push platform"
-  - name: "Cordial"
-    evidence: "Led onboarding of Cordial as Levi’s global communication platform"
-  - name: "Loyalty Platforms"
-    evidence: "Global loyalty platform for the Red Tab program"
-  - name: "Zendesk"
-    evidence: "Zendesk Sunshine and Help Center upgrade for Global Customer Care"
-  - name: "Data Migration"
-    evidence: "Migrated loyalty data feeds from Amazon Redshift to AuroraDB and Google Cloud"
-  - name: "Amazon Redshift"
-    evidence: "Migrated feeds off Amazon Redshift"
-  - name: "Product Analytics"
-    evidence: "Traffic analysis with Adobe Analytics and Quantum Metric"
-  - name: "Incident Response"
-    evidence: "Incident response for high-visibility marketing and loyalty campaigns"
-  - name: "Runbook Development"
-    evidence: "Authored troubleshooting runbooks and SOPs"
-  - name: "GitHub Copilot"
-    evidence: "Drove adoption of GitHub Copilot and Amazon Q/Kiro across 6 engineers"
+  - name: KPI / Success Metrics
+    evidence: Delivery metrics and executive-ready platform health summaries
+  - name: Release Governance
+    evidence: Executed 25+ loyalty platform releases and governed the release process
+  - name: Omnichannel Messaging
+    evidence: Onboarded Cordial as the global email, SMS and push platform
+  - name: Cordial
+    evidence: Led onboarding of Cordial as Levi’s global communication platform
+  - name: Loyalty Platforms
+    evidence: Global loyalty platform for the Red Tab program
+  - name: Zendesk
+    evidence: Zendesk Sunshine and Help Center upgrade for Global Customer Care
+  - name: Data Migration
+    evidence: Migrated loyalty data feeds from Amazon Redshift to AuroraDB and Google Cloud
+  - name: Amazon Redshift
+    evidence: Migrated feeds off Amazon Redshift
+  - name: Product Analytics
+    evidence: Traffic analysis with Adobe Analytics and Quantum Metric
+  - name: Incident Response
+    evidence: Incident response for high-visibility marketing and loyalty campaigns
+  - name: Runbook Development
+    evidence: Authored troubleshooting runbooks and SOPs
+  - name: GitHub Copilot
+    evidence: Drove adoption of GitHub Copilot and Amazon Q/Kiro across 6 engineers
 ---
