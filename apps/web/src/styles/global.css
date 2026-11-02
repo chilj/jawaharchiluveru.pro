@@ -685,3 +685,4 @@ html.chat-open .feedback-tab { display: none; } /* the open chat panel takes the
 @media (max-width: 479px) {
   .chat-panel { left: 0.5rem; right: 0.5rem; width: auto; bottom: calc(4.75rem + var(--dock-lift) + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 6.5rem - var(--dock-lift)); }
 }
+.bubble-link { display: inline-block; margin-top: 0.45rem; font-weight: 600; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }

@@ -14,9 +14,15 @@ handoff_note: Your message opens in {channel}, ready to send.
 faqs:
   - question: What roles are you open to?
     answer: Platform, Technical Product Management and Product Owner roles. The Career section shows the work behind that, and the Toolkit maps skills to roles.
+    link_label: See my career
+    link: '#career'
   - question: Where are you based?
     answer: Dallas–Fort Worth, Texas, and open to remote work across US time zones.
   - question: How do I set up a call?
     answer: Use the Request a meeting form in Let's Talk. Pick a time and it writes the email for you.
+    link_label: Request a meeting
+    link: '#connect'
   - question: Can I get your résumé?
-    answer: Yes. The Résumé button at the top of the home page always has the latest PDF.
+    answer: Yes. This link always has the latest PDF.
+    link_label: Open my résumé
+    link: /resume.pdf

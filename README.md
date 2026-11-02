@@ -117,12 +117,13 @@ ID). If the service can't be reached, visitors are offered their email app inste
 send a `feedback_submit` analytics event with the topic and rating.
 
 **Chat:** a floating **Chat** button at the bottom-right of every page (set it up under Profile &
-settings → Chat). It answers your suggested questions on the page, and a typed message goes to the
+settings → Chat). It answers your suggested questions on the page (add, edit, reorder or hide them
+under **Suggested questions**; each answer can have a link button, e.g. to #connect or /resume.pdf), and a typed message goes to the
 channel you choose: email (default), WhatsApp (your number becomes visible in the page), Telegram
 (your username; number stays private) or Tawk.to live chat (reply from the Tawk app on your phone;
 it loads only when a visitor starts a chat). The Feedback tab and Chat button never overlap, hide
 behind the cookie banner, or cover the end of a page. Events: `chat_open`, `chat_reopen`,
-`chat_close`, `chat_faq` (the question), `chat_message` (the channel), `chat_live_start`,
+`chat_close`, `chat_faq` (the question), `chat_faq_link`, `chat_message` (the channel), `chat_live_start`,
 `chat_live_connected`.
 
 **Meeting requests:** the form in Let's Talk offers open slots from the availability under

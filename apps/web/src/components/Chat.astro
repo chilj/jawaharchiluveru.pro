@@ -21,6 +21,18 @@ if (c?.enabled && !ready[channel]) {
   channel = 'email';
 }
 const show = !!c?.enabled && ready[channel];
+// Visible questions, with links made absolute for the site's base path (#connect works from any page).
+const base = import.meta.env.BASE_URL;
+const href = (l?: string) => {
+  const v = l?.trim();
+  if (!v) return undefined;
+  if (v.startsWith('#')) return `${base}${v}`;
+  if (v.startsWith('/')) return `${base}${v.slice(1)}`;
+  return /^(https?:|mailto:)/.test(v) ? v : undefined;
+};
+const faqs = (c?.faqs ?? []).filter((q) => q.show).map((q) => ({
+  question: q.question, answer: q.answer, link: href(q.link), label: q.link_label?.trim() || (href(q.link) ? 'Open' : undefined),
+}));
 const channelName = { email: 'your email app', whatsapp: 'WhatsApp', telegram: 'Telegram', tawk: 'live chat' }[channel];
 const config = show ? {
   channel, email, whatsapp: digits, telegram: tg, tawk, title: c!.title,
@@ -41,9 +53,9 @@ const config = show ? {
       <div class="chat-log" role="log" aria-live="polite">
         <p class="bubble bot">{c.greeting}</p>
       </div>
-      {c.faqs.length > 0 && (
+      {faqs.length > 0 && (
         <div class="chat-chips" aria-label="Suggested questions">
-          {c.faqs.map((q, i) => <button type="button" class="chip" data-faq={i}>{q.question}</button>)}
+          {faqs.map((q, i) => <button type="button" class="chip" data-faq={i}>{q.question}</button>)}
         </div>
       )}
       {channel === 'tawk' ? (
@@ -58,7 +70,7 @@ const config = show ? {
         </form>
       )}
       <p class="chat-note">{config!.note}</p>
-      <script type="application/json" data-chat-faqs set:html={JSON.stringify(c.faqs)} />
+      <script type="application/json" data-chat-faqs set:html={JSON.stringify(faqs).replace(/</g, '\\u003c')} />
     </section>
     <button type="button" class="chat-fab" aria-expanded="false" aria-controls="chat-panel" data-chat-toggle>
       <Icon name="message-circle" /><span>{c.button_label}</span>
@@ -75,7 +87,7 @@ const config = show ? {
     const panel = $<HTMLElement>('.chat-panel')!;
     const fab = $<HTMLButtonElement>('.chat-fab')!;
     const log = $<HTMLElement>('.chat-log')!;
-    const faqs: { question: string; answer: string }[] = JSON.parse($('[data-chat-faqs]')?.textContent || '[]');
+    const faqs: { question: string; answer: string; link?: string; label?: string }[] = JSON.parse($('[data-chat-faqs]')?.textContent || '[]');
     const track = (name: string, label?: string, extra?: Record<string, string>) => (window as any).jcTrack?.(name, label, extra);
     let opened = false;
 
@@ -101,9 +113,24 @@ const config = show ? {
       log.append(p); log.scrollTop = log.scrollHeight;
       return p;
     };
-    const botSays = (text: string) => {
+    const botSays = (text: string, link?: { href: string; label: string; question: string }) => {
       const typing = bubble('…', 'bot'); typing.classList.add('typing'); typing.setAttribute('aria-hidden', 'true');
-      setTimeout(() => { typing.remove(); bubble(text, 'bot'); }, 450);
+      setTimeout(() => {
+        typing.remove();
+        const p = bubble(text, 'bot');
+        if (link) {
+          const a = document.createElement('a');
+          a.className = 'bubble-link'; a.href = link.href; a.textContent = link.label;
+          if (/^https?:/.test(link.href) && !link.href.startsWith(location.origin)) { a.target = '_blank'; a.rel = 'noopener'; }
+          a.addEventListener('click', () => {
+            track('chat_faq_link', link.question, { to: link.href });
+            // Same-page section links: close the chat so the section is visible.
+            if (a.pathname === location.pathname && a.hash) setOpen(false);
+          });
+          p.append(document.createElement('br'), a);
+          log.scrollTop = log.scrollHeight;
+        }
+      }, 450);
     };
 
     // FAQ chips: answered on the page.
@@ -112,7 +139,7 @@ const config = show ? {
       if (!chip) return;
       const q = faqs[Number(chip.dataset.faq)];
       bubble(q.question, 'me');
-      botSays(q.answer);
+      botSays(q.answer, q.link ? { href: q.link, label: q.label!, question: q.question } : undefined);
       track('chat_faq', q.question);
     });
 

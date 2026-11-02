@@ -200,7 +200,13 @@ const chat = defineCollection({
     tawk_widget_id: z.string().optional(),
     input_placeholder: z.string().default('Type a message…'),
     handoff_note: z.string().default('Your message opens in {channel}, ready to send.'),
-    faqs: z.array(z.object({ question: z.string(), answer: z.string() })).default([]),
+    faqs: z.array(z.object({
+      question: z.string(),
+      answer: z.string(),
+      link_label: z.string().optional(),   // optional button under the answer
+      link: z.string().optional(),         // #section, /path on the site, or https://…
+      show: z.boolean().default(true),
+    })).default([]),
   }),
 });
 

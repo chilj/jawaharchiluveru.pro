@@ -178,10 +178,14 @@ collections:
             label_singular: Question
             widget: list
             required: false
-            hint: "Shown as buttons. The chat answers them instantly on the page."
+            summary: '{{fields.question}}'
+            hint: "Shown as buttons in the chat, in this order; drag to reorder. The chat answers them instantly on the page."
             fields:
-              - { name: question, label: Question, widget: string }
+              - { name: question, label: Question, widget: string, hint: "Keep it short: it's a button label." }
               - { name: answer, label: Answer, widget: text }
+              - { name: link_label, label: Link button text, widget: string, required: false, hint: "Optional button under the answer, e.g. Request a meeting." }
+              - { name: link, label: Link, widget: string, required: false, hint: "Where the button goes: a section (#connect for Let's Talk, #career, #toolkit), a page on the site (/resume.pdf, /blog/), or a full https:// address." }
+              - { name: show, label: Show this question, widget: boolean, default: true, hint: "Turn off to hide it without deleting it." }
           - name: channel
             label: Where typed messages go
             widget: select
