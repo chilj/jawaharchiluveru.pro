@@ -84,6 +84,18 @@ const playbook = defineCollection({
   }),
 });
 
+const blog = defineCollection({
+  loader: glob({ base: `${CONTENT}/blog`, pattern: entries }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    date: z.coerce.date(),
+    updated: z.coerce.date().optional(),
+    tags: z.array(z.string()).default([]),
+    status,
+  }),
+});
+
 const level = z.enum(['expert', 'advanced-expert', 'advanced', 'working-advanced', 'working', 'exposure']);
 
 // toolkit.yaml holds `overall: [...]` (domain summary) and `groups: [...]`; list position sets order.
@@ -207,7 +219,7 @@ const connect = defineCollection({
 });
 
 export const collections = {
-  sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
+  sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
   resume, analytics, privacy,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,

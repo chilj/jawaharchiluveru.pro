@@ -90,15 +90,15 @@ collections:
               - { name: blocked_dates, label: Unavailable dates, widget: list, required: false, field: { name: date, label: Date, widget: datetime, type: date }, hint: 'Holidays, travel or busy days.' }
 
       - name: theme
-        label: Theme & colours
+        label: Theme & colors
         file: content/theme.yaml
         fields:
-          - { name: preset, label: Colour scheme, widget: select, default: ocean, options: [{ label: 'Ocean (blue & teal)', value: ocean }, { label: 'Emerald (green & blue)', value: emerald }, { label: 'Indigo (violet & pink)', value: indigo }, { label: 'Graphite (slate & teal)', value: graphite }, { label: 'Sunset (orange & purple)', value: sunset }, { label: 'Crimson (red & navy)', value: crimson }], hint: 'Applies to light and dark mode. Custom colours below override it.' }
+          - { name: preset, label: Color scheme, widget: select, default: ocean, options: [{ label: 'Ocean (blue & teal)', value: ocean }, { label: 'Emerald (green & blue)', value: emerald }, { label: 'Indigo (violet & pink)', value: indigo }, { label: 'Graphite (slate & teal)', value: graphite }, { label: 'Sunset (orange & purple)', value: sunset }, { label: 'Crimson (red & navy)', value: crimson }], hint: 'Applies to light and dark mode. Custom colors below override it.' }
           - name: custom
-            label: Custom colours (optional)
+            label: Custom colors (optional)
             widget: object
             collapsed: true
-            hint: 'Leave empty to use the scheme above. Hard-to-read colours are adjusted automatically to keep text accessible.'
+            hint: 'Leave empty to use the scheme above. Hard-to-read colors are adjusted automatically to keep text accessible.'
             fields:
               - name: light
                 label: Light mode
@@ -324,6 +324,26 @@ collections:
         fields:
           - { name: name, label: Skill, widget: string }
           - { name: evidence, label: Evidence from this role, widget: string, required: false, hint: Shown when a visitor selects the cell. }
+
+  - name: blog
+    label: Blog
+    label_singular: Blog post
+    folder: content/blog
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{year}}-{{month}}-{{slug}}'
+    summary: '{{title}} [{{status}}]'
+    sortable_fields: [date, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: slug, label: Web address, widget: string, required: false, hint: 'The end of the post link, e.g. my-first-post gives jawaharchiluveru.pro/blog/my-first-post/. Lowercase letters, numbers and dashes. Leave empty to use the file name.', pattern: ['^[a-z0-9-]*$', 'Lowercase letters, numbers and dashes only'] }
+      - { name: summary, label: Summary, widget: text, hint: 'One or two sentences. Shown on the blog page, in search results and in link previews.' }
+      - { name: date, label: Published, widget: datetime, type: date }
+      - { name: updated, label: Last updated, widget: datetime, type: date, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: status, label: Status, widget: select, options: [planned, draft, published], default: draft, hint: Only published posts appear on the live site. }
+      - { name: body, label: Post, widget: markdown }
 
   - name: case-studies
     label: Case Studies

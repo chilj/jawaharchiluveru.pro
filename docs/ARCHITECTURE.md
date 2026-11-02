@@ -70,7 +70,7 @@ CLAUDE.md                   working rules (preview before merging to main)
 - **Trunk-based development.** Unfinished content ships hidden behind `status`
   (`planned` / `draft` / `published`). Code changes go through a short-lived branch, a preview the
   owner reviews, then a merge to `main`.
-- **Guardrails in the build.** WCAG colour checks, analytics ID format checks, and a hidden Résumé
+- **Guardrails in the build.** WCAG color checks, analytics ID format checks, and a hidden Résumé
   button when its file is missing: problems are caught before deployment.
 - **Privacy.** Analytics loads after the page renders, only after consent for visitors in Europe,
   and never for visitors with Do Not Track or Global Privacy Control.
@@ -83,15 +83,15 @@ CLAUDE.md                   working rules (preview before merging to main)
 Content first, accessible by default (WCAG 2.1 AA enforced at build time), fast (nothing blocks
 first paint), and editable without touching code.
 
-### Colour (`src/lib/theme.ts`)
+### Color (`src/lib/theme.ts`)
 - Six presets (Ocean, Emerald, Indigo, Graphite, Sunset, Crimson) or custom accent and secondary
-  colours per light and dark mode, set in `content/theme.yaml`.
+  colors per light and dark mode, set in `content/theme.yaml`.
 - Neutrals are fixed: background `#f7f8fb` / `#0c0f15`, text `#141821` / `#e8ebf2`,
   grey text `#495063` / `#9aa2b5`.
 - Derived tokens: `--accent`, `--teal` (secondary), `--on-accent`, `--accent-soft`, `--shade-2`,
   `--shade-3`, `--mark-bg`, `--dot`, `--glow-a/b/c`. Emitted as `html:root` CSS so they override the
   defaults in `global.css`.
-- Guardrail: text pairings need 4.5:1 and meter segments 3:1. Colours that fall short are nudged
+- Guardrail: text pairings need 4.5:1 and meter segments 3:1. Colors that fall short are nudged
   darker (light mode) or lighter (dark mode); glows are softened if text over them would fail; the
   build throws if anything still fails. Adjustments are logged as `[theme]` warnings.
 
@@ -104,7 +104,7 @@ first paint), and editable without touching code.
 
 ### Layout
 - Single column, max width `61.25rem`; side gutter at least 16px (2rem from 720px).
-- Centred hero: role line, name, summary, buttons, headline numbers.
+- Centered hero: role line, name, summary, buttons, headline numbers.
 - Collapsible sections with icon, title and count; Expand all / Collapse all; state remembered per
   visitor. Phone menu below 640px.
 - Background: dot grid and three drifting glows (static with reduced motion).

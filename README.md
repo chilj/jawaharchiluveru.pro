@@ -15,9 +15,10 @@ content/                  ← everything you edit
 ├── career/               Career: one file per role
 ├── case-studies/         Case Studies: one file per story
 ├── playbook/             Playbook: TPM artifacts
+├── blog/                 Blog: one Markdown file per post, at /blog/<slug>/
 ├── education.yaml        Education: degrees and institutions
 ├── certifications.yaml   Certifications
-├── theme.yaml            Theme & colours: preset palette or custom accent/secondary per mode
+├── theme.yaml            Theme & colors: preset palette or custom accent/secondary per mode
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── resume.yaml           Résumé button: PDF, button text, download name, last updated
 ├── analytics.yaml        Analytics: Microsoft Clarity, Google Analytics 4, Cloudflare Web Analytics IDs
@@ -57,12 +58,15 @@ Things to know:
     so levels always match. Behind the scenes each role's **Skills shown in Toolkit** list holds it.
   - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
-- **Theme & colours** (Profile & settings): pick a preset (Ocean, Emerald, Indigo, Graphite, Sunset,
-  Crimson) or set custom accent and secondary colours for light and dark mode. Every colour pairing
-  is checked against WCAG 2.1 AA (4.5:1 for text, 3:1 for meters); colours that fall short are
+- **Theme & colors** (Profile & settings): pick a preset (Ocean, Emerald, Indigo, Graphite, Sunset,
+  Crimson) or set custom accent and secondary colors for light and dark mode. Every color pairing
+  is checked against WCAG 2.1 AA (4.5:1 for text, 3:1 for meters); colors that fall short are
   darkened (light mode) or lightened (dark mode) automatically, background glows are softened if
   needed, and the build stops rather than publish a palette that still fails. Adjustments are
   listed in the build log.
+- **Blog**: write a post under **Blog → New**. Set **Web address** for a clean link
+  (/blog/<web-address>/), and **Status: published** to put it live. The Blog link appears in the
+  menu once a post is published; posts are in the sitemap and carry article metadata for search.
 - **Résumé** (Profile & settings): upload a new PDF to replace the current one. The live résumé is
   always at **jawaharchiluveru.pro/resume.pdf** (a permanent link for LinkedIn or email
   signatures) and at `/<File name for visitors>`. If the file goes missing, the button hides

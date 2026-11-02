@@ -10,6 +10,8 @@ export default defineConfig({
   site,
   base,
   integrations: [cms()],
+  // Plain code blocks styled by the site theme (used for diagrams in blog posts).
+  markdown: { syntaxHighlight: false },
   // Inline CSS into each page so styling never depends on resolving a separate asset path.
   build: { inlineStylesheets: 'always' },
   // Static files (résumé, headshot, playbook downloads) live with the content.

@@ -9,6 +9,8 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     ...(await getCollection('case-studies', published)).map((e) => `case-studies/${e.id}/`),
     ...(await getCollection('playbook', published)).map((e) => `playbook/${e.id}/`),
+    ...((await getCollection('blog', published)).length ? ['blog/'] : []),
+    ...(await getCollection('blog', published)).map((e) => `blog/${e.id}/`),
   ];
   const urls = paths.map((p) => `  <url><loc>${new URL(base + p, site)}</loc></url>`).join('\n');
   return new Response(

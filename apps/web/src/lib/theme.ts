@@ -1,7 +1,7 @@
-// Site colour scheme: a preset or custom accent/secondary colours from content/theme.yaml,
+// Site color scheme: a preset or custom accent/secondary colors from content/theme.yaml,
 // expanded into the CSS tokens global.css uses.
 //
-// WCAG 2.1 AA guardrail: every pairing the site draws is checked, and colours are nudged darker
+// WCAG 2.1 AA guardrail: every pairing the site draws is checked, and colors are nudged darker
 // (light mode) or lighter (dark mode) until it passes:
 //   1.4.3 text contrast 4.5:1 — accent text on page, cards and accent tints; button text on accent;
 //         secondary text on page and cards; text on secondary; body text on tile and highlight tints.
@@ -30,7 +30,7 @@ const NEUTRAL: Record<Mode, { bg: string; surface: string; text: string; muted: 
   dark: { bg: '#0c0f15', surface: '#151922', text: '#e8ebf2', muted: '#9aa2b5', onAccent: '#0c0f15' },
 };
 
-// ---- colour maths ----
+// ---- color math ----
 const hex = (h: string) => {
   const m = h.trim().replace('#', '');
   const full = m.length === 3 ? m.split('').map((c) => c + c).join('') : m.slice(0, 6);

@@ -159,7 +159,7 @@ nav a:hover { color: var(--text); text-decoration: none; }
 .hero h1 { font-size: clamp(2.5rem, 8vw, 4.25rem); letter-spacing: -0.03em; font-weight: 700; }
 .lede { font-size: clamp(1.125rem, 2.4vw, 1.3125rem); color: var(--muted); max-width: 46ch; margin: 1.125rem 0 1.75rem; }
 .cta { display: flex; flex-wrap: wrap; gap: 0.625rem; }
-/* Hero: centred name and buttons; the summary is a centred, justified block about as wide as the name */
+/* Hero: centered name and buttons; the summary is a centered, justified block about as wide as the name */
 .hero { text-align: center; }
 .hero .lede {
   max-width: 34em; margin-inline: auto; text-align: justify; text-align-last: center;
@@ -552,3 +552,30 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .meeting-done p { margin: 0; }
 .meeting-copy { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8125rem; resize: vertical; }
 .selectable { user-select: all; font-weight: 600; }
+
+/* Blog */
+.post-list { list-style: none; margin: 0; padding: 0; max-width: 65ch; }
+.post-list li { padding: 1.5rem 0; border-top: 1px solid var(--line); }
+.post-list time, .post-meta { color: var(--muted); font-size: 0.9375rem; }
+.post-list h2 { font-size: 1.3125rem; margin: 0.375rem 0 0.5rem; }
+.post-list p { margin: 0; color: var(--muted); }
+.post .post-meta { margin: 0.75rem 0 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+.prose ul, .prose ol { margin: 0 0 1rem; padding-left: 1.4rem; }
+.prose li { margin-bottom: 0.4rem; }
+.prose li::marker { color: var(--muted); }
+.prose a { text-decoration: underline; text-underline-offset: 2px; }
+.prose table {
+  width: 100%; border-collapse: separate; border-spacing: 0; margin: 0 0 1.25rem;
+  font-size: 0.9375rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.prose th, .prose td { text-align: left; padding: 0.55rem 0.8rem; overflow-wrap: anywhere; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { font-size: 0.8125rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+.prose tr:last-child td { border-bottom: 0; }
+.prose td { text-align: left; hyphens: manual; }
+.prose pre {
+  overflow-x: auto; margin: 0 0 1.25rem; padding: 1rem 1.1rem; border-radius: 10px;
+  background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--line);
+  font-size: 0.78rem; line-height: 1.5;
+}
+.prose pre code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+@media (max-width: 480px) { .prose table { font-size: 0.8125rem; } .prose th, .prose td { padding: 0.45rem 0.5rem; } }

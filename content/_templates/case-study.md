@@ -17,7 +17,7 @@ TODO: the business, the team, and why this mattered.
 TODO: what was broken or missing, and for whom.
 
 ## Approach
-TODO: discovery, prioritisation, key decisions and trade-offs.
+TODO: discovery, prioritization, key decisions and trade-offs.
 
 ## Outcome
 TODO: measurable results and what you'd do differently.
