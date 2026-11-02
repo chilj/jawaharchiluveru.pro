@@ -61,7 +61,12 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <Analytics />
   <link rel="sitemap" href={`${home}sitemap.xml`}>
   <slot name="head" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232f5bd3'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='28' font-weight='700' fill='white'>JC</text></svg>">
+  <!-- Site icons (generated from the theme colors at build time). Google needs a real file of 48px or more. -->
+  <link rel="icon" href={`${home}favicon.ico`} sizes="48x48">
+  <link rel="icon" href={`${home}favicon.svg`} type="image/svg+xml">
+  <link rel="icon" href={`${home}favicon-96x96.png`} type="image/png" sizes="96x96">
+  <link rel="apple-touch-icon" href={`${home}apple-touch-icon.png`}>
+  <link rel="manifest" href={`${home}site.webmanifest`}>
 </head>
 <body>
   <div class="backdrop" aria-hidden="true">

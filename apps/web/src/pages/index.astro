@@ -94,7 +94,12 @@ const person = {
   knowsAbout: [...new Set(allSkills.filter((i) => !i.level || LEVELS[i.level].score >= 3).map((i) => i.name))].filter((n) => !isPlaceholder(n)),
   sameAs: connect.links.map((l) => l.url),
 };
-const website = { '@context': 'https://schema.org', '@type': 'WebSite', name: about.name, url: siteUrl, publisher: { '@id': `${siteUrl}#person` } };
+// Google takes the name shown above search results ("site name") from this, on the home page.
+const website = {
+  '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${siteUrl}#website`,
+  name: about.name, alternateName: [`${about.name} – ${about.role}`, 'jawaharchiluveru.pro'],
+  url: siteUrl, inLanguage: 'en-US', publisher: { '@id': `${siteUrl}#person` },
+};
 const section = (id: string) => ({
   id, title: byId[id]?.label ?? id, icon: byId[id]?.icon ?? 'circle', open: !byId[id]?.collapsed,
 });
