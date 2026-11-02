@@ -16,6 +16,7 @@ content/                  ← everything you edit
 ├── education.yaml        Education: degrees and institutions
 ├── certifications.yaml   Certifications
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
+├── resume.yaml           Résumé button: PDF, button text, download name, last updated
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
 └── _templates/           starting points for new entries when editing files by hand
@@ -51,6 +52,10 @@ Things to know:
     so levels always match. Behind the scenes each role's **Skills shown in Toolkit** list holds it.
   - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
+- **Résumé** (Profile & settings): upload a new PDF to replace the current one. The live résumé is
+  always at **jawaharchiluveru.pro/resume.pdf** (a permanent link for LinkedIn or email
+  signatures) and at `/<File name for visitors>`. If the file goes missing, the button hides
+  instead of linking to a dead file.
 
 ## Workflow
 
