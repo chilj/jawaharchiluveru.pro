@@ -6,6 +6,8 @@ A small monorepo run with **trunk-based development**: `main` is the trunk, ever
 builds and deploys, and unfinished work ships "dark" behind content flags instead of living on
 long-running branches.
 
+Tech stack, design spec and architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ```
 content/                  ← everything you edit
 ├── sections.yaml         section names, order, on/off flags
