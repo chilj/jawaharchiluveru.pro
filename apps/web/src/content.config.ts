@@ -32,7 +32,6 @@ const about = defineCollection({
     description: z.string(),
     social_image: z.string().optional(),  // 1200×630 preview for LinkedIn, Slack, X
     social_image_alt: z.string().optional(),
-    resume: z.string().optional(),
     stats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
   }),
 });
@@ -149,6 +148,17 @@ const theme = defineCollection({
   }),
 });
 
+const resume = defineCollection({
+  loader: file(`${CONTENT}/resume.yaml`, { parser: (text) => [{ id: 'resume', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    file: z.string().optional(),
+    show: z.boolean().default(true),
+    label: z.string().default('Résumé'),
+    download_name: z.string().optional(),
+    updated: z.coerce.date().optional(),
+  }),
+});
+
 const connect = defineCollection({
   loader: glob({ base: CONTENT, pattern: 'connect.md' }),
   schema: z.object({
@@ -166,6 +176,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
+  resume,
   education: credentialList('education'), certifications: credentialList('certifications'),
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

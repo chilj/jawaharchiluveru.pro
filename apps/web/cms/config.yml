@@ -33,7 +33,6 @@ collections:
           - { name: description, label: Search description, widget: text, hint: 'Shown in search results and link previews. Keep to about 150 characters.' }
           - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Use 1200×630 pixels (PNG or JPG).' }
           - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe the image for screen readers.' }
-          - { name: resume, label: Résumé (PDF), widget: file, required: false }
           - name: stats
             label: Headline numbers
             widget: list
@@ -41,6 +40,16 @@ collections:
               - { name: value, label: Value, widget: string, hint: 'e.g. 16+' }
               - { name: label, label: Label, widget: string }
           - { name: body, label: Bio, widget: markdown }
+
+      - name: resume
+        label: Résumé
+        file: content/resume.yaml
+        fields:
+          - { name: file, label: Résumé PDF, widget: file, accept: application/pdf, hint: 'Upload a new PDF to replace the current one. It goes live about a minute after you save, at the same permanent link: jawaharchiluveru.pro/resume.pdf' }
+          - { name: show, label: Show the Résumé button, widget: boolean, default: true }
+          - { name: label, label: Button text, widget: string, default: Résumé }
+          - { name: download_name, label: File name for visitors, widget: string, default: Jawahar-Chiluveru-Resume.pdf, pattern: ['^[A-Za-z0-9._-]+\.pdf$', 'Letters, numbers, dots, dashes or underscores, ending in .pdf'], hint: 'Also published at jawaharchiluveru.pro/<this name>, so saved copies are named clearly.' }
+          - { name: updated, label: Last updated, widget: datetime, type: date, required: false, hint: Shown when visitors hover the button. }
 
       - name: connect
         label: Let's Talk
