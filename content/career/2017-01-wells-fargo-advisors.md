@@ -15,4 +15,14 @@ highlights:
   - Produced business requirements, use cases, and UI prototypes.
   - Supported production releases and post-implementation validation.
 to_verify: []
+short: "Wells Fargo"
+skills:
+  - name: "Product Ownership"
+    evidence: "Senior Business Analyst & Product Owner"
+  - name: "Requirements Engineering"
+    evidence: "Produced business requirements, use cases and UI prototypes"
+  - name: "Release Governance"
+    evidence: "Supported production releases and post-implementation validation"
+  - name: "Workflow Redesign"
+    evidence: "Redesigned workflows and UI, migrating legacy systems to IBM BPM"
 ---

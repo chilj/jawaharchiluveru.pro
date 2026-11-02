@@ -100,22 +100,59 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
     toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
     document.querySelectorAll('#site-nav a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
     addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-    // Skill matrix level filter: hide rows below the chosen level, and groups left empty.
-    const filters = [...document.querySelectorAll<HTMLButtonElement>('.level-filter button')];
-    filters.forEach((btn) => btn.addEventListener('click', () => {
-      const min = Number(btn.dataset.min);
-      filters.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      document.querySelectorAll<HTMLElement>('.skill-card').forEach((card) => {
-        let shown = 0;
-        card.querySelectorAll<HTMLElement>('.skill-rows li').forEach((li) => {
-          li.hidden = Number(li.dataset.score) < min;
-          if (!li.hidden) shown++;
+    // Skill grid: search plus minimum-level filter. Groups with no matches hide; matches are highlighted.
+    const search = document.querySelector<HTMLInputElement>('#skill-search');
+    const levelBtns = [...document.querySelectorAll<HTMLButtonElement>('.level-filter button')];
+    const hits = document.querySelector<HTMLElement>('.skill-hits');
+    const emptyMsg = document.querySelector<HTMLElement>('.skill-empty');
+    let minLevel = 0;
+    const escapeRe = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    document.querySelectorAll<HTMLElement>('.skill-rows .hl').forEach((el) => (el.dataset.raw = el.textContent ?? ''));
+    const applySkillFilter = () => {
+      const q = (search?.value ?? '').trim().toLowerCase();
+      let shown = 0, total = 0;
+      document.querySelectorAll<HTMLDetailsElement>('.skill-group').forEach((group) => {
+        let inGroup = 0;
+        group.querySelectorAll<HTMLElement>('.skill-rows li').forEach((li) => {
+          total++;
+          const match = Number(li.dataset.score) >= minLevel && (!q || (li.dataset.text ?? '').includes(q));
+          li.hidden = !match;
+          if (match) inGroup++;
+          li.querySelectorAll<HTMLElement>('.hl').forEach((el) => {
+            const raw = el.dataset.raw ?? '';
+            if (!q) { el.textContent = raw; return; }
+            el.innerHTML = raw.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!))
+              .replace(new RegExp(escapeRe(q.replace(/[&<>]/g, '')), 'gi'), (m) => `<mark>${m}</mark>`);
+          });
         });
-        card.hidden = shown === 0;
-        const count = card.querySelector<HTMLElement>('summary .count');
-        if (count) count.textContent = min ? `${shown} of ${count.dataset.total}` : count.dataset.total!;
+        shown += inGroup;
+        group.hidden = inGroup === 0;
+        if (q && inGroup) group.open = true;
+        const count = group.querySelector<HTMLElement>('summary .count');
+        if (count) count.textContent = inGroup === Number(count.dataset.total) ? count.dataset.total! : `${inGroup}/${count.dataset.total}`;
       });
+      if (hits) hits.textContent = `${shown} of ${total}`;
+      if (emptyMsg) emptyMsg.hidden = shown > 0;
+    };
+    search?.addEventListener('input', applySkillFilter);
+    levelBtns.forEach((btn) => btn.addEventListener('click', () => {
+      minLevel = Number(btn.dataset.min);
+      levelBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      applySkillFilter();
     }));
+
+    // Evidence map: selecting a filled cell shows the highlight behind it.
+    const evDetail = document.querySelector<HTMLElement>('.ev-detail');
+    document.querySelector('.ev')?.addEventListener('click', (e) => {
+      const cell = (e.target as HTMLElement).closest<HTMLButtonElement>('button.ev-cell');
+      if (!cell || !evDetail) return;
+      document.querySelectorAll('.ev button[aria-pressed="true"]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      cell.setAttribute('aria-pressed', 'true');
+      evDetail.replaceChildren();
+      const strong = document.createElement('strong');
+      strong.textContent = cell.dataset.skill ?? '';
+      evDetail.append(strong, ` at ${cell.dataset.role}`, document.createElement('br'), cell.dataset.evidence || 'Listed on this role.');
+    });
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-fold-all]')) {
       b.addEventListener('click', () => {
         const open = b.dataset.foldAll === 'open';

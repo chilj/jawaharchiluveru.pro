@@ -42,6 +42,12 @@ changes are written to disk and you commit and push them yourself.
 Things to know:
 - Use `status` to stage work: `planned` and `draft` items stay off the live site.
 - Unconfirmed career bullets go in **Needs verification**, which is never shown.
+- **Toolkit** has three parts, all editable:
+  - *T-shaped profile*: breadth comes from the skill groups; depth lists the Advanced–Expert and
+    Expert domains in **Toolkit → Overall profile**. Edit the depth heading under **T-shaped profile**.
+  - *Skills by role*: each career role's **Skills shown in Toolkit** list fills that role's column.
+    Use the skill name exactly as in Toolkit so its level shows, and add the evidence line.
+  - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
 
 ## Workflow

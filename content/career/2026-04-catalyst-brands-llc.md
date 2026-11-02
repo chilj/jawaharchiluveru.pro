@@ -19,4 +19,28 @@ highlights:
   - Built AI-powered workflows (automated discovery synthesis, persona-driven use-case validation, dependency mapping) that reduced documentation time by 40%.
   - Prototyped an AI agent that triggers performance test runs, correlates performance data and logs, performs root-cause analysis on anomalies, and sends release sign-off notifications.
 to_verify: []
+short: "Catalyst"
+skills:
+  - name: "Platform Product Management"
+    evidence: "Modernization of a Platform-as-a-Product offering: infrastructure, security, observability, developer experience"
+  - name: "Requirements Engineering"
+    evidence: "Turned the architecture vision into a backlog of 50+ user stories"
+  - name: "MVP Definition"
+    evidence: "Recommended a WireMock MVP for self-service performance testing"
+  - name: "Backlog Management"
+    evidence: "Prioritized backlog of 50+ user stories"
+  - name: "KPI / Success Metrics"
+    evidence: "Defined KPI targets for tenant provisioning, isolation, cost attribution and adoption"
+  - name: "Vendor Management"
+    evidence: "Evaluated WireMock, Hoverfly and Mountebank"
+  - name: "Service Virtualization"
+    evidence: "Evaluated service virtualization tools and recommended WireMock"
+  - name: "Platform Engineering"
+    evidence: "Foundational platform, security, infrastructure and observability"
+  - name: "AI-Assisted Discovery"
+    evidence: "Automated discovery synthesis and persona-driven use-case validation"
+  - name: "AI-Assisted Documentation"
+    evidence: "AI-powered workflows cut documentation time by 40%"
+  - name: "AI Agents"
+    evidence: "Prototyped an AI agent that runs performance tests and performs root-cause analysis"
 ---

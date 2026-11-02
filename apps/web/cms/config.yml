@@ -184,8 +184,14 @@ collections:
         label: Toolkit (skill matrix)
         file: content/toolkit.yaml
         fields:
+          - name: t_shape
+            label: T-shaped profile
+            widget: object
+            fields:
+              - { name: title, label: Depth heading, widget: string, default: Depth }
+              - { name: summary, label: Depth summary, widget: string, required: false }
           - name: overall
-            label: Overall profile
+            label: Overall profile (Advanced–Expert and Expert domains form the T's depth)
             label_singular: Domain
             widget: list
             summary: '{{fields.name}} · {{fields.level}}'
@@ -237,6 +243,17 @@ collections:
       - { name: status, label: Status, widget: select, options: [planned, draft, published], default: published }
       - { name: highlights, label: Highlights, widget: list, required: false }
       - { name: to_verify, label: Needs verification (never shown), widget: list, required: false, hint: Park unconfirmed bullets here; move them to Highlights once checked. }
+      - { name: short, label: Short name, widget: string, required: false, hint: "Column label in Toolkit's Skills by role map, e.g. Levi's. Default: the company name." }
+      - name: skills
+        label: Skills shown in Toolkit (Skills by role)
+        label_singular: Skill
+        widget: list
+        required: false
+        summary: '{{fields.name}}'
+        hint: Each entry fills one cell in the Skills by role map. Use the skill name exactly as it appears in Toolkit so its level shows.
+        fields:
+          - { name: name, label: Skill, widget: string }
+          - { name: evidence, label: Evidence from this role, widget: string, required: false, hint: Shown when a visitor selects the cell. }
 
   - name: case-studies
     label: Case Studies

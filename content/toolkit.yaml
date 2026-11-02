@@ -5,7 +5,11 @@
 #   working = demonstrated use / supporting experience
 #   exposure = listed technology, depth not established
 # Items: name, level, evidence (one line), and optional logo (Simple Icons slug) or mark.
-# `overall` is the domain-level summary shown first.
+# `overall` is the domain-level summary; Advanced–Expert and Expert domains form the T-shape's stem.
+# `t_shape` sets the stem's heading and one-line summary.
+t_shape:
+  title: 'Depth: integration & messaging platforms'
+  summary: Backend platforms, APIs, event-driven integrations and communications systems
 overall:
 - name: Technical Product Management
   level: expert

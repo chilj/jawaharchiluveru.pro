@@ -28,13 +28,37 @@ const toolkit = (await getCollection('toolkit')).sort(byOrder)
   .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i.name) || showUnpublished) }))
   .filter((g) => g.items.length);
 const skillProfile = (await getCollection('skill-profile')).sort(byOrder).map((e) => e.data);
+const tShape = (await getEntry('toolkit-meta', 't-shape'))?.data;
 const allSkills = toolkit.flatMap((g) => g.items);
-const levelCount = (min: number) => allSkills.filter((i) => i.level && LEVELS[i.level].score >= min).length;
+const score = (i: { level?: keyof typeof LEVELS }) => (i.level ? LEVELS[i.level].score : 0);
 const skillFilters = [
-  { min: 0, label: 'All skills', count: allSkills.length },
-  { min: 3, label: 'Advanced and up', count: levelCount(3) },
-  { min: 4, label: 'Expert', count: levelCount(4) },
+  { min: 0, label: 'All' },
+  { min: 3, label: 'Advanced+' },
+  { min: 4, label: 'Expert' },
 ];
+const levelLegend = (['expert', 'advanced-expert', 'advanced', 'working-advanced', 'working'] as const).map((l) => LEVELS[l]);
+const levelClass = (sc: number) => `lv-${String(sc).replace('.', '')}`;
+
+// T-shape: breadth = every group (shaded by its share of Expert skills); depth = Expert-level domains.
+const breadth = toolkit.map((g) => {
+  const expert = g.items.filter((i) => score(i) >= 3.5).length;
+  const share = expert / g.items.length;
+  return { label: g.data.label, count: g.items.length, expert, shade: share >= 0.5 ? 4 : share >= 0.3 ? 3 : share >= 0.12 ? 2 : 1 };
+});
+const depth = skillProfile.filter((d) => LEVELS[d.level].score >= 3.5);
+
+// Evidence map: columns are roles that list skills (newest first); rows follow the matrix's group and item order.
+const matrixIndex = new Map<string, { group: string; pos: number; level?: keyof typeof LEVELS }>();
+toolkit.forEach((g, gi) => g.items.forEach((i, ii) => matrixIndex.set(i.name.toLowerCase(), { group: g.data.label, pos: gi * 1000 + ii, level: i.level })));
+const evRoles = career.filter((e) => e.data.skills.length > 0).map((e) => ({
+  label: e.data.short ?? e.data.org,
+  years: e.data.end?.slice(0, 4) === e.data.start.slice(0, 4) ? e.data.start.slice(0, 4) : `${e.data.start.slice(0, 4)}–${e.data.end ? e.data.end.slice(2, 4) : ''}`,
+  cells: new Map(e.data.skills.map((sk) => [sk.name.toLowerCase(), sk.evidence ?? ''])),
+}));
+const evSkills = [...new Map(career.flatMap((e) => e.data.skills.map((sk) => [sk.name.toLowerCase(), sk.name]))).values()]
+  .map((name) => ({ name, ...(matrixIndex.get(name.toLowerCase()) ?? { group: 'Other', pos: 1e9 }) }))
+  .sort((a, b) => a.pos - b.pos);
+const evGroups = [...new Set(evSkills.map((r) => r.group))].map((group) => ({ group, rows: evSkills.filter((r) => r.group === group) }));
 const education = (await getCollection('education')).sort(byOrder).map((e) => e.data);
 const certifications = (await getCollection('certifications')).sort(byOrder).map((e) => e.data);
 const credentialSections = [
@@ -220,54 +244,106 @@ const section = (id: string) => ({
 
   {show('toolkit') && (
     <Section {...section('toolkit')} count={`${allSkills.length} skills`}>
-      <dl class="level-key">
-        <div><dt><LevelMeter level="expert" /></dt><dd>Repeated ownership, deep demonstrated experience</dd></div>
-        <div><dt><LevelMeter level="advanced" /></dt><dd>Strong applied experience</dd></div>
-        <div><dt><LevelMeter level="working" /></dt><dd>Demonstrated use or supporting experience</dd></div>
-      </dl>
+      <div class="tk-block">
+        <h3 class="subhead"><Icon name="layers" />T-shaped profile</h3>
+        <div class="t-axis"><span>Breadth: {breadth.length} skill groups</span><span>Darker = more Expert skills</span></div>
+        <ul class="t-top">
+          {breadth.map((b) => (
+            <li class={`shade-${b.shade}`}>{b.label}<small>{b.count} skills · {b.expert} Expert</small></li>
+          ))}
+        </ul>
+        {depth.length > 0 && (
+          <div class="t-stem">
+            <h4>{tShape?.title ?? 'Depth'}</h4>
+            {tShape?.summary && <p>{tShape.summary}</p>}
+            <ul>{depth.map((d) => <li><span>{d.name}</span><LevelMeter level={d.level} showLabel={false} /></li>)}</ul>
+          </div>
+        )}
+      </div>
 
-      {skillProfile.length > 0 && (
-        <div class="profile">
-          <h3 class="subhead"><Icon name="gauge" />Overall profile</h3>
-          <ul class="profile-list">
-            {skillProfile.map((d) => <li><span>{d.name}</span><LevelMeter level={d.level} /></li>)}
-          </ul>
+      {evRoles.length > 0 && (
+        <div class="tk-block">
+          <h3 class="subhead"><Icon name="route" />Skills by role</h3>
+          <p class="section-intro">Each filled cell is backed by a highlight from that role. Select one to read it.</p>
+          <div class="ev-scroll">
+            <table class="ev">
+              <thead>
+                <tr>
+                  <th scope="col">Skill</th>
+                  {evRoles.map((r) => <th scope="col">{r.label}<span>{r.years}</span></th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {evGroups.map(({ group, rows }) => (
+                  <>
+                    <tr class="ev-group"><td colspan={evRoles.length + 1}><span>{group}</span></td></tr>
+                    {rows.map((row) => (
+                      <tr>
+                        <th scope="row"><span>{row.name}</span>{row.level && <LevelMeter level={row.level} showLabel={false} />}</th>
+                        {evRoles.map((r) => {
+                          const ev = r.cells.get(row.name.toLowerCase());
+                          return (
+                            <td>
+                              {ev !== undefined
+                                ? <button type="button" class="ev-cell on" aria-pressed="false" aria-label={`${row.name} at ${r.label}`} data-skill={row.name} data-role={`${r.label} (${r.years})`} data-evidence={ev} />
+                                : <span class="ev-cell" />}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="ev-detail" aria-live="polite">Select a filled cell to see the highlight behind it.</p>
         </div>
       )}
 
-      <div class="matrix-head">
-        <h3 class="subhead"><Icon name="filter" />Skill matrix</h3>
-        <div class="level-filter" role="group" aria-label="Show skills by level">
-          {skillFilters.map((f, i) => (
-            <button type="button" data-min={f.min} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label} <span class="count">{f.count}</span></button>
-          ))}
+      <div class="tk-block">
+        <h3 class="subhead"><Icon name="filter" />Every skill</h3>
+        <div class="skill-tools">
+          <input id="skill-search" type="search" placeholder={`Search ${allSkills.length} skills, e.g. Kafka, MuleSoft, Zendesk`} aria-label="Search skills" />
+          <div class="level-filter" role="group" aria-label="Minimum level">
+            {skillFilters.map((f, i) => <button type="button" data-min={f.min} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>)}
+          </div>
+          <span class="skill-hits" aria-live="polite">{allSkills.length} of {allSkills.length}</span>
         </div>
-      </div>
-      <div class="matrix">
-        {toolkit.map((g, gi) => (
-          <details class="skill-card" data-fold={`toolkit-${g.id}`} open={gi < 2}>
-            <summary>
-              <span class="section-icon"><Icon name={g.data.icon} /></span>
-              <h4>{g.data.label}</h4>
-              <span class="count" data-total={g.items.length}>{g.items.length}</span>
-              <span class="chev"><Icon name="chevron-down" /></span>
-            </summary>
-            <ul class="skill-rows">
-              {g.items.map((i) => {
-                const svg = brandFor(i.name, i.logo);
-                return (
-                  <li data-score={i.level ? LEVELS[i.level].score : 0} class={isPlaceholder(i.name) ? 'chip-placeholder' : ''}>
-                    <span class="skill-name">
-                      <span>{svg && <Fragment set:html={svg} />}{i.name}</span>
-                      {i.evidence && <span class="evidence">{i.evidence}</span>}
-                    </span>
-                    {i.level && <LevelMeter level={i.level} />}
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
-        ))}
+        <div class="level-legend">
+          {levelLegend.map((l) => <span><i class={`swatch ${levelClass(l.score)}`} />{l.label}</span>)}
+        </div>
+        <div class="skill-groups">
+          {toolkit.map((g, gi) => {
+            const mix = [4, 3.5, 3, 2.5, 2, 1].map((sc) => ({ sc, n: g.items.filter((i) => score(i) === sc).length })).filter((m) => m.n);
+            return (
+              <details class="skill-group" data-fold={`toolkit-${g.id}`} open={gi === 0}>
+                <summary>
+                  <span class="group-name">{g.data.label}</span>
+                  <span class="mix" role="img" aria-label={mix.map((m) => `${m.n} ${Object.values(LEVELS).find((l) => l.score === m.sc)?.label}`).join(', ')}>
+                    {mix.map((m) => <span class={levelClass(m.sc)} style={`width:${(m.n / g.items.length) * 100}%`} />)}
+                  </span>
+                  <span class="count" data-total={g.items.length}>{g.items.length}</span>
+                </summary>
+                <ul class="skill-rows">
+                  {g.items.map((i) => {
+                    const svg = brandFor(i.name, i.logo);
+                    return (
+                      <li data-score={score(i)} data-text={`${i.name} ${i.evidence ?? ''}`.toLowerCase()} class={isPlaceholder(i.name) ? 'chip-placeholder' : ''}>
+                        <span class="skill-name">
+                          <span>{svg && <Fragment set:html={svg} />}<span class="hl">{i.name}</span></span>
+                          {i.evidence && <span class="evidence hl">{i.evidence}</span>}
+                        </span>
+                        {i.level && <LevelMeter level={i.level} />}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            );
+          })}
+        </div>
+        <p class="skill-empty" hidden>No skills match. Try a shorter word.</p>
       </div>
     </Section>
   )}

@@ -52,6 +52,8 @@ const career = defineCollection({
     clients: z.array(z.string()).default([]),
     highlights: z.array(z.string()).default([]),
     to_verify: z.array(z.string()).default([]),   // notes for you; never shown on the site
+    short: z.string().optional(),                 // column label in the evidence map; default: org
+    skills: z.array(z.object({ name: z.string(), evidence: z.string().optional() })).default([]),  // evidence map
     earlier: z.boolean().default(false),
     status,
   }),
@@ -107,6 +109,13 @@ const toolkit = defineCollection({
   }),
 });
 
+const toolkitMeta = defineCollection({
+  loader: file(`${CONTENT}/toolkit.yaml`, {
+    parser: (text) => [{ id: 't-shape', ...(parseYaml(text).t_shape ?? {}) }],
+  }),
+  schema: z.object({ title: z.string().default('Depth'), summary: z.string().optional() }),
+});
+
 const skillProfile = defineCollection({
   loader: file(`${CONTENT}/toolkit.yaml`, {
     parser: (text) => (parseYaml(text).overall ?? []).map((d: Record<string, unknown>, i: number) => ({ id: `${i}`, order: i, ...d })),
@@ -147,5 +156,5 @@ const connect = defineCollection({
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
   education: credentialList('education'), certifications: credentialList('certifications'),
-  'skill-profile': skillProfile,
+  'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta,
 };
