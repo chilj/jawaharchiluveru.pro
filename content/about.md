@@ -34,11 +34,11 @@ Master's Degrees in Engineering Management from The University of Texas at Arlin
 
 ### Industry Experience
 
-**Retail, E-commerce & Omnichannel** (\~8 years) |
-Catalyst Brands · Levi Strauss & Co. · 7-Eleven · Advance Auto Parts
+**Catalyst Brands, Levi Strauss & Co., 7-Eleven, Advance Auto Parts**
+_Retail, E-commerce & Omnichannel (\~8 years)_
 
-**Financial Services, Fintech & Insurance** (\~4 years) |
-Mr. Cooper · PayPal / Braintree · Wells Fargo Advisors · State Farm
+**Mr. Cooper, PayPal / Braintree, Wells Fargo Advisors, State Farm**
+_Financial Services, Fintech & Insurance (\~4 years)_
 
-**Media, Logistics & Publishing** (\~4 years) |
-RR Donnelley · Progressive Digital Media
+**RR Donnelley, Progressive Digital Media**
+_Media, Logistics & Publishing (\~4 years)_
