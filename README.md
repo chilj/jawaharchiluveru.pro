@@ -45,8 +45,10 @@ Things to know:
 - **Toolkit** has three parts, all editable:
   - *T-shaped profile*: breadth comes from the skill groups; depth lists the Advanced–Expert and
     Expert domains in **Toolkit → Overall profile**. Edit the depth heading under **T-shaped profile**.
-  - *Skills by role*: each career role's **Skills shown in Toolkit** list fills that role's column.
-    Use the skill name exactly as in Toolkit so its level shows, and add the evidence line.
+  - *Skills by role*: edit the whole map at **/admin/skills-by-role/**. Sign in with the same
+    GitHub token, click cells to add or remove a skill for a role, pick or type the evidence,
+    then **Save to GitHub** (one commit for all changed roles). Skill names come from the matrix,
+    so levels always match. Behind the scenes each role's **Skills shown in Toolkit** list holds it.
   - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
 
