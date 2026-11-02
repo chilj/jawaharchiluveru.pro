@@ -4,7 +4,7 @@
   --surface: #ffffff;
   --surface-glass: rgb(255 255 255 / 0.72);
   --text: #141821;
-  --muted: #586074;
+  --muted: #495063;
   --line: #e3e6ee;
   --accent: #2f5bd3;
   --accent-soft: #e8eefc;
@@ -341,9 +341,10 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .lv-35 { background: color-mix(in srgb, var(--accent) 82%, var(--accent-soft)); }
 .lv-3 { background: color-mix(in srgb, var(--accent) 64%, var(--accent-soft)); }
 /* T-shape tiles carry text, so their middle shade stays light enough for body text (WCAG AA) */
-.shade-3 { background: color-mix(in srgb, var(--accent) 42%, var(--accent-soft)); }
+.shade-3 { background: var(--shade-3, color-mix(in srgb, var(--accent) 42%, var(--accent-soft))); }
 .lv-25 { background: color-mix(in srgb, var(--accent) 46%, var(--accent-soft)); }
-.lv-2, .shade-2 { background: color-mix(in srgb, var(--accent) 30%, var(--accent-soft)); }
+.lv-2 { background: color-mix(in srgb, var(--accent) 30%, var(--accent-soft)); }
+.shade-2 { background: var(--shade-2, color-mix(in srgb, var(--accent) 30%, var(--accent-soft))); }
 .lv-1, .shade-1 { background: var(--accent-soft); }
 
 .level { display: inline-flex; align-items: center; gap: 0.625rem; flex: none; }
@@ -433,7 +434,7 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .skill-name { display: grid; gap: 0.0625rem; min-width: 0; font-size: 0.875rem; font-weight: 500; }
 .skill-name .icon { width: 0.875rem; height: 0.875rem; color: var(--accent); margin-right: 0.375rem; }
 .evidence { color: var(--muted); font-size: 0.75rem; font-weight: 400; }
-.skill-rows mark { background: color-mix(in srgb, var(--teal) 28%, transparent); color: inherit; border-radius: 0.1875rem; padding: 0 0.125rem; }
+.skill-rows mark { background: var(--mark-bg, color-mix(in srgb, var(--teal) 28%, transparent)); color: inherit; border-radius: 0.1875rem; padding: 0 0.125rem; }
 .skill-rows li.chip-placeholder .skill-name { color: var(--warn); }
 .skill-empty { color: var(--muted); padding: 0.75rem 0; margin: 0; }
 @media (max-width: 480px) {

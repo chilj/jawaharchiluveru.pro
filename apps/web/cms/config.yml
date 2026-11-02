@@ -63,6 +63,30 @@ collections:
               - { name: label, label: Label, widget: string }
               - { name: url, label: URL, widget: string }
 
+      - name: theme
+        label: Theme & colours
+        file: content/theme.yaml
+        fields:
+          - { name: preset, label: Colour scheme, widget: select, default: ocean, options: [{ label: 'Ocean (blue & teal)', value: ocean }, { label: 'Emerald (green & blue)', value: emerald }, { label: 'Indigo (violet & pink)', value: indigo }, { label: 'Graphite (slate & teal)', value: graphite }, { label: 'Sunset (orange & purple)', value: sunset }, { label: 'Crimson (red & navy)', value: crimson }], hint: 'Applies to light and dark mode. Custom colours below override it.' }
+          - name: custom
+            label: Custom colours (optional)
+            widget: object
+            collapsed: true
+            hint: 'Leave empty to use the scheme above. Hard-to-read colours are adjusted automatically to keep text accessible.'
+            fields:
+              - name: light
+                label: Light mode
+                widget: object
+                fields:
+                  - { name: accent, label: 'Accent (links, buttons, headings)', widget: color, allowInput: true, required: false }
+                  - { name: secondary, label: 'Secondary (gradients, highlights)', widget: color, allowInput: true, required: false }
+              - name: dark
+                label: Dark mode
+                widget: object
+                fields:
+                  - { name: accent, label: 'Accent (links, buttons, headings)', widget: color, allowInput: true, required: false }
+                  - { name: secondary, label: 'Secondary (gradients, highlights)', widget: color, allowInput: true, required: false }
+
       - name: sections
         label: Section names & order
         file: content/sections.yaml

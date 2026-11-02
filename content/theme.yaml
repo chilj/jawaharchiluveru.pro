@@ -1,0 +1,12 @@
+# Site colours. Edit here or in the site editor at /admin (Profile & settings → Theme & colours).
+# preset: ocean | emerald | indigo | graphite | sunset | crimson
+# custom colours (hex, e.g. "#2f5bd3") override the preset; leave empty to use the preset.
+# Colours that would be hard to read are darkened (light mode) or lightened (dark mode) automatically.
+preset: ocean
+custom:
+  light:
+    accent: ""
+    secondary: ""
+  dark:
+    accent: ""
+    secondary: ""

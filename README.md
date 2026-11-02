@@ -15,6 +15,7 @@ content/                  ← everything you edit
 ├── playbook/             Playbook: TPM artifacts
 ├── education.yaml        Education: degrees and institutions
 ├── certifications.yaml   Certifications
+├── theme.yaml            Theme & colours: preset palette or custom accent/secondary per mode
 ├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
@@ -51,6 +52,12 @@ Things to know:
     so levels always match. Behind the scenes each role's **Skills shown in Toolkit** list holds it.
   - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
+- **Theme & colours** (Profile & settings): pick a preset (Ocean, Emerald, Indigo, Graphite, Sunset,
+  Crimson) or set custom accent and secondary colours for light and dark mode. Every colour pairing
+  is checked against WCAG 2.1 AA (4.5:1 for text, 3:1 for meters); colours that fall short are
+  darkened (light mode) or lightened (dark mode) automatically, background glows are softened if
+  needed, and the build stops rather than publish a palette that still fails. Adjustments are
+  listed in the build log.
 
 ## Workflow
 

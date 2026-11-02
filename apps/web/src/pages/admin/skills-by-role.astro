@@ -4,7 +4,10 @@
 import '@fontsource-variable/ibm-plex-sans/wght.css';
 import '@fontsource-variable/sora/wght.css';
 import '../../styles/global.css';
+import { getEntry } from 'astro:content';
+import { buildTheme } from '../../lib/theme';
 const home = import.meta.env.BASE_URL;
+const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
 ---
 <!doctype html>
 <html lang="en">
@@ -13,6 +16,7 @@ const home = import.meta.env.BASE_URL;
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Skills by role editor · Jawahar Chiluveru</title>
+  <style is:inline set:html={theme.css}></style>
 </head>
 <body class="sbr">
   <header class="sbr-bar">

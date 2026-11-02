@@ -138,6 +138,17 @@ const credentialList = (name: string) => defineCollection({
   }),
 });
 
+const theme = defineCollection({
+  loader: file(`${CONTENT}/theme.yaml`, { parser: (text) => [{ id: 'theme', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    preset: z.string().default('ocean'),
+    custom: z.object({
+      light: z.object({ accent: z.string().optional(), secondary: z.string().optional() }).partial().optional(),
+      dark: z.object({ accent: z.string().optional(), secondary: z.string().optional() }).partial().optional(),
+    }).partial().optional(),
+  }),
+});
+
 const connect = defineCollection({
   loader: glob({ base: CONTENT, pattern: 'connect.md' }),
   schema: z.object({
@@ -156,5 +167,5 @@ const connect = defineCollection({
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
   education: credentialList('education'), certifications: credentialList('certifications'),
-  'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta,
+  'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };
