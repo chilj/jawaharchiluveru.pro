@@ -1,21 +1,86 @@
-# Certifications section, shown in this order. Edit here or in the site editor at /admin.
-# Fields match LinkedIn's "Licenses & certifications": name, issuer, issue_month/issue_year,
-# expiry_month/expiry_year, credential_id, credential_url, skills, media (url or file, title,
-# description). The badge comes from the credential URL when the site builds; logo (Simple Icons
-# slug) or mark (initials) are fallbacks.
 items:
-- name: Generative AI Fundamentals
-  issuer: Databricks
-  logo: databricks
-- name: SAFe 6 Product Owner / Product Manager
-  issuer: Scaled Agile
-  mark: SAFe
-- name: Certified Scrum Product Owner
-  issuer: Scrum Alliance
-  mark: CSPO
-- name: Certified ScrumMaster
-  issuer: Scrum Alliance
-  mark: CSM
-- name: SQL Fundamentals
-  issuer: SoloLearn
-  logo: sololearn
+  - name: Generative AI Fundamentals
+    issuer: Databricks
+    issue_month: 3
+    issue_year: 2026
+    expiry_month: null
+    expiry_year: null
+    credential_id: '177231635'
+    credential_url: https://credentials.databricks.com/8c1f6372-542a-4d3d-8139-5addb8f7bbb0#acc.LfrFT0VM
+    skills:
+      - Generative artificial intelligence (AI)
+    media: []
+    badge: ''
+    logo: databricks
+    mark: ''
+  - name: Certified SAFe® 4 Product Owner/Product Manager
+    issuer: Scaled Agile
+    issue_month: null
+    issue_year: 2018
+    expiry_month: null
+    expiry_year: null
+    credential_id: ''
+    credential_url: https://www.credly.com/badges/a3a8982a-ec53-482c-a2ea-603ab2e079fc/linked_in_profile
+    skills:
+      - Agile Methodologies
+      - Backlog Refinement
+      - Value Definition
+      - Building Lean-Agile Portfolios
+      - Business Case Development
+      - Economic Prioritization
+      - Enterprise Coordination
+      - Hypothesis Driven Development
+      - Kanban
+      - Lean-Agile
+      - Product Development
+      - Product Management
+      - Product Ownership
+      - Program Management
+      - SAFe®
+      - SAFe® Principles
+      - Scaled Agile Framework
+      - Scrum
+      - Stakeholder Management
+    media: []
+    badge: /files/cert_mark_POPM_badge.png
+    logo: ''
+    mark: SAFe
+  - name: Certified Scrum Product Owner
+    issuer: Scrum Alliance
+    issue_month: 6
+    issue_year: 2016
+    expiry_month: null
+    expiry_year: null
+    credential_id: '543019'
+    credential_url: ''
+    skills: []
+    media: []
+    badge: ''
+    logo: ''
+    mark: CSPO
+  - name: Certified ScrumMaster
+    issuer: Scrum Alliance
+    issue_month: 6
+    issue_year: 2016
+    expiry_month: null
+    expiry_year: null
+    credential_id: '543019'
+    credential_url: ''
+    skills: []
+    media: []
+    badge: ''
+    logo: ''
+    mark: CSM
+  - name: SQL Fundamentals
+    issuer: SoloLearn
+    issue_month: null
+    issue_year: null
+    expiry_month: null
+    expiry_year: null
+    credential_id: ''
+    credential_url: ''
+    skills: []
+    media: []
+    badge: ''
+    logo: sololearn
+    mark: ''
