@@ -15,7 +15,7 @@ content/                  ← everything you edit
 ├── playbook/             Playbook: TPM artifacts
 ├── education.yaml        Education: degrees and institutions
 ├── certifications.yaml   Certifications
-├── toolkit.yaml          Toolkit: skills and tools
+├── toolkit.yaml          Toolkit: skill matrix (overall profile + groups with levels and evidence)
 ├── connect.md            Let's Talk: calendar booking link, email, social links
 ├── public/files/         downloadable files (résumé, artifact PDFs), served at /files/…
 └── _templates/           starting points for new entries when editing files by hand

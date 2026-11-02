@@ -5,9 +5,10 @@ import Status from '../components/Status.astro';
 import Section from '../components/Section.astro';
 import Icon from '../components/Icon.astro';
 import LogoTile from '../components/LogoTile.astro';
+import LevelMeter from '../components/LevelMeter.astro';
 import { brandFor } from '../lib/icons';
 import {
-  byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase,
+  byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase, LEVELS,
 } from '../lib/content';
 
 const { nav, byId } = await getSections();
@@ -26,6 +27,14 @@ const playbook = (await getCollection('playbook', (e) => isVisible(e.data.status
 const toolkit = (await getCollection('toolkit')).sort(byOrder)
   .map((g) => ({ ...g, items: g.data.items.filter((i) => !isPlaceholder(i.name) || showUnpublished) }))
   .filter((g) => g.items.length);
+const skillProfile = (await getCollection('skill-profile')).sort(byOrder).map((e) => e.data);
+const allSkills = toolkit.flatMap((g) => g.items);
+const levelCount = (min: number) => allSkills.filter((i) => i.level && LEVELS[i.level].score >= min).length;
+const skillFilters = [
+  { min: 0, label: 'All skills', count: allSkills.length },
+  { min: 3, label: 'Advanced and up', count: levelCount(3) },
+  { min: 4, label: 'Expert', count: levelCount(4) },
+];
 const education = (await getCollection('education')).sort(byOrder).map((e) => e.data);
 const certifications = (await getCollection('certifications')).sort(byOrder).map((e) => e.data);
 const credentialSections = [
@@ -54,7 +63,7 @@ const person = {
   hasCredential: certifications.map((i) => ({
     '@type': 'EducationalOccupationalCredential', name: i.name, ...(i.detail && { recognizedBy: { '@type': 'Organization', name: i.detail } }),
   })),
-  knowsAbout: toolkit.filter((g) => g.data.layout === 'chips').flatMap((g) => g.items.map((i) => i.name)).filter((n) => !isPlaceholder(n)),
+  knowsAbout: [...new Set(allSkills.filter((i) => !i.level || LEVELS[i.level].score >= 3).map((i) => i.name))].filter((n) => !isPlaceholder(n)),
   sameAs: connect.links.map((l) => l.url),
 };
 const website = { '@context': 'https://schema.org', '@type': 'WebSite', name: about.name, url: siteUrl, publisher: { '@id': `${siteUrl}#person` } };
@@ -210,33 +219,54 @@ const section = (id: string) => ({
   )}
 
   {show('toolkit') && (
-    <Section {...section('toolkit')}>
-      <div class="skills">
-        {toolkit.map((g) => (
-          <div class={`skill-group layout-${g.data.layout}`}>
-            <h3><Icon name={g.data.icon} />{g.data.label}</h3>
-            {g.data.layout === 'list' ? (
-              <ul class="cred-list">
-                {g.items.map((i) => (
-                  <li>
-                    <LogoTile name={i.detail ?? i.name} logo={i.logo} mark={i.mark} icon={g.data.icon} />
-                    <span><strong>{i.name}</strong>{i.detail && <span class="meta">{i.detail}</span>}</span>
+    <Section {...section('toolkit')} count={`${allSkills.length} skills`}>
+      <dl class="level-key">
+        <div><dt><LevelMeter level="expert" /></dt><dd>Repeated ownership, deep demonstrated experience</dd></div>
+        <div><dt><LevelMeter level="advanced" /></dt><dd>Strong applied experience</dd></div>
+        <div><dt><LevelMeter level="working" /></dt><dd>Demonstrated use or supporting experience</dd></div>
+      </dl>
+
+      {skillProfile.length > 0 && (
+        <div class="profile">
+          <h3 class="subhead"><Icon name="gauge" />Overall profile</h3>
+          <ul class="profile-list">
+            {skillProfile.map((d) => <li><span>{d.name}</span><LevelMeter level={d.level} /></li>)}
+          </ul>
+        </div>
+      )}
+
+      <div class="matrix-head">
+        <h3 class="subhead"><Icon name="filter" />Skill matrix</h3>
+        <div class="level-filter" role="group" aria-label="Show skills by level">
+          {skillFilters.map((f, i) => (
+            <button type="button" data-min={f.min} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label} <span class="count">{f.count}</span></button>
+          ))}
+        </div>
+      </div>
+      <div class="matrix">
+        {toolkit.map((g, gi) => (
+          <details class="skill-card" data-fold={`toolkit-${g.id}`} open={gi < 2}>
+            <summary>
+              <span class="section-icon"><Icon name={g.data.icon} /></span>
+              <h4>{g.data.label}</h4>
+              <span class="count" data-total={g.items.length}>{g.items.length}</span>
+              <span class="chev"><Icon name="chevron-down" /></span>
+            </summary>
+            <ul class="skill-rows">
+              {g.items.map((i) => {
+                const svg = brandFor(i.name, i.logo);
+                return (
+                  <li data-score={i.level ? LEVELS[i.level].score : 0} class={isPlaceholder(i.name) ? 'chip-placeholder' : ''}>
+                    <span class="skill-name">
+                      <span>{svg && <Fragment set:html={svg} />}{i.name}</span>
+                      {i.evidence && <span class="evidence">{i.evidence}</span>}
+                    </span>
+                    {i.level && <LevelMeter level={i.level} />}
                   </li>
-                ))}
-              </ul>
-            ) : (
-              <ul class="chips">
-                {g.items.map((i) => {
-                  const svg = brandFor(i.name, i.logo);
-                  return (
-                    <li class={isPlaceholder(i.name) ? 'chip-placeholder' : svg ? 'chip-brand' : ''}>
-                      {svg && <Fragment set:html={svg} />}{i.name}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+                );
+              })}
+            </ul>
+          </details>
         ))}
       </div>
     </Section>

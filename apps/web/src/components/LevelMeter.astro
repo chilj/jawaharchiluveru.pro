@@ -1,0 +1,14 @@
+---
+// Four-segment meter for a skill level; half levels (e.g. Advanced–Expert) half-fill a segment.
+import { LEVELS, type Level } from '../lib/content';
+interface Props { level: Level; showLabel?: boolean }
+const { level, showLabel = true } = Astro.props;
+const { label, score } = LEVELS[level];
+const fill = (n: number) => (score >= n ? 'full' : score >= n - 0.5 ? 'half' : '');
+---
+<span class="level" title={label}>
+  <span class="meter" role="img" aria-label={`${label}, ${score} of 4`}>
+    {[1, 2, 3, 4].map((n) => <i class={fill(n)}></i>)}
+  </span>
+  {showLabel && <span class="level-label">{label}</span>}
+</span>

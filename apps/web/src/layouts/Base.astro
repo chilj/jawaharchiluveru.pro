@@ -100,6 +100,22 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
     toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
     document.querySelectorAll('#site-nav a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
     addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    // Skill matrix level filter: hide rows below the chosen level, and groups left empty.
+    const filters = [...document.querySelectorAll<HTMLButtonElement>('.level-filter button')];
+    filters.forEach((btn) => btn.addEventListener('click', () => {
+      const min = Number(btn.dataset.min);
+      filters.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      document.querySelectorAll<HTMLElement>('.skill-card').forEach((card) => {
+        let shown = 0;
+        card.querySelectorAll<HTMLElement>('.skill-rows li').forEach((li) => {
+          li.hidden = Number(li.dataset.score) < min;
+          if (!li.hidden) shown++;
+        });
+        card.hidden = shown === 0;
+        const count = card.querySelector<HTMLElement>('summary .count');
+        if (count) count.textContent = min ? `${shown} of ${count.dataset.total}` : count.dataset.total!;
+      });
+    }));
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-fold-all]')) {
       b.addEventListener('click', () => {
         const open = b.dataset.foldAll === 'open';

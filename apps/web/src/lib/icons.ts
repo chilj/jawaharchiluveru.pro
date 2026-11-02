@@ -37,6 +37,9 @@ const normalize = (s: string) => s.toLowerCase().replace(/\(.*?\)/g, '').replace
 const ALIASES: Record<string, string> = {
   gitlabcicd: 'gitlab',
   gcppubsub: 'googlepubsub',
+  pubsub: 'googlepubsub',
+  googlecloudgcp: 'googlecloud',
+  kafka: 'apachekafka',
   wellsfargoadvisors: 'wellsfargo',
   certifiedscrummaster: 'scrumalliance',
   certifiedscrumproductowner: 'scrumalliance',

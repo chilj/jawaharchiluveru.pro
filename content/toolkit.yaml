@@ -1,76 +1,542 @@
-# Toolkit groups, shown in this order. Edit here or in the site editor at /admin.
-# Items: name, plus optional detail, logo (Simple Icons slug, https://simpleicons.org)
-# and mark (monogram text when there's no logo). Brand logos are matched automatically
-# for well-known tool names. `layout: list` shows a group as rows with logo tiles.
+# Toolkit: skill matrix shown in this order. Edit here or in the site editor at /admin.
+# Levels: expert, advanced-expert, advanced, working-advanced, working, exposure
+#   expert = repeated ownership / deep demonstrated experience
+#   advanced = strong applied experience
+#   working = demonstrated use / supporting experience
+#   exposure = listed technology, depth not established
+# Items: name, level, evidence (one line), and optional logo (Simple Icons slug) or mark.
+# `overall` is the domain-level summary shown first.
+overall:
+- name: Technical Product Management
+  level: expert
+- name: API / Integration Product Management
+  level: expert
+- name: Event-Driven Architecture
+  level: expert
+- name: Communications / Messaging Systems
+  level: expert
+- name: Product Ownership / Agile
+  level: expert
+- name: Workflow Automation
+  level: expert
+- name: Enterprise Systems Integration
+  level: expert
+- name: AI-Native Product Execution
+  level: advanced-expert
+- name: Cloud / Platform Engineering
+  level: advanced
+- name: Data / SQL / Analytics
+  level: advanced
+- name: DevOps / SRE
+  level: advanced
+- name: Observability / Reliability
+  level: advanced
+- name: Customer Experience Platforms
+  level: advanced
+- name: Security / Privacy / Compliance
+  level: advanced
+- name: Financial / Payments Systems
+  level: advanced
+- name: Front-End / UI Technology
+  level: working
 groups:
 - id: product
-  label: Product Leadership
+  label: Technical Product & Leadership
   icon: layers
   items:
   - name: Technical Product Management
+    level: expert
+    evidence: 16+ years; current and recent roles
+  - name: Product Ownership
+    level: expert
+    evidence: Multiple Product Owner roles
   - name: Platform Product Management
+    level: expert
+    evidence: Internal developer platform; unified digital platform
   - name: Product Discovery
+    level: expert
+    evidence: Discovery, synthesis, dependency mapping
+  - name: Product Strategy
+    level: advanced
+    evidence: Business goals translated into product requirements
+  - name: Requirements Engineering
+    level: expert
+    evidence: Requirements, specs, user stories, acceptance criteria
+  - name: MVP Definition
+    level: expert
+    evidence: WireMock MVP and platform capabilities
   - name: Backlog Management
+    level: expert
+    evidence: 50+ user stories and prioritization
+  - name: User Story Development
+    level: expert
+    evidence: Repeated ownership of 50+ stories
+  - name: Acceptance Criteria
+    level: expert
+    evidence: Explicitly demonstrated
+  - name: KPI / Success Metrics
+    level: advanced
+    evidence: Instrumentation and measurable KPIs
+  - name: Tradeoff Analysis
+    level: advanced
+    evidence: Decision/tradeoff memos
+  - name: Cross-Functional Leadership
+    level: expert
+    evidence: Product, Engineering, Legal, Security, Analytics
+  - name: Vendor Management
+    level: advanced
+    evidence: Vendor evaluation, onboarding, accountability
   - name: Release Governance
+    level: advanced
+    evidence: Release and production readiness
   - name: Stakeholder Management
+    level: expert
+    evidence: Senior engineering and business stakeholders
 - id: integration
-  label: APIs & Integration
+  label: Architecture, APIs & Integration
   icon: plug
   items:
+  - name: Systems Integration
+    level: expert
+    evidence: 40+ integrations; multiple enterprise platforms
   - name: API Product Management
+    level: expert
+    evidence: API definition, requirements, consolidation
+  - name: REST APIs
+    level: advanced
+    evidence: Repeatedly used
+  - name: API Architecture
+    level: advanced
+    evidence: Communications and platform integrations
   - name: API Standardization
-  - name: MuleSoft
-  - name: Systems Integration (40+)
+    level: expert
+    evidence: Consolidated/standardized production APIs
+  - name: API Consolidation
+    level: expert
+    evidence: Five production MuleSoft Email APIs
+  - name: Webhooks
+    level: advanced
+    evidence: Core integration competency
   - name: Third-Party Integration
+    level: expert
+    evidence: Multiple vendor/platform integrations
+  - name: Integration Architecture
+    level: expert
+    evidence: MAO → Pub/Sub → MuleSoft → Cordial
+  - name: Microservices
+    level: advanced
+    evidence: Repeated technical experience
+  - name: Service Virtualization
+    level: advanced
+    evidence: WireMock, Hoverfly, Mountebank evaluation
+  - name: API Mocking
+    level: advanced
+    evidence: Self-service performance testing
+  - name: Payload Transformation
+    level: advanced
+    evidence: Messaging integration architecture
+  - name: Data Transformation
+    level: advanced
+    evidence: Integration/data-feed work
 - id: events
   label: Event-Driven & Messaging
   icon: radio
   items:
   - name: Event-Driven Architecture
-  - name: GCP Pub/Sub
+    level: expert
+    evidence: Explicit core competency
+  - name: Event-Driven Integration
+    level: expert
+    evidence: Production communications architecture
+  - name: Pub/Sub
+    level: advanced
+    evidence: GCP Pub/Sub production architecture
+  - name: Event Routing
+    level: advanced
+    evidence: Messaging architecture
+  - name: Message Processing
+    level: advanced
+    evidence: Production messaging systems
+  - name: Retry Mechanisms
+    level: advanced
+    evidence: Automated retries
   - name: Dead-Letter Queues
+    level: advanced
+    evidence: Production messaging architecture
+  - name: Message Reliability
+    level: expert
+    evidence: Reliability ownership and incident management
+  - name: Email APIs
+    level: expert
+    evidence: MuleSoft Email APIs
+  - name: SMS
+    level: advanced
+    evidence: Cordial SMS
+  - name: Push Notifications
+    level: advanced
+    evidence: Cordial push
   - name: Omnichannel Messaging
-  - name: Cordial
+    level: expert
+    evidence: Global communications platform
+  - name: Communications Platforms
+    level: expert
+    evidence: Cordial ownership
 - id: cloud
-  label: Cloud & Platform
+  label: Cloud & Platform Engineering
   icon: cloud
   items:
   - name: AWS
-  - name: Google Cloud
+    level: advanced
+    evidence: Current and prior platform experience
+  - name: Google Cloud / GCP
+    level: advanced
+    evidence: Migration and Pub/Sub architecture
+  - name: Microsoft Azure
+    level: working
+    evidence: Listed in technical skills
+  - name: Internal Developer Platforms
+    level: advanced
+    evidence: Current role ownership
+  - name: Platform Engineering
+    level: advanced
+    evidence: Infrastructure, security, observability, developer experience
+  - name: Developer Experience
+    level: advanced
+    evidence: Developer dashboards/scaffolding
+  - name: Infrastructure Automation
+    level: advanced
+    evidence: Platform workflow automation
+  - name: Infrastructure as Code
+    level: working-advanced
+    evidence: Terraform
   - name: Kubernetes
+    level: working
+    evidence: Listed in current technical skills
+  - name: Service Mesh
+    level: working
+    evidence: Istio
+  - name: Kafka
+    level: working
+    evidence: Listed in current technical skills
   - name: Terraform
-  - name: Istio
-  - name: GitLab CI/CD
-  - name: Jenkins
-  - name: Dynatrace
-  - name: Datadog
-- id: agile
-  label: Agile
-  icon: repeat
-  items:
-  - name: Scrum
-  - name: Kanban
-  - name: SAFe
-  - name: WSJF
-  - name: Product Ownership
-- id: data
-  label: Data
-  icon: database
-  items:
-  - name: SQL
-  - name: Data Migration
-  - name: Data Reconciliation
-  - name: Product Analytics
-  - name: KPI Instrumentation
+    level: working-advanced
+    evidence: Platform/DevOps environment
+  - name: CI/CD
+    level: advanced
+    evidence: GitLab CI, Jenkins
+  - name: DevOps
+    level: advanced
+    evidence: SRE/DevOps projects
+  - name: SRE
+    level: advanced
+    evidence: Explicit SRE experience
 - id: ai
   label: AI-Native Execution
   icon: sparkles
   items:
+  - name: AI-Native Product Execution
+    level: advanced-expert
+    evidence: Repeated AI usage throughout product lifecycle
   - name: AI-Assisted Discovery
-  - name: Requirements Synthesis
-  - name: Documentation
-  - name: Prototyping
-  - name: Vendor Evaluation
+    level: expert
+    evidence: Discovery synthesis
+  - name: AI Requirements Synthesis
+    level: expert
+    evidence: Requirements and user-story generation
+  - name: AI-Assisted Documentation
+    level: expert
+    evidence: 40% documentation-time reduction
+  - name: AI-Assisted Prototyping
+    level: advanced
+    evidence: Use-case prototyping
+  - name: AI Workflow Automation
+    level: advanced
+    evidence: AI-powered workflows
+  - name: AI Dependency Mapping
+    level: advanced
+    evidence: Explicitly demonstrated
+  - name: AI Vendor Evaluation
+    level: advanced
+    evidence: Feature-matrix comparisons
+  - name: AI Benchmarking
+    level: working-advanced
+    evidence: Industry benchmarking
+  - name: AI Agents
+    level: advanced
+    evidence: Used across discovery/execution
   - name: Claude
+    level: advanced
+    evidence: Listed and applied
   - name: AWS Q / Kiro
+    level: advanced
+    evidence: Current platform role
   - name: GitHub Copilot
+    level: advanced
+    evidence: Listed in technical skills
+- id: data
+  label: Data, SQL & Analytics
+  icon: database
+  items:
+  - name: SQL
+    level: advanced
+    evidence: Multiple roles and certification
+  - name: Data Analysis
+    level: advanced
+    evidence: Financial, loyalty, operational data
+  - name: Data Quality
+    level: advanced
+    evidence: Explicit ownership
+  - name: Data Validation
+    level: advanced
+    evidence: SQL/data validation
+  - name: Data Migration
+    level: advanced
+    evidence: Redshift → GCP
+  - name: Data Mapping
+    level: advanced
+    evidence: 40+ integrations
+  - name: Data Reconciliation
+    level: advanced
+    evidence: PayPal/Braintree financial transformation
+  - name: Data Transformation
+    level: advanced
+    evidence: Integration architecture
+  - name: Data Integration
+    level: expert
+    evidence: Enterprise integration history
+  - name: Product Analytics
+    level: advanced
+    evidence: Event tracking and tagging
+  - name: Instrumentation
+    level: advanced
+    evidence: Platform success metrics
+  - name: KPI Measurement
+    level: advanced
+    evidence: Explicit ownership
+  - name: Amazon Redshift
+    level: advanced
+    evidence: 20M+ daily transaction analysis
+  - name: Snowflake
+    level: working
+    evidence: Listed technical skill
+  - name: PostgreSQL
+    level: working-advanced
+    evidence: Listed technical skill
+  - name: MongoDB
+    level: working-advanced
+    evidence: Queried for data quality
+  - name: Oracle
+    level: working-advanced
+    evidence: Queried for data analysis
+  - name: SQL Server
+    level: working-advanced
+    evidence: Queried for data analysis
+  - name: Cosmos DB
+    level: working
+    evidence: Listed technical skill
+  - name: AuroraDB
+    level: working
+    evidence: Listed technical skill
+- id: operations
+  label: Observability, Reliability & Operations
+  icon: activity
+  items:
+  - name: Observability
+    level: advanced
+    evidence: Core/current platform responsibility
+  - name: Monitoring
+    level: advanced
+    evidence: New Relic, Dynatrace
+  - name: Instrumentation
+    level: advanced
+    evidence: Success metrics
+  - name: Platform Health
+    level: advanced
+    evidence: Monthly health metrics
+  - name: Incident Response
+    level: expert
+    evidence: P2 outage ownership
+  - name: Incident Management
+    level: advanced
+    evidence: Vendor and production coordination
+  - name: Root Cause Analysis
+    level: advanced
+    evidence: Vendor RCA management
+  - name: Production Support
+    level: advanced
+    evidence: Multiple roles
+  - name: Troubleshooting
+    level: advanced
+    evidence: Production runbooks
+  - name: Operational Readiness
+    level: advanced
+    evidence: Campaign/platform readiness
+  - name: Performance Testing
+    level: advanced
+    evidence: WireMock MVP
+  - name: Risk Management
+    level: advanced
+    evidence: Reliability/compliance/revenue tradeoffs
+  - name: Runbook Development
+    level: advanced
+    evidence: Production troubleshooting runbooks
+  - name: Vendor Escalation
+    level: advanced
+    evidence: Cordial outage/vendor accountability
+- id: agile
+  label: Agile & Delivery
+  icon: repeat
+  items:
+  - name: Agile
+    level: expert
+    evidence: Career-long
+  - name: Scrum
+    level: expert
+    evidence: Scrum Master roles/certification
+  - name: Scrum Master
+    level: expert
+    evidence: Multiple roles
+  - name: Product Owner
+    level: expert
+    evidence: Multiple roles/certification
+  - name: SAFe
+    level: advanced
+    evidence: SAFe 6 certification
+  - name: Backlog Prioritization
+    level: expert
+    evidence: Repeated ownership
+  - name: UAT
+    level: advanced
+    evidence: State Farm / earlier experience
+  - name: Release Management
+    level: advanced
+    evidence: Production releases
+  - name: Release Governance
+    level: advanced
+    evidence: Current competency
+  - name: Production Readiness
+    level: advanced
+    evidence: Multiple environments
+  - name: Stakeholder Alignment
+    level: expert
+    evidence: Cross-functional leadership
+- id: workflow
+  label: Workflow & Automation
+  icon: workflow
+  items:
+  - name: Workflow Automation
+    level: expert
+    evidence: Core competency
+  - name: Process Automation
+    level: advanced
+    evidence: Manual → scalable systems
+  - name: Self-Service Workflows
+    level: advanced
+    evidence: Zendesk/support platforms
+  - name: Support Automation
+    level: advanced
+    evidence: Zendesk Sunshine
+  - name: Process Optimization
+    level: advanced
+    evidence: Multiple roles
+  - name: Workflow Redesign
+    level: advanced
+    evidence: IRA service platform
+  - name: SharePoint Automation
+    level: advanced
+    evidence: PowerApps workflows
+  - name: PowerApps
+    level: advanced
+    evidence: Charge-off approval automation
+  - name: Automated Incident Generation
+    level: advanced
+    evidence: ServiceNow integration
+  - name: Automated Retry Processing
+    level: advanced
+    evidence: Messaging systems
+- id: business
+  label: Customer / Business Platforms
+  icon: users
+  items:
+  - name: Customer Experience
+    level: advanced
+    evidence: Customer-facing platforms
+  - name: Customer Support Platforms
+    level: advanced
+    evidence: Zendesk environments
+  - name: Self-Service Support
+    level: advanced
+    evidence: Zendesk Sunshine / Help Center
+  - name: Zendesk
+    level: expert
+    evidence: Direct ownership
+  - name: Zendesk Sunshine
+    level: advanced
+    evidence: Support enhancements
+  - name: Cordial
+    level: expert
+    evidence: Global omnichannel communications platform
+  - name: MuleSoft
+    level: advanced-expert
+    evidence: Production API/integration ownership
+  - name: Loyalty Platforms
+    level: expert
+    evidence: Global loyalty platform
+  - name: Loyalty Benefits
+    level: advanced
+    evidence: Benefits administration
+  - name: Omnichannel Commerce
+    level: advanced
+    evidence: Web/mobile/loyalty experience
+  - name: E-Commerce
+    level: advanced
+    evidence: 7NOW web ordering
+  - name: Mobile Checkout
+    level: advanced
+    evidence: Apple Pay/Google Pay/cards
+  - name: Order Management
+    level: advanced
+    evidence: Ordering and OMS exposure
+  - name: Payment Systems
+    level: advanced
+    evidence: PayPal/Braintree/banks/processors
+  - name: Financial Reconciliation
+    level: advanced
+    evidence: BFiT program
+  - name: Workforce Management
+    level: advanced
+    evidence: Reflexis implementation
+  - name: Enterprise Systems Integration
+    level: expert
+    evidence: 40+ system integrations
+- id: security
+  label: Security, Privacy & Compliance
+  icon: shield-check
+  items:
+  - name: Data Privacy
+    level: advanced
+    evidence: Customer-data handling
+  - name: Consent Management
+    level: advanced
+    evidence: Consent/opt-in requirements
+  - name: Opt-In Management
+    level: advanced
+    evidence: Messaging compliance
+  - name: Customer Data Protection
+    level: advanced
+    evidence: Cross-functional compliance
+  - name: Security Requirements
+    level: working-advanced
+    evidence: Product/platform context
+  - name: Authentication
+    level: working-advanced
+    evidence: Authentication cleanup
+  - name: Compliance
+    level: advanced
+    evidence: Legal/Security collaboration
+  - name: Risk Management
+    level: advanced
+    evidence: Reliability/compliance/revenue
+  - name: Legal/Security Collaboration
+    level: advanced
+    evidence: Product, Engineering, Legal, Security

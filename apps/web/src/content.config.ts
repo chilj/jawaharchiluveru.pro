@@ -83,8 +83,10 @@ const playbook = defineCollection({
   }),
 });
 
+const level = z.enum(['expert', 'advanced-expert', 'advanced', 'working-advanced', 'working', 'exposure']);
+
+// toolkit.yaml holds `overall: [...]` (domain summary) and `groups: [...]`; list position sets order.
 const toolkit = defineCollection({
-  // toolkit.yaml holds `groups: [...]`; list position sets display order.
   loader: file(`${CONTENT}/toolkit.yaml`, {
     parser: (text) => parseYaml(text).groups.map((g: Record<string, unknown>, i: number) => ({ order: i, ...g })),
   }),
@@ -92,12 +94,24 @@ const toolkit = defineCollection({
     label: z.string(),
     icon: z.string().default('wrench'),
     order: z.number().default(99),
-    layout: z.enum(['chips', 'list']).default('chips'),
     items: z.array(z.union([
       z.string().transform((name) => ({ name })),
-      z.object({ name: z.string(), detail: z.string().optional(), logo: z.string().optional(), mark: z.string().optional() }),
+      z.object({
+        name: z.string(),
+        level: level.optional(),
+        evidence: z.string().optional(),
+        logo: z.string().optional(),
+        mark: z.string().optional(),
+      }),
     ])),
   }),
+});
+
+const skillProfile = defineCollection({
+  loader: file(`${CONTENT}/toolkit.yaml`, {
+    parser: (text) => (parseYaml(text).overall ?? []).map((d: Record<string, unknown>, i: number) => ({ id: `${i}`, order: i, ...d })),
+  }),
+  schema: z.object({ name: z.string(), level, order: z.number() }),
 });
 
 // education.yaml and certifications.yaml hold `items: [...]`; list position sets display order.
@@ -133,4 +147,5 @@ const connect = defineCollection({
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, toolkit, connect,
   education: credentialList('education'), certifications: credentialList('certifications'),
+  'skill-profile': skillProfile,
 };

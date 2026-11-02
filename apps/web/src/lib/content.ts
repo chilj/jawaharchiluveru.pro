@@ -59,3 +59,14 @@ export function tenure(start: string, end?: string) {
 /** Prefix a site-relative path from content (e.g. "/files/resume.pdf") with the deploy base. */
 export const withBase = (path: string) =>
   path.startsWith('/') ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}` : path;
+
+/** Skill levels from the skill matrix, with a score out of 4 for the meter. */
+export const LEVELS = {
+  expert: { label: 'Expert', score: 4 },
+  'advanced-expert': { label: 'Advanced–Expert', score: 3.5 },
+  advanced: { label: 'Advanced', score: 3 },
+  'working-advanced': { label: 'Working–Advanced', score: 2.5 },
+  working: { label: 'Working', score: 2 },
+  exposure: { label: 'Exposure', score: 1 },
+} as const;
+export type Level = keyof typeof LEVELS;

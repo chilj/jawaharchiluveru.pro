@@ -181,11 +181,19 @@ collections:
               - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials for the tile, e.g. UTA.' }
 
       - name: toolkit
-        label: Toolkit
+        label: Toolkit (skill matrix)
         file: content/toolkit.yaml
         fields:
+          - name: overall
+            label: Overall profile
+            label_singular: Domain
+            widget: list
+            summary: '{{fields.name}} · {{fields.level}}'
+            fields:
+              - { name: name, label: Domain, widget: string }
+              - { name: level, label: Level, widget: select, options: [{ label: Expert, value: expert }, { label: Advanced–Expert, value: advanced-expert }, { label: Advanced, value: advanced }, { label: Working–Advanced, value: working-advanced }, { label: Working, value: working }, { label: Exposure, value: exposure }] }
           - name: groups
-            label: Groups
+            label: Skill groups
             label_singular: Group
             widget: list
             summary: '{{fields.label}}'
@@ -193,17 +201,16 @@ collections:
               - { name: id, label: ID, widget: string, hint: Short unique name without spaces. }
               - { name: label, label: Heading, widget: string }
               - { name: icon, label: Icon, widget: string, default: wrench, hint: 'Any icon name from https://lucide.dev/icons' }
-              - { name: layout, label: Layout, widget: select, options: [chips, list], default: chips, required: false }
               - name: items
-                label: Items
-                label_singular: Item
+                label: Skills
+                label_singular: Skill
                 widget: list
-                summary: '{{fields.name}}'
+                summary: '{{fields.name}} · {{fields.level}}'
                 fields:
-                  - { name: name, label: Name, widget: string }
-                  - { name: detail, label: Detail, widget: string, required: false, hint: 'Second line, e.g. issuing body or university.' }
-                  - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org, e.g. paypal. Matched automatically for well-known names.' }
-                  - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials to show when there is no logo, e.g. UTA.' }
+                  - { name: name, label: Skill, widget: string }
+                  - { name: level, label: Level, widget: select, required: false, options: [{ label: Expert, value: expert }, { label: Advanced–Expert, value: advanced-expert }, { label: Advanced, value: advanced }, { label: Working–Advanced, value: working-advanced }, { label: Working, value: working }, { label: Exposure, value: exposure }] }
+                  - { name: evidence, label: Evidence, widget: string, required: false, hint: 'One line on where you used it, e.g. "40+ integrations".' }
+                  - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org. Matched automatically for well-known names.' }
 
   - name: career
     label: Career
