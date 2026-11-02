@@ -250,7 +250,7 @@ collections:
         widget: list
         required: false
         summary: '{{fields.name}}'
-        hint: Each entry fills one cell in the Skills by role map. Use the skill name exactly as it appears in Toolkit so its level shows.
+        hint: 'Each entry fills one cell in the Skills by role map. Easier: edit every role at once at /admin/skills-by-role/.'
         fields:
           - { name: name, label: Skill, widget: string }
           - { name: evidence, label: Evidence from this role, widget: string, required: false, hint: Shown when a visitor selects the cell. }

@@ -1,0 +1,295 @@
+---
+// Grid editor for the Toolkit's "Skills by role" map. Loads live content from GitHub with the
+// owner's token and saves every changed role in one commit to main (which redeploys the site).
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/sora/600.css';
+import '../../styles/global.css';
+const home = import.meta.env.BASE_URL;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Skills by role editor · Jawahar Chiluveru</title>
+</head>
+<body class="sbr">
+  <header class="sbr-bar">
+    <div class="sbr-wrap sbr-bar-inner">
+      <div>
+        <h1>Skills by role</h1>
+        <p class="sbr-sub">Edits the map in Toolkit. Saving commits to <code>main</code>; the site updates about a minute later.</p>
+      </div>
+      <nav class="sbr-links"><a href={`${home}admin/`}>Content editor</a><a href={home}>View site</a></nav>
+    </div>
+  </header>
+
+  <main class="sbr-wrap">
+    <section id="signin" class="sbr-card">
+      <h2>Sign in</h2>
+      <p>Paste the same fine-grained GitHub token you use in the content editor (access to <code>chilj/jawaharchiluveru.pro</code>, Contents: Read and write).</p>
+      <form id="signin-form" class="sbr-row">
+        <label class="sr-only" for="token">GitHub token</label>
+        <input id="token" type="password" autocomplete="off" placeholder="github_pat_…" required>
+        <button type="submit" class="btn primary">Load</button>
+      </form>
+      <label class="sbr-check"><input id="remember" type="checkbox"> Remember on this browser</label>
+      <p id="signin-status" class="sbr-status" role="status"></p>
+    </section>
+
+    <section id="editor" hidden>
+      <div class="sbr-toolbar">
+        <form id="add-form" class="sbr-row">
+          <label class="sr-only" for="add-skill">Add a skill row</label>
+          <input id="add-skill" list="matrix-skills" placeholder="Add a skill from your matrix, e.g. MuleSoft" autocomplete="off">
+          <datalist id="matrix-skills"></datalist>
+          <button type="submit" class="btn">Add row</button>
+        </form>
+        <label class="sbr-check"><input id="show-earlier" type="checkbox"> Show earlier roles</label>
+        <span id="change-count" class="sbr-status"></span>
+        <button id="save" type="button" class="btn primary" disabled>Save to GitHub</button>
+      </div>
+      <p id="editor-status" class="sbr-status" role="status"></p>
+
+      <div class="sbr-layout">
+        <div class="sbr-grid-wrap"><table id="grid" class="ev sbr-grid"></table></div>
+        <aside id="panel" class="sbr-card sbr-panel">
+          <p class="sbr-muted">Click an empty cell to add a skill to that role. Click a filled cell to edit its evidence.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import { parse, parseDocument } from 'yaml';
+
+    const REPO = 'chilj/jawaharchiluveru.pro';
+    const BRANCH = 'main';
+    const TOKEN_KEY = 'jc-sbr-token';
+    const LEVEL_LABEL: Record<string, string> = {
+      expert: 'Expert', 'advanced-expert': 'Advanced–Expert', advanced: 'Advanced',
+      'working-advanced': 'Working–Advanced', working: 'Working', exposure: 'Exposure',
+    };
+
+    type MatrixSkill = { name: string; group: string; level?: string; pos: number };
+    type Role = {
+      path: string; sha: string; raw: string; org: string; short?: string; start: string; end?: string;
+      earlier: boolean; highlights: string[]; skills: Map<string, { name: string; evidence: string }>;
+    };
+
+    let token = '';
+    let matrix = new Map<string, MatrixSkill>();
+    let roles: Role[] = [];
+    let extraRows: string[] = [];
+    const dirty = new Set<string>();
+    let selected: { role: Role; key: string } | null = null;
+
+    const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+    const key = (name: string) => name.trim().toLowerCase();
+
+    // ---- GitHub API ----
+    async function gh(path: string, init: RequestInit = {}) {
+      const res = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+        ...init,
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(init.headers ?? {}) },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(res.status === 401 ? 'GitHub rejected the token. Check it hasn’t expired.'
+          : res.status === 403 || res.status === 404 ? 'The token can’t access this repository. Give it access to chilj/jawaharchiluveru.pro with Contents: Read and write.'
+          : `GitHub returned ${res.status}${body.message ? `: ${body.message}` : ''}.`);
+      }
+      return res.json();
+    }
+    const decode = (b64: string) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+    async function getFile(path: string) {
+      const f = await gh(`/contents/${path}?ref=${BRANCH}`);
+      return { sha: f.sha as string, text: decode(f.content) };
+    }
+
+    // ---- Front matter ----
+    function splitFrontMatter(raw: string) {
+      const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      if (!m) throw new Error('A career file has no front matter.');
+      return { fm: m[1], body: m[2] };
+    }
+    function serialize(role: Role) {
+      const { fm, body } = splitFrontMatter(role.raw);
+      const doc = parseDocument(fm);
+      const skills = [...role.skills.values()].map((s) => (s.evidence.trim() ? { name: s.name, evidence: s.evidence.trim() } : { name: s.name }));
+      if (skills.length) doc.set('skills', skills); else doc.delete('skills');
+      return `---\n${doc.toString({ lineWidth: 0 })}---\n${body}`;
+    }
+
+    // ---- Load ----
+    async function load() {
+      const toolkit = parse((await getFile('content/toolkit.yaml')).text);
+      matrix = new Map();
+      (toolkit.groups ?? []).forEach((g: any, gi: number) => (g.items ?? []).forEach((i: any, ii: number) => {
+        const name = typeof i === 'string' ? i : i.name;
+        matrix.set(key(name), { name, group: g.label, level: i.level, pos: gi * 1000 + ii });
+      }));
+      const list = await gh(`/contents/content/career?ref=${BRANCH}`);
+      const files = (list as any[]).filter((f) => f.type === 'file' && f.name.endsWith('.md') && !f.name.startsWith('_'));
+      roles = await Promise.all(files.map(async (f) => {
+        const { sha, text } = await getFile(f.path);
+        const data = parse(splitFrontMatter(text).fm) ?? {};
+        const skills = new Map<string, { name: string; evidence: string }>();
+        (data.skills ?? []).forEach((s: any) => skills.set(key(s.name), { name: s.name, evidence: s.evidence ?? '' }));
+        return {
+          path: f.path, sha, raw: text, org: data.org, short: data.short, start: String(data.start), end: data.end ? String(data.end) : undefined,
+          earlier: !!data.earlier, highlights: (data.highlights ?? []).map(String), skills,
+        } as Role;
+      }));
+      roles.sort((a, b) => b.start.localeCompare(a.start));
+      extraRows = []; dirty.clear(); selected = null;
+      $('#matrix-skills').replaceChildren(...[...matrix.values()].map((s) => Object.assign(document.createElement('option'), { value: s.name })));
+    }
+
+    // ---- Render ----
+    const visibleRoles = () => roles.filter((r) => !r.earlier || r.skills.size > 0 || $<HTMLInputElement>('#show-earlier').checked);
+    const years = (r: Role) => (r.end?.slice(0, 4) === r.start.slice(0, 4) ? r.start.slice(0, 4) : `${r.start.slice(0, 4)}–${r.end ? r.end.slice(2, 4) : ''}`);
+    function rows() {
+      const names = new Map<string, string>();
+      roles.forEach((r) => r.skills.forEach((s, k) => names.set(k, s.name)));
+      extraRows.forEach((n) => names.set(key(n), names.get(key(n)) ?? n));
+      return [...names].map(([k, name]) => ({ k, name, m: matrix.get(k) }))
+        .sort((a, b) => (a.m?.pos ?? 1e9) - (b.m?.pos ?? 1e9) || a.name.localeCompare(b.name));
+    }
+    function el<K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> & Record<string, any> = {}, ...kids: (Node | string)[]) {
+      const e = document.createElement(tag);
+      Object.entries(props).forEach(([k, v]) => (k.startsWith('data-') || k.startsWith('aria-') ? e.setAttribute(k, v) : ((e as any)[k] = v)));
+      e.append(...kids);
+      return e;
+    }
+    function renderGrid() {
+      const vr = visibleRoles();
+      const thead = el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Skill'),
+        ...vr.map((r) => el('th', { scope: 'col', className: dirty.has(r.path) ? 'changed' : '' }, r.short ?? r.org, el('span', {}, years(r))))));
+      const tbody = el('tbody');
+      let group = '';
+      for (const row of rows()) {
+        const g = row.m?.group ?? 'Not in skill matrix';
+        if (g !== group) { group = g; tbody.append(el('tr', { className: 'ev-group' }, el('td', { colSpan: vr.length + 1 }, el('span', {}, g)))); }
+        const label = el('th', { scope: 'row' }, el('span', {}, row.name));
+        if (row.m?.level) label.append(el('small', { className: 'sbr-level' }, LEVEL_LABEL[row.m.level] ?? row.m.level));
+        if (!row.m) label.append(el('small', { className: 'sbr-warn' }, 'Not in matrix'));
+        const tr = el('tr', {}, label);
+        vr.forEach((r) => {
+          const on = r.skills.has(row.k);
+          const isSel = selected?.role === r && selected.key === row.k;
+          tr.append(el('td', {}, el('button', {
+            type: 'button', className: `ev-cell${on ? ' on' : ''}${on && !r.skills.get(row.k)!.evidence ? ' no-evidence' : ''}`,
+            'aria-pressed': String(isSel), 'aria-label': `${row.name} at ${r.short ?? r.org}${on ? ', on' : ', off'}`,
+            'data-path': r.path, 'data-key': row.k, 'data-name': row.name,
+          })));
+        });
+        tbody.append(tr);
+      }
+      $('#grid').replaceChildren(thead, tbody);
+      $('#change-count').textContent = dirty.size ? `${dirty.size} role${dirty.size > 1 ? 's' : ''} changed` : 'No changes';
+      $<HTMLButtonElement>('#save').disabled = dirty.size === 0;
+    }
+    function renderPanel() {
+      const panel = $('#panel');
+      if (!selected) { panel.replaceChildren(el('p', { className: 'sbr-muted' }, 'Click an empty cell to add a skill to that role. Click a filled cell to edit its evidence.')); return; }
+      const { role, key: k } = selected;
+      const entry = role.skills.get(k)!;
+      const m = matrix.get(k);
+      const area = el('textarea', { id: 'evidence', rows: 3, value: entry.evidence, placeholder: 'One line on how this role shows the skill' });
+      area.addEventListener('input', () => { entry.evidence = area.value; dirty.add(role.path); renderGrid(); });
+      const suggestions = role.highlights.length
+        ? el('div', { className: 'sbr-suggest' }, el('h3', {}, 'Use a highlight from this role'),
+            ...role.highlights.map((h) => {
+              const b = el('button', { type: 'button', className: 'sbr-suggestion' }, h.length > 160 ? `${h.slice(0, 157)}…` : h);
+              b.addEventListener('click', () => { entry.evidence = h; area.value = h; dirty.add(role.path); renderGrid(); area.focus(); });
+              return b;
+            }))
+        : el('p', { className: 'sbr-muted' }, 'This role has no highlights yet.');
+      const remove = el('button', { type: 'button', className: 'btn' }, 'Remove from this role');
+      remove.addEventListener('click', () => { role.skills.delete(k); dirty.add(role.path); selected = null; renderGrid(); renderPanel(); });
+      panel.replaceChildren(
+        el('h2', {}, entry.name),
+        el('p', { className: 'sbr-muted' }, `${role.short ?? role.org} · ${years(role)}${m?.level ? ` · ${LEVEL_LABEL[m.level]}` : ''}`),
+        el('label', { htmlFor: 'evidence' }, 'Evidence'), area, suggestions, remove,
+      );
+    }
+
+    // ---- Events ----
+    $('#grid').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.ev-cell');
+      if (!b) return;
+      const role = roles.find((r) => r.path === b.dataset.path)!;
+      const k = b.dataset.key!;
+      if (!role.skills.has(k)) { role.skills.set(k, { name: matrix.get(k)?.name ?? b.dataset.name!, evidence: '' }); dirty.add(role.path); }
+      selected = { role, key: k };
+      renderGrid(); renderPanel();
+      $<HTMLTextAreaElement>('#evidence')?.focus();
+    });
+    $('#add-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = $<HTMLInputElement>('#add-skill');
+      const m = matrix.get(key(input.value));
+      if (!input.value.trim()) return;
+      if (!m) { setStatus('#editor-status', `“${input.value}” isn’t in your skill matrix. Pick a name from the list, or add the skill to Toolkit first.`, true); return; }
+      if (!extraRows.some((n) => key(n) === key(m.name))) extraRows.push(m.name);
+      input.value = ''; setStatus('#editor-status', `Added ${m.name}. Click a cell to assign it to a role.`); renderGrid();
+    });
+    $('#show-earlier').addEventListener('change', renderGrid);
+    window.addEventListener('beforeunload', (e) => { if (dirty.size) e.preventDefault(); });
+
+    function setStatus(sel: string, msg: string, error = false) {
+      const s = $(sel); s.textContent = msg; s.classList.toggle('error', error);
+    }
+
+    $('#signin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      token = $<HTMLInputElement>('#token').value.trim();
+      setStatus('#signin-status', 'Loading from GitHub…');
+      try {
+        await load();
+        try { $<HTMLInputElement>('#remember').checked ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY); } catch {}
+        $('#signin').hidden = true; $('#editor').hidden = false;
+        setStatus('#editor-status', `Loaded ${roles.length} roles and your skill matrix from main.`);
+        renderGrid(); renderPanel();
+      } catch (err) { setStatus('#signin-status', (err as Error).message, true); }
+    });
+
+    $('#save').addEventListener('click', async () => {
+      const save = $<HTMLButtonElement>('#save');
+      save.disabled = true; setStatus('#editor-status', 'Saving…');
+      try {
+        const changed = roles.filter((r) => dirty.has(r.path));
+        // Refuse to overwrite a role that changed on GitHub after it was loaded.
+        for (const r of changed) {
+          const now = await gh(`/contents/${r.path}?ref=${BRANCH}`);
+          if (now.sha !== r.sha) throw new Error(`${r.short ?? r.org} was changed on GitHub after you loaded this page. Reload to get the latest, then redo your edits for that role.`);
+        }
+        const ref = await gh(`/git/ref/heads/${BRANCH}`);
+        const parent = await gh(`/git/commits/${ref.object.sha}`);
+        const tree = await Promise.all(changed.map(async (r) => {
+          const blob = await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: serialize(r), encoding: 'utf-8' }) });
+          return { path: r.path, mode: '100644', type: 'blob', sha: blob.sha };
+        }));
+        const newTree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: parent.tree.sha, tree }) });
+        const names = changed.map((r) => r.short ?? r.org).join(', ');
+        const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message: `Update skills by role: ${names}`, tree: newTree.sha, parents: [ref.object.sha] }) });
+        await gh(`/git/refs/heads/${BRANCH}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
+        await load(); renderGrid(); renderPanel();
+        setStatus('#editor-status', `Saved ${changed.length} role${changed.length > 1 ? 's' : ''}. The site updates in about a minute.`);
+      } catch (err) {
+        setStatus('#editor-status', (err as Error).message, true);
+        save.disabled = dirty.size === 0;
+      }
+    });
+
+    try {
+      const saved = localStorage.getItem(TOKEN_KEY);
+      if (saved) { $<HTMLInputElement>('#token').value = saved; $<HTMLInputElement>('#remember').checked = true; }
+    } catch {}
+  </script>
+</body>
+</html>

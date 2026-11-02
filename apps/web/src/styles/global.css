@@ -441,3 +441,55 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .facts dd { margin: 0; font-weight: 600; }
 
 .site-footer { padding-top: 2.5rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.875rem; }
+
+/* Skills by role editor (/admin/skills-by-role/) */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sbr-wrap { max-width: 82rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.sbr-bar { border-bottom: 1px solid var(--line); background: var(--surface); }
+.sbr-bar-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem 1.5rem; padding-block: 1rem; }
+.sbr h1 { font-size: 1.375rem; }
+.sbr-sub { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.875rem; }
+.sbr-links { display: flex; gap: 1rem; font-size: 0.9rem; }
+.sbr main { padding-block: 1.5rem 3rem; }
+.sbr-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.125rem; }
+#signin { max-width: 36rem; }
+#signin h2, .sbr-panel h2 { font-size: 1.125rem; margin-bottom: 0.375rem; }
+.sbr-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.sbr-row input, .sbr-panel textarea {
+  flex: 1 1 14rem; min-width: 0; font: inherit; font-size: 0.9rem; padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line); border-radius: 0.5625rem; background: var(--bg); color: var(--text);
+}
+.sbr .btn { cursor: pointer; font: inherit; font-size: 0.9rem; }
+.sbr .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sbr-check { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; color: var(--muted); margin-top: 0.625rem; }
+.sbr-status { font-size: 0.875rem; color: var(--muted); margin: 0.5rem 0 0; }
+.sbr-status.error { color: var(--warn); }
+.sbr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+.sbr-toolbar #add-form { flex: 1 1 24rem; }
+.sbr-toolbar .sbr-check, .sbr-toolbar .sbr-status { margin: 0; }
+.sbr-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 1rem; align-items: start; margin-top: 1rem; }
+@media (max-width: 900px) { .sbr-layout { grid-template-columns: 1fr; } }
+.sbr-grid-wrap { overflow: auto; max-height: 75vh; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 0 0.5rem 0.5rem 0; }
+.sbr-grid thead th {
+  position: sticky; top: 0; z-index: 2; background: var(--surface); padding-top: 0.5rem;
+  box-shadow: 0 -0.25rem 0 var(--surface), 0 0.1875rem 0 var(--surface), 0.1875rem 0 0 var(--surface), -0.1875rem 0 0 var(--surface);
+}
+.sbr-grid thead th:first-child { z-index: 3; }
+.sbr-grid thead th.changed { color: var(--accent); }
+.sbr-grid thead th.changed::after { content: " •"; }
+.sbr-grid tbody th small { display: block; font-size: 0.6875rem; color: var(--muted); }
+.sbr-grid tbody th small.sbr-warn { color: var(--warn); }
+.sbr-grid .ev-cell { cursor: pointer; }
+.sbr-grid .ev-cell:not(.on):hover { background: color-mix(in srgb, var(--accent) 25%, var(--accent-soft)); }
+.sbr-grid .ev-cell.no-evidence { background: repeating-linear-gradient(135deg, var(--accent) 0 6px, color-mix(in srgb, var(--accent) 55%, var(--accent-soft)) 6px 12px); }
+.sbr-panel { position: sticky; top: 1rem; display: grid; gap: 0.625rem; }
+.sbr-panel label { font-size: 0.8125rem; font-weight: 600; }
+.sbr-panel textarea { resize: vertical; }
+.sbr-muted { color: var(--muted); font-size: 0.875rem; margin: 0; }
+.sbr-suggest { display: grid; gap: 0.375rem; }
+.sbr-suggest h3 { font: 600 0.75rem var(--font-body); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.sbr-suggestion {
+  text-align: left; font: inherit; font-size: 0.8125rem; line-height: 1.4; color: var(--text); cursor: pointer;
+  background: var(--accent-soft); border: 1px solid transparent; border-radius: 0.5rem; padding: 0.4375rem 0.625rem;
+}
+.sbr-suggestion:hover { border-color: var(--accent); }
