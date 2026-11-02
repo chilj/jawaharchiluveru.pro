@@ -69,6 +69,9 @@ Things to know:
 - **Blog**: write a post under **Blog → New**. Set **Web address** for a clean link
   (/blog/<web-address>/), and **Status: published** to put it live. The Blog link appears in the
   menu once a post is published; posts are in the sitemap and carry article metadata for search.
+- **Site icon** (Profile & settings → About): **Site icon (large)** is used for phone home screens
+  and other big icons; **Site icon (small)** for browser tabs and Google results, where icons are
+  16–48 pixels, so keep it simple (SVG is best). Leave both empty for a JC icon in your theme colors.
 - **Résumé** (Profile & settings): upload a new PDF to replace the current one. The live résumé is
   always at **jawaharchiluveru.pro/resume.pdf** (a permanent link for LinkedIn or email
   signatures) and at `/<File name for visitors>`. If the file goes missing, the button hides

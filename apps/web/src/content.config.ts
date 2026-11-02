@@ -32,6 +32,8 @@ const about = defineCollection({
     description: z.string(),
     social_image: z.string().optional(),  // 1200×630 preview for LinkedIn, Slack, X
     social_image_alt: z.string().optional(),
+    site_icon: z.string().optional(),        // detailed square icon, used at 180px and up
+    site_icon_small: z.string().optional(),  // simple version for browser tabs and search results (SVG or PNG)
     stats: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
   }),
 });

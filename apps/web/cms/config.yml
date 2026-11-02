@@ -33,6 +33,8 @@ collections:
           - { name: description, label: Search description, widget: text, hint: 'Shown in search results and link previews. Keep to about 150 characters.' }
           - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Use 1200×630 pixels (PNG or JPG).' }
           - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe the image for screen readers.' }
+          - { name: site_icon, label: Site icon (large), widget: image, required: false, hint: 'Square image, at least 512×512. Used for phone home screens and other large icons. Leave empty to use the JC icon in your theme colors.' }
+          - { name: site_icon_small, label: Site icon (small), widget: image, required: false, hint: 'A simple version for browser tabs and Google results (shown at 16–48 pixels). SVG is best; fine detail disappears at these sizes. Leave empty to use the large icon.' }
           - name: stats
             label: Headline numbers
             widget: list

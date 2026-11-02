@@ -1,11 +1,22 @@
 import { getEntry } from 'astro:content';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import sharp from 'sharp';
 import { buildTheme } from './theme';
 
-// Site icon: the JC monogram as a roadmap (a start milestone on the J, a delivered milestone where
-// the C ends), in the current theme's colors (light mode).
-// Letters are drawn as strokes, not text, so every renderer draws them the same way.
-export async function iconSvg({ rounded = true } = {}) {
+// Site icons. If the editor has a site icon, large sizes (180px and up) come from it and small
+// sizes (tabs, Google results) from the small version. Otherwise: the JC monogram with roadmap
+// milestones, in the current theme's colors.
+// Builds run from apps/web, like the content loaders in content.config.ts.
+const PUBLIC = resolve(process.cwd(), '../../content/public') + '/';
+const read = (path: string) => readFile(PUBLIC + path.replace(/^\//, ''));
+
+async function settings() {
+  const about = (await getEntry('about', 'about'))!.data;
+  return { large: about.site_icon?.trim() || undefined, small: about.site_icon_small?.trim() || about.site_icon?.trim() || undefined };
+}
+
+async function monogram({ rounded = true } = {}) {
   const t = buildTheme((await getEntry('theme', 'theme'))?.data).light;
   const [a, b, fg] = [t['--accent'], t['--teal'], t['--on-accent']];
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
@@ -19,9 +30,21 @@ export async function iconSvg({ rounded = true } = {}) {
 </svg>`;
 }
 
-export async function iconPng(size: number, opts?: { rounded?: boolean }) {
-  return sharp(Buffer.from(await iconSvg(opts)), { density: Math.max(72, (size / 64) * 72) })
-    .resize(size, size).png().toBuffer();
+/** favicon.svg: the small icon if it's an SVG, else the generated monogram (or a wrapper around the PNG). */
+export async function iconSvg() {
+  const { small } = await settings();
+  if (!small) return monogram();
+  if (small.endsWith('.svg')) return (await read(small)).toString();
+  const png = await sharp(await read(small)).resize(64, 64).png().toBuffer();
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><image width="64" height="64" href="data:image/png;base64,${png.toString('base64')}"/></svg>`;
+}
+
+export async function iconPng(size: number, opts: { rounded?: boolean } = {}) {
+  const { large, small } = await settings();
+  const file = size >= 120 ? large ?? small : small;
+  const src = file ? await read(file) : Buffer.from(await monogram(opts));
+  const density = file && !file.endsWith('.svg') ? undefined : Math.max(72, (size / 64) * 72);
+  return sharp(src, density ? { density } : {}).resize(size, size, { fit: 'cover' }).png().toBuffer();
 }
 
 /** A .ico file holding PNG images (supported by every current browser and by Google). */
