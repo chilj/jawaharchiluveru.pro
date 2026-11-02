@@ -43,4 +43,8 @@ skills:
     evidence: AI-powered workflows cut documentation time by 40%
   - name: AI Agents
     evidence: Prototyped an AI agent that runs performance tests and performs root-cause analysis
+  - name: Data Analysis
+    evidence: ''
+  - name: Runbook Development
+    evidence: ''
 ---
