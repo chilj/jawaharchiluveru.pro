@@ -1,12 +1,18 @@
 ---
-title: "Product Owner & Senior Business Analyst"
+title: Product Owner & Senior Business Analyst
 org: PayPal
-via: Webzion
+via: KPMG & Webzion, LLC
 product: Braintree Finance Transformation
 start: 2018-07
 end: 2018-12
 location: San Jose, CA
+logo: ''
+mark: ''
+earlier: false
 status: published
 highlights:
-  - "Documented reconciliation processes across PayPal, Braintree, banks and processors, and analyzed 20M+ daily transactions in Redshift."
+  - Worked on Braintree Finance Transformation (BFiT), delivering financial reconciliation tools and dashboards for global payment operations.
+  - Documented reconciliation processes across PayPal, Braintree, banks and processors, and analyzed 20M+ daily transactions in Redshift.
+  - Analyzed 20M+ daily transactions using Redshift to identify reconciliation logic and data discrepancies. Created epics, user stories, and system requirements to guide Agile delivery.
+to_verify: []
 ---
