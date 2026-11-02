@@ -11,6 +11,7 @@ mark: ''
 earlier: false
 status: published
 highlights:
+  - 'Unified Digital Platform: Spearheaded the modernization of a Platform-as-a-Product offering foundational infrastructure, security, observability, developer experience, and quality engineering capabilities to support existing and new brands.'
   - Led modernization of a Platform-as-a-Product offering covering foundational platform, security, infrastructure, observability, developer experience, and quality engineering for existing and new brands; managed 26 features across two teams against pre-defined KPI targets.
   - Evaluated service virtualization tools (WireMock, Hoverfly, Mountebank) and recommended a WireMock MVP for self-service performance testing.
   - Led the Java Platform Module System migration strategy for Java 21 LTS, phased across 20 modules. Turned the architecture vision into a prioritized backlog of 50+ user stories with acceptance criteria tied to personas, problem statements, and KPIs.
