@@ -71,4 +71,6 @@ skills:
     evidence: ''
   - name: E-Commerce
     evidence: ''
+  - name: Vendor Management
+    evidence: ''
 ---
