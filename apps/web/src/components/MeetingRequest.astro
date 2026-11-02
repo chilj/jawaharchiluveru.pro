@@ -1,0 +1,201 @@
+---
+// "Request a meeting" form for Let's Talk. Offers open slots from the availability in
+// content/connect.md and, on submit, opens the visitor's email app with the request filled in.
+// No server: nothing is sent until the visitor sends the email themselves.
+interface Props {
+  meeting: {
+    heading: string; intro?: string; timezone: string; days: string[]; start: string; end: string;
+    length: number; min_notice_hours: number; weeks_ahead: number; blocked_dates: Date[];
+  };
+  email: string;
+  owner: string;
+}
+const { meeting, email, owner } = Astro.props;
+const config = {
+  ...meeting,
+  blocked: meeting.blocked_dates.map((d) => d.toISOString().slice(0, 10)),
+  email,
+  owner: owner.split(' ')[0],
+  link: new URL(`${import.meta.env.BASE_URL}#connect`, Astro.site).href,
+};
+---
+<div class="meeting" data-meeting={JSON.stringify(config)}>
+  <h3 class="subhead">{meeting.heading}</h3>
+  {meeting.intro && <p class="section-intro">{meeting.intro}</p>}
+  <form class="meeting-form" novalidate>
+    <div class="field">
+      <label for="mr-name">Your name</label>
+      <input id="mr-name" name="name" autocomplete="name" required>
+    </div>
+    <div class="field">
+      <label for="mr-email">Your email</label>
+      <input id="mr-email" name="email" type="email" autocomplete="email" required>
+    </div>
+    <div class="field field-wide">
+      <label for="mr-company">Company or role <span class="optional">(optional)</span></label>
+      <input id="mr-company" name="company" autocomplete="organization">
+    </div>
+    <div class="field">
+      <label for="mr-date1">Preferred date</label>
+      <select id="mr-date1" name="date1" required></select>
+    </div>
+    <div class="field">
+      <label for="mr-time1">Preferred time</label>
+      <select id="mr-time1" name="time1" required></select>
+    </div>
+    <div class="field">
+      <label for="mr-date2">Second choice <span class="optional">(optional)</span></label>
+      <select id="mr-date2" name="date2"></select>
+    </div>
+    <div class="field">
+      <label for="mr-time2">Second-choice time</label>
+      <select id="mr-time2" name="time2"></select>
+    </div>
+    <div class="field field-wide">
+      <label for="mr-topic">What would you like to discuss? <span class="optional">(optional)</span></label>
+      <textarea id="mr-topic" name="topic" rows="3"></textarea>
+    </div>
+    <p class="meeting-note field-wide" data-tz-note></p>
+    <p class="meeting-error field-wide" role="alert" hidden></p>
+    <div class="field-wide meeting-actions">
+      <button type="submit" class="btn primary">Create email</button>
+    </div>
+  </form>
+  <div class="meeting-done" hidden aria-live="polite">
+    <p><strong>Your email app should now be open with the request.</strong> Check it and press Send.</p>
+    <p>If nothing opened, <a data-mailto href="#">open it again</a>, or copy the message below and send it to <span class="selectable" data-email></span>.</p>
+    <textarea class="meeting-copy" readonly rows="9" aria-label="Meeting request text"></textarea>
+    <div class="meeting-actions">
+      <button type="button" class="btn" data-copy>Copy message</button>
+      <button type="button" class="btn" data-again>Change the request</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  type Cfg = {
+    heading: string; timezone: string; days: string[]; start: string; end: string; length: number;
+    min_notice_hours: number; weeks_ahead: number; blocked: string[]; email: string; owner: string; link: string;
+  };
+  const root = document.querySelector<HTMLElement>('.meeting[data-meeting]');
+  if (root) {
+    const cfg: Cfg = JSON.parse(root.dataset.meeting!);
+    const DAY = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const sameTz = (() => {
+      // Same zone, or zones that agree on the current offset (e.g. America/Chicago and US/Central).
+      const off = (tz: string, t: number) => tzOffset(t, tz);
+      const now = Date.now();
+      return visitorTz === cfg.timezone || (off(visitorTz, now) === off(cfg.timezone, now) && off(visitorTz, now + 182 * 864e5) === off(cfg.timezone, now + 182 * 864e5));
+    })();
+
+    // Offset (ms) of `tz` from UTC at instant `t`.
+    function tzOffset(t: number, tz: string) {
+      const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+      }).formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+      return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second) - t;
+    }
+    // UTC instant for a wall-clock time in `tz` (two passes handle daylight-saving changes).
+    function zoned(y: number, m: number, d: number, h: number, mi: number, tz: string) {
+      let t = Date.UTC(y, m - 1, d, h, mi);
+      for (let i = 0; i < 2; i++) t = Date.UTC(y, m - 1, d, h, mi) - tzOffset(t, tz);
+      return t;
+    }
+    const fmt = (t: number, tz: string, opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-US', { timeZone: tz, ...opts }).format(new Date(t));
+    const ownerTime = (t: number) => fmt(t, cfg.timezone, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    const localTime = (t: number) => fmt(t, visitorTz, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    const dateLabel = (t: number) => fmt(t, cfg.timezone, { weekday: 'short', month: 'short', day: 'numeric' });
+    const fullDate = (t: number, tz: string) => fmt(t, tz, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    // Build the open days and slots from the configured availability.
+    const [sh, sm] = cfg.start.split(':').map(Number);
+    const [eh, em] = cfg.end.split(':').map(Number);
+    const earliest = Date.now() + cfg.min_notice_hours * 36e5;
+    const todayParts = fmt(Date.now(), cfg.timezone, { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/'); // MM/DD/YYYY
+    const days: { key: string; label: string; slots: number[] }[] = [];
+    for (let i = 0; i < cfg.weeks_ahead * 7 + 1; i++) {
+      const base = new Date(Date.UTC(+todayParts[2], +todayParts[0] - 1, +todayParts[1] + i));
+      const [y, m, d] = [base.getUTCFullYear(), base.getUTCMonth() + 1, base.getUTCDate()];
+      const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      if (!cfg.days.includes(DAY[base.getUTCDay()]) || cfg.blocked.includes(key)) continue;
+      const slots: number[] = [];
+      for (let mins = sh * 60 + sm; mins + cfg.length <= eh * 60 + em; mins += cfg.length) {
+        const t = zoned(y, m, d, Math.floor(mins / 60), mins % 60, cfg.timezone);
+        if (t >= earliest) slots.push(t);
+      }
+      if (slots.length) days.push({ key, label: dateLabel(slots[0]), slots });
+    }
+
+    const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const form = $<HTMLFormElement>('.meeting-form');
+    const pairs = [['#mr-date1', '#mr-time1', 'Choose a date'], ['#mr-date2', '#mr-time2', 'No second choice']] as const;
+    const slotLabel = (t: number) => (sameTz ? ownerTime(t) : `${ownerTime(t)} (${localTime(t)} your time)`);
+    function fillTimes(dateSel: HTMLSelectElement, timeSel: HTMLSelectElement) {
+      const day = days.find((x) => x.key === dateSel.value);
+      timeSel.replaceChildren(...(day ? day.slots.map((t) => new Option(slotLabel(t), String(t))) : [new Option('—', '')]));
+      timeSel.disabled = !day;
+    }
+    pairs.forEach(([dSel, tSel, empty]) => {
+      const dateSel = $<HTMLSelectElement>(dSel), timeSel = $<HTMLSelectElement>(tSel);
+      dateSel.replaceChildren(new Option(empty, ''), ...days.map((x) => new Option(x.label, x.key)));
+      dateSel.addEventListener('change', () => fillTimes(dateSel, timeSel));
+      fillTimes(dateSel, timeSel);
+    });
+    $('[data-tz-note]').textContent = days.length
+      ? `Times are ${cfg.owner}'s (${fmt(Date.now(), cfg.timezone, { timeZoneName: 'long' }).split(', ').pop()})${sameTz ? '' : ', with yours in brackets'}. Each call is ${cfg.length} minutes.`
+      : 'No open times right now. Please email instead.';
+
+    form.addEventListener('input', () => { $('.meeting-error').hidden = true; });
+    const describe = (t: number) => `${fullDate(t, cfg.timezone)}, ${ownerTime(t)}` + (sameTz ? '' : ` (${fullDate(t, visitorTz) === fullDate(t, cfg.timezone) ? '' : fullDate(t, visitorTz) + ', '}${localTime(t)} for me)`);
+    let mailto = '', body = '';
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = new FormData(form);
+      const get = (k: string) => String(f.get(k) ?? '').trim();
+      const error = $('.meeting-error');
+      const problems: string[] = [];
+      if (!get('name')) problems.push('your name');
+      if (!$<HTMLInputElement>('#mr-email').checkValidity() || !get('email')) problems.push('a valid email address');
+      if (!get('time1')) problems.push('a preferred date and time');
+      if (problems.length) {
+        error.textContent = `Please add ${problems.join(', ')}.`;
+        error.hidden = false;
+        return;
+      }
+      error.hidden = true;
+      const t1 = Number(get('time1')), t2 = get('time2') ? Number(get('time2')) : 0;
+      const subject = `Meeting request from ${get('name')}: ${dateLabel(t1)}, ${ownerTime(t1)}`;
+      body = [
+        `Hi ${cfg.owner},`,
+        '',
+        `I'd like to set up a ${cfg.length}-minute call.`,
+        '',
+        `Preferred: ${describe(t1)}`,
+        ...(t2 && t2 !== t1 ? [`Second choice: ${describe(t2)}`] : []),
+        '',
+        `Name: ${get('name')}`,
+        `Email: ${get('email')}`,
+        ...(get('company') ? [`Company or role: ${get('company')}`] : []),
+        ...(get('topic') ? ['', 'What I would like to discuss:', get('topic')] : []),
+        '',
+        `Sent from the Let's Talk form: ${cfg.link}`,
+      ].join('\n');
+      mailto = `mailto:${cfg.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      $<HTMLAnchorElement>('[data-mailto]').href = mailto;
+      $('[data-email]').textContent = cfg.email;
+      $<HTMLTextAreaElement>('.meeting-copy').value = `To: ${cfg.email}\nSubject: ${subject}\n\n${body}`;
+      form.hidden = true;
+      $('.meeting-done').hidden = false;
+      (window as any).jcTrack?.('contact_click', 'meeting-request');
+      window.location.href = mailto;
+    });
+    $('[data-copy]').addEventListener('click', async (e) => {
+      const area = $<HTMLTextAreaElement>('.meeting-copy');
+      const btn = e.currentTarget as HTMLButtonElement;
+      try { await navigator.clipboard.writeText(area.value); btn.textContent = 'Copied'; }
+      catch { area.select(); btn.textContent = 'Press Ctrl+C or Cmd+C to copy'; }
+    });
+    $('[data-again]').addEventListener('click', () => { $('.meeting-done').hidden = true; form.hidden = false; });
+  }
+</script>

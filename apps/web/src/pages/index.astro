@@ -6,6 +6,7 @@ import Section from '../components/Section.astro';
 import Icon from '../components/Icon.astro';
 import LogoTile from '../components/LogoTile.astro';
 import LevelMeter from '../components/LevelMeter.astro';
+import MeetingRequest from '../components/MeetingRequest.astro';
 import { brandFor } from '../lib/icons';
 import { getResume } from '../lib/resume';
 import {
@@ -364,6 +365,7 @@ const section = (id: string) => ({
         {connect.email && <a class="btn" href={`mailto:${connect.email}`}><Icon name="mail" />{connect.email}</a>}
         {resume && <a class="btn" href={withBase(resume.href)} title={resumeTitle} target="_blank" rel="noopener" data-track="resume_download" data-track-label="lets-talk"><Icon name="file-text" />{resume.label}</a>}
       </div>
+      {connect.meeting?.enabled && connect.email && <MeetingRequest meeting={connect.meeting} email={connect.email} owner={about.name} />}
     </Section>
   )}
 </Base>

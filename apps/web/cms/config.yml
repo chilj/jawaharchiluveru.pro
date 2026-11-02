@@ -71,6 +71,23 @@ collections:
             fields:
               - { name: label, label: Label, widget: string }
               - { name: url, label: URL, widget: string }
+          - name: meeting
+            label: Meeting request form
+            widget: object
+            collapsed: true
+            hint: 'Visitors pick an open slot; submitting opens their email app with the request addressed to you. No booking happens until you reply.'
+            fields:
+              - { name: enabled, label: Show the form, widget: boolean, default: true }
+              - { name: heading, label: Heading, widget: string, default: Request a meeting }
+              - { name: intro, label: Intro, widget: text, required: false }
+              - { name: timezone, label: Your time zone, widget: select, default: America/Chicago, options: [{ label: 'US Central (Dallas–Fort Worth)', value: America/Chicago }, { label: US Eastern, value: America/New_York }, { label: US Mountain, value: America/Denver }, { label: US Pacific, value: America/Los_Angeles }, { label: UK, value: Europe/London }, { label: India, value: Asia/Kolkata }] }
+              - { name: days, label: Available days, widget: select, multiple: true, default: [mon, tue, wed, thu, fri], options: [{ label: Monday, value: mon }, { label: Tuesday, value: tue }, { label: Wednesday, value: wed }, { label: Thursday, value: thu }, { label: Friday, value: fri }, { label: Saturday, value: sat }, { label: Sunday, value: sun }] }
+              - { name: start, label: Day starts at, widget: string, default: '09:00', pattern: ['^([01]\d|2[0-3]):[0-5]\d$', '24-hour time, e.g. 09:00'] }
+              - { name: end, label: Day ends at, widget: string, default: '17:00', pattern: ['^([01]\d|2[0-3]):[0-5]\d$', '24-hour time, e.g. 17:00'] }
+              - { name: length, label: Meeting length (minutes), widget: select, default: 30, options: [{ label: '15', value: 15 }, { label: '30', value: 30 }, { label: '45', value: 45 }, { label: '60', value: 60 }] }
+              - { name: min_notice_hours, label: Minimum notice (hours), widget: number, value_type: int, default: 24, min: 0 }
+              - { name: weeks_ahead, label: Weeks ahead to offer, widget: number, value_type: int, default: 3, min: 1, max: 12 }
+              - { name: blocked_dates, label: Unavailable dates, widget: list, required: false, field: { name: date, label: Date, widget: datetime, type: date }, hint: 'Holidays, travel or busy days.' }
 
       - name: theme
         label: Theme & colours

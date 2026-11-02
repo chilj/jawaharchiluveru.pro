@@ -100,6 +100,12 @@ A section with nothing published shows a "coming soon" note on the live site.
 To add an entry, use **New** in the content editor, or copy a file from `content/_templates/`
 into the section's folder. Flip `status` to `published` when it's ready.
 
+**Meeting requests:** the form in Let's Talk offers open slots from the availability under
+Profile & settings → Let's Talk → Meeting request form (time zone, days, hours, length, notice,
+weeks ahead, unavailable dates). Submitting opens the visitor's email app with the request,
+both proposed times (in your time zone and theirs) and a link back to Let's Talk; nothing is
+booked until you reply.
+
 **Book time:** set `booking.url` in `content/connect.md` to your Calendly, Cal.com or Google
 Calendar appointment-schedule link. Set `embed: true` to show the scheduler inline.
 

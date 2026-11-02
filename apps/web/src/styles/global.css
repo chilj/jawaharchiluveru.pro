@@ -65,6 +65,8 @@
 }
 
 * { box-sizing: border-box; }
+/* The hidden attribute always wins over component display rules (filters, banners, form states). */
+[hidden] { display: none !important; }
 /* Everything is sized in rem, so the whole layout scales with this one fluid value. */
 html { font-size: clamp(15px, 13.5px + 0.3vw, 20px); scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
 body {
@@ -526,3 +528,27 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 .consent p a { margin-left: 0.25rem; }
 .consent-actions { display: flex; gap: 0.5rem; flex: none; }
 .consent .btn { cursor: pointer; font: inherit; font-size: 0.9rem; padding: 0.5rem 1rem; }
+
+/* Let's Talk: meeting request form */
+.meeting { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+.meeting-form { display: grid; gap: 0.875rem 1.25rem; grid-template-columns: 1fr; max-width: 44rem; }
+/* Two columns keep each date beside its time */
+@media (min-width: 640px) { .meeting-form { grid-template-columns: 1fr 1fr; } }
+.field { display: grid; gap: 0.3125rem; min-width: 0; }
+.field-wide { grid-column: 1 / -1; }
+.field label { font-size: 0.875rem; font-weight: 600; }
+.optional { color: var(--muted); font-weight: 400; }
+.field input, .field select, .field textarea, .meeting-copy {
+  font: inherit; font-size: 0.9375rem; color: var(--text); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 0.5625rem; padding: 0.5625rem 0.75rem; width: 100%; min-width: 0;
+}
+.field select:disabled { color: var(--muted); }
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.meeting-note { margin: 0; color: var(--muted); font-size: 0.8125rem; }
+.meeting-error { margin: 0; color: var(--warn); font-weight: 600; font-size: 0.875rem; }
+.meeting-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.meeting .btn { cursor: pointer; font: inherit; }
+.meeting-done { max-width: 48rem; display: grid; gap: 0.75rem; }
+.meeting-done p { margin: 0; }
+.meeting-copy { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8125rem; resize: vertical; }
+.selectable { user-select: all; font-weight: 600; }

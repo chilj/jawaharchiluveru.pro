@@ -190,6 +190,19 @@ const connect = defineCollection({
     }),
     email: z.string().optional(),
     links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+    meeting: z.object({
+      enabled: z.boolean().default(false),
+      heading: z.string().default('Request a meeting'),
+      intro: z.string().optional(),
+      timezone: z.string().default('America/Chicago'),
+      days: z.array(z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])).default(['mon', 'tue', 'wed', 'thu', 'fri']),
+      start: z.string().regex(/^\d{2}:\d{2}$/).default('09:00'),
+      end: z.string().regex(/^\d{2}:\d{2}$/).default('17:00'),
+      length: z.number().int().min(15).max(120).default(30),
+      min_notice_hours: z.number().int().min(0).default(24),
+      weeks_ahead: z.number().int().min(1).max(12).default(3),
+      blocked_dates: z.array(z.coerce.date()).default([]),
+    }).optional(),
   }),
 });
 
