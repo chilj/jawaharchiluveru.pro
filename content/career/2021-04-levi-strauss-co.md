@@ -73,4 +73,6 @@ skills:
     evidence: ''
   - name: Vendor Management
     evidence: ''
+  - name: Data Analysis
+    evidence: ''
 ---
