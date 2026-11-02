@@ -165,6 +165,9 @@ nav a:hover { color: var(--text); text-decoration: none; }
 }
 .hero .cta, .hero .stats { justify-content: center; }
 .nowrap { white-space: nowrap; }
+/* About: the bio fills the section width, justified; no hyphenation once lines are long enough */
+#about .prose { max-width: none; }
+@media (min-width: 720px) { #about .prose p, #about .prose li { hyphens: manual; -webkit-hyphens: manual; } }
 .btn {
   display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.125rem; border-radius: 62.4375rem;
   border: 1px solid var(--line); color: var(--text); background: var(--surface-glass); font-weight: 500;
