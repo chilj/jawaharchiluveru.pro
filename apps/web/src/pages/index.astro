@@ -101,7 +101,7 @@ const section = (id: string) => ({
     <script type="application/ld+json" set:html={JSON.stringify(website)} />
   </Fragment>
   <section class="hero wrap" id="top">
-    <p class="eyebrow">{about.role}{about.location && ` · ${about.location}`}</p>
+    <p class="eyebrow">{about.role}{about.location && <> · <span class="nowrap">{about.location}</span></>}</p>
     <h1>{about.name}</h1>
     <p class="lede">{about.tagline}</p>
     <div class="cta">

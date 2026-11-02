@@ -157,6 +157,14 @@ nav a:hover { color: var(--text); text-decoration: none; }
 .hero h1 { font-size: clamp(2.5rem, 8vw, 4.25rem); letter-spacing: -0.03em; font-weight: 700; }
 .lede { font-size: clamp(1.125rem, 2.4vw, 1.3125rem); color: var(--muted); max-width: 46ch; margin: 1.125rem 0 1.75rem; }
 .cta { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+/* Hero: centred name and buttons; the summary is a centred, justified block about as wide as the name */
+.hero { text-align: center; }
+.hero .lede {
+  max-width: 34em; margin-inline: auto; text-align: justify; text-align-last: center;
+  hyphens: manual; -webkit-hyphens: manual;
+}
+.hero .cta, .hero .stats { justify-content: center; }
+.nowrap { white-space: nowrap; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.125rem; border-radius: 62.4375rem;
   border: 1px solid var(--line); color: var(--text); background: var(--surface-glass); font-weight: 500;
