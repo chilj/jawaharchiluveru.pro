@@ -15,7 +15,7 @@ highlights:
   - Partnered with SMEs to define business rules and create prioritized product backlog items. Managed MVP roadmap, release plans, and sprint backlogs using VSTS, improving delivery efficiency.
   - Prioritized bugs and enhancements, ensuring alignment with product objectives and business priorities.
 to_verify: []
-short: ''
+short: Mr. Cooper
 skills:
   - name: Product Ownership
     evidence: Product Owner for the Debenture Interest Tracking and Management Tool
@@ -25,4 +25,8 @@ skills:
     evidence: Created prioritized product backlog items; prioritized bugs and enhancements
   - name: Release Governance
     evidence: Managed release plans
+  - name: Data Analysis
+    evidence: ''
+  - name: UAT
+    evidence: ''
 ---
