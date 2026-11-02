@@ -1,4 +1,19 @@
 items:
+  - name: AI-Native Ready
+    issuer: AI-Native Training by Scaled Agile, Inc.
+    issue_month: null
+    issue_year: 2026
+    expiry_month: null
+    expiry_year: null
+    credential_id: ''
+    credential_url: https://www.credly.com/badges/b890d032-cba7-4011-842a-1477866d52b2
+    skills:
+      - Artificial Intelligence (AI)
+      - Prompt Engineering
+    media: []
+    badge: /files/blob.png
+    logo: ''
+    mark: ''
   - name: Generative AI Fundamentals
     issuer: Databricks
     issue_month: 3
@@ -11,7 +26,7 @@ items:
       - Generative artificial intelligence (AI)
     media: []
     badge: /files/31d8f0fa-0d99-4908-8ec1-ff00f8273124.png
-    logo: databricks
+    logo: '#FF3621'
     mark: ''
   - name: Certified SAFe® 4 Product Owner/Product Manager
     issuer: Scaled Agile
@@ -83,19 +98,4 @@ items:
     media: []
     badge: ''
     logo: sololearn
-    mark: ''
-  - name: AI-Native Ready
-    issuer: AI-Native Training by Scaled Agile, Inc.
-    issue_month: null
-    issue_year: 2026
-    expiry_month: null
-    expiry_year: null
-    credential_id: ''
-    credential_url: https://www.credly.com/badges/b890d032-cba7-4011-842a-1477866d52b2
-    skills:
-      - Artificial Intelligence (AI)
-      - Prompt Engineering
-    media: []
-    badge: /files/blob.png
-    logo: ''
     mark: ''
