@@ -1,6 +1,6 @@
 enabled: true
-delivery: email_app
-service_key: ''
+delivery: web3forms
+service_key: a92ff3ec-1c35-4471-a610-fabc3a77fa1e
 button_label: Feedback
 bottom_tab: true
 heading: Share feedback
