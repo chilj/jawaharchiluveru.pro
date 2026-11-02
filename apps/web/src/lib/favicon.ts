@@ -2,7 +2,8 @@ import { getEntry } from 'astro:content';
 import sharp from 'sharp';
 import { buildTheme } from './theme';
 
-// Site icon: the "JC" tile from the header, in the current theme's colors (light mode).
+// Site icon: the JC monogram as a roadmap (a start milestone on the J, a delivered milestone where
+// the C ends), in the current theme's colors (light mode).
 // Letters are drawn as strokes, not text, so every renderer draws them the same way.
 export async function iconSvg({ rounded = true } = {}) {
   const t = buildTheme((await getEntry('theme', 'theme'))?.data).light;
@@ -11,9 +12,10 @@ export async function iconSvg({ rounded = true } = {}) {
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
   <rect width="64" height="64" rx="${rounded ? 14 : 0}" fill="url(#g)"/>
   <g fill="none" stroke="${fg}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M25 18v18a7 7 0 0 1-14 0"/>
+    <path d="M25 20v16a7 7 0 0 1-14 0"/>
     <path d="M50 23.5a11 11 0 1 0 0 17"/>
   </g>
+  <g fill="${fg}"><circle cx="25" cy="17" r="5"/><circle cx="50" cy="40.5" r="5"/></g>
 </svg>`;
 }
 
