@@ -160,6 +160,20 @@ npm run build     # static output in apps/web/dist
 
 ## Deploy
 
+**Backup address (Cloudflare Pages).** Some work networks block new or uncommon domains. Every
+deploy can also publish the same site to `https://<project>.pages.dev` (search engines are told not
+to index it; the main domain stays canonical). Send that link to anyone who can't open the main one.
+To switch it on:
+
+1. In Cloudflare: **My Profile → API Tokens → Create Token → Custom token**, permission
+   **Account → Cloudflare Pages → Edit**, then copy the token. Copy your **Account ID** from the
+   right side of any Cloudflare dashboard page (Workers & Pages overview).
+2. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**:
+   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+3. Re-run **Actions → Build & deploy** (or push to `main`). The project is created on the first run
+   as `jawaharchiluveru` (set the `CLOUDFLARE_PAGES_PROJECT` repository variable to change it); the
+   step's log shows the exact address.
+
 `.github/workflows/deploy.yml` builds every pull request and deploys every push to `main` to GitHub Pages.
 The site URL and base path come from the Pages settings, so it works at `https://chilj.github.io/jawaharchiluveru.pro/`
 and, once a custom domain is set, at the domain root with no code change.
