@@ -5,6 +5,8 @@ import Icon from '../components/Icon.astro';
 import Analytics from '../components/Analytics.astro';
 import Feedback from '../components/Feedback.astro';
 import Chat from '../components/Chat.astro';
+import Rum from '../components/Rum.astro';
+import { rumConfig } from '../lib/rum';
 import { buildTheme } from '../lib/theme';
 import { brandMark } from '../lib/favicon';
 // Self-hosted fonts: no render-blocking request to a third-party host.
@@ -25,6 +27,7 @@ const title = Astro.props.title ? `${Astro.props.title} · ${about.name}` : (abo
 const description = Astro.props.description ?? about.description;
 const home = import.meta.env.BASE_URL;
 const brand = await brandMark();
+const rum = await rumConfig();
 const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
 // WCAG 2.1 AA guardrail: report colors that were adjusted, and refuse to build if anything still fails.
 for (const a of theme.adjusted) console.warn(`[theme] ${a.mode} ${a.color} ${a.requested} → ${a.used} to meet WCAG AA contrast`);
@@ -92,10 +95,11 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <main id="main"><slot /></main>
   <footer class="site-footer wrap">
     <p>© {new Date().getFullYear()} {about.name}</p>
-    <p class="footer-links">{feedback?.enabled && <button type="button" class="link-button" data-feedback-open>{feedback.button_label}</button>}<a href={`${home}privacy/`}>Privacy</a><button type="button" class="link-button" data-consent-settings hidden>Cookie settings</button></p>
+    <p class="footer-links">{feedback?.enabled && <button type="button" class="link-button" data-feedback-open>{feedback.button_label}</button>}{rum.statusPage && <a href={`${home}status/`}>Site health</a>}<a href={`${home}privacy/`}>Privacy</a><button type="button" class="link-button" data-consent-settings hidden>Cookie settings</button></p>
   </footer>
   <Feedback />
   <Chat />
+  <Rum />
   <script>
     // Keep the Feedback tab and Chat button above the cookie banner while it's showing.
     const lift = () => {

@@ -9,3 +9,8 @@ consent: europe
 consent_text: This site uses cookies from Microsoft Clarity and Google Analytics to see which content is useful. No ads, and your data isn't sold.
 consent_accept: Accept
 consent_decline: Decline
+# Real-user monitoring (Core Web Vitals) through the observability agent on Cloudflare.
+# Leave rum_endpoint empty to use the agent's address from the latest deploy.
+rum_endpoint: ""
+rum_sample: 100          # % of page views measured
+status_page: true        # public Site health page at /status/

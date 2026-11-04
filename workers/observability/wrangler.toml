@@ -1,0 +1,23 @@
+# Observability agent for jawaharchiluveru.pro: collects real-user Web Vitals from the site,
+# checks the site's addresses every 10 minutes, tracks goals and serves a summary for the
+# site's Site health page. Deployed by .github/workflows/deploy.yml.
+name = "jc-observability"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+workers_dev = true
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+[vars]
+# Pages allowed to send measurements and read the summary.
+ALLOWED_ORIGINS = "https://www.jawaharchiluveru.pro,https://jawaharchiluveru.pro,https://jawaharchiluveru.pages.dev"
+# Addresses the agent checks: name=url, comma separated.
+TARGETS = "main=https://www.jawaharchiluveru.pro/,backup=https://jawaharchiluveru.pages.dev/"
+RETENTION_DAYS = "90"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "jc-observability"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced at deploy time with the real id
+migrations_dir = "migrations"

@@ -1,0 +1,166 @@
+---
+// Site health: real-user performance (RUM), uptime and incidents from the observability agent.
+// The numbers load in the browser from the agent's /summary, so the page is always current.
+import Base from '../layouts/Base.astro';
+import { rumConfig } from '../lib/rum';
+const rum = await rumConfig();
+const home = import.meta.env.BASE_URL;
+---
+<Base title="Site health" description="Live real-user performance, uptime and incidents for this site, measured by a Cloudflare Worker agent.">
+  <Fragment slot="head"><meta name="robots" content="noindex"></Fragment>
+  <div class="wrap detail status-page">
+    <a class="back" href={home}>← Home</a>
+    <h1>Site health</h1>
+    {rum.statusPage ? (
+      <>
+        <p class="lede">How fast this site is for real visitors, measured in their browsers, plus uptime checks every 10 minutes. Collected by an observability agent running on Cloudflare: no cookies, no personal data.</p>
+        <div class="status-bar">
+          <div class="bento-toggle" role="group" aria-label="Time range">
+            <button type="button" aria-pressed="true" data-days="7">7 days</button>
+            <button type="button" aria-pressed="false" data-days="30">30 days</button>
+          </div>
+          <p class="status-meta" data-meta aria-live="polite">Loading…</p>
+        </div>
+        <div data-status data-endpoint={rum.endpoint}>
+          <section aria-labelledby="h-vitals"><h2 id="h-vitals">Core Web Vitals</h2>
+            <p class="status-note">75th percentile of real page views: three in four visits were at least this fast. Goals are Google's "good" thresholds.</p>
+            <div class="vitals" data-vitals></div>
+          </section>
+          <section aria-labelledby="h-uptime"><h2 id="h-uptime">Uptime</h2><div class="uptime" data-uptime></div></section>
+          <section aria-labelledby="h-trend"><h2 id="h-trend">Loading speed by day</h2>
+            <p class="status-note">Largest Contentful Paint, 75th percentile per day; the dashed line is the 2.5 s goal.</p>
+            <div data-trend></div>
+          </section>
+          <div class="status-cols">
+            <section aria-labelledby="h-ab"><h2 id="h-ab">Home page A/B test</h2><div data-variants></div></section>
+            <section aria-labelledby="h-dev"><h2 id="h-dev">By device</h2><div data-devices></div></section>
+          </div>
+          <section aria-labelledby="h-pages"><h2 id="h-pages">Most visited pages</h2><div data-pages></div></section>
+          <section aria-labelledby="h-inc"><h2 id="h-inc">Incidents</h2><div data-incidents></div></section>
+        </div>
+      </>
+    ) : (
+      <p class="lede">Site health isn't available yet.</p>
+    )}
+  </div>
+</Base>
+
+<script>
+  type Stat = { n: number; p75: number; rating: string; good: number; needs: number; poor: number };
+  type Summary = {
+    generated: number; days: number; views: number; thresholds: Record<string, [number, number]>;
+    metrics: Record<string, Stat>; devices: Record<string, Record<string, Stat>>; variants: Record<string, Record<string, Stat>>;
+    daily: { day: string; LCP: number | null; views: number }[]; pages: { page: string; views: number; LCP: number | null }[];
+    uptime: { target: string; checks: number; uptime: number; avgMs: number; last: { ts: number; ok: boolean; status: number | null; ms: number } }[];
+    incidents: { kind: string; started: number; resolved: number | null; detail: string }[];
+  };
+  const root = document.querySelector<HTMLElement>('[data-status]');
+  if (root) {
+    const endpoint = root.dataset.endpoint!;
+    const meta = document.querySelector<HTMLElement>('[data-meta]')!;
+    const NAMES: Record<string, [string, string]> = {
+      LCP: ['Largest Contentful Paint', 'Loading'], INP: ['Interaction to Next Paint', 'Responsiveness'],
+      CLS: ['Cumulative Layout Shift', 'Visual stability'], FCP: ['First Contentful Paint', 'First content'], TTFB: ['Time to First Byte', 'Server response'],
+    };
+    const VARIANTS: Record<string, string> = { journey: 'B · Career journey', bento: 'D · Bento dashboard', classic: 'Current hero' };
+    const TARGETS: Record<string, string> = { main: 'Main site', backup: 'Backup copy (pages.dev)' };
+    const RATING: Record<string, string> = { good: 'Good', 'needs-improvement': 'Needs improvement', poor: 'Poor' };
+    const fmt = (m: string, v: number | null | undefined) => v == null ? '–' : m === 'CLS' ? v.toFixed(3) : v < 1000 ? `${Math.round(v)} ms` : `${(v / 1000).toFixed(2)} s`;
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+    const when = (ts: number) => new Date(ts).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const h = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
+      const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e;
+    };
+    const slot = (name: string) => root.querySelector<HTMLElement>(`[data-${name}]`)!;
+    const empty = (el: HTMLElement, text: string) => el.replaceChildren(h('p', 'status-note', text));
+
+    function table(head: string[], rows: (string | HTMLElement)[][], label: string) {
+      const wrap = h('div', 'status-table');
+      // Scrolls sideways on phones, so it must be reachable by keyboard.
+      wrap.tabIndex = 0; wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', label);
+      const t = h('table'); const tr = h('tr');
+      head.forEach((x) => tr.append(h('th', undefined, x)));
+      const tb = h('tbody');
+      rows.forEach((r) => { const row = h('tr'); r.forEach((c) => { const td = h('td'); td.append(c); row.append(td); }); tb.append(row); });
+      t.append(h('thead'), tb); t.tHead!.append(tr); wrap.append(t); return wrap;
+    }
+    const badge = (rating?: string) => h('span', `rating rating-${rating ?? 'none'}`, rating ? RATING[rating] : 'No data');
+    const cell = (m: string, s?: Stat) => { const span = h('span', `rv rating-${s?.rating ?? 'none'}`, fmt(m, s?.p75)); return span; };
+
+    function render(d: Summary) {
+      meta.textContent = `${d.views.toLocaleString('en-US')} page views measured in the last ${d.days} days · updated ${when(d.generated)}`;
+      // Vitals
+      const vitals = slot('vitals');
+      vitals.replaceChildren(...['LCP', 'INP', 'CLS', 'FCP', 'TTFB'].map((m) => {
+        const s = d.metrics[m]; const card = h('div', 'vital');
+        card.append(h('p', 'vital-kind', NAMES[m][1]), h('h3', undefined, `${NAMES[m][0]} (${m})`), h('p', 'vital-value', fmt(m, s?.p75)), badge(s?.rating));
+        if (s) {
+          const bar = h('div', 'dist'); bar.setAttribute('role', 'img');
+          bar.setAttribute('aria-label', `${pct(s.good)} good, ${pct(s.needs)} needs improvement, ${pct(s.poor)} poor`);
+          [['good', s.good], ['needs-improvement', s.needs], ['poor', s.poor]].forEach(([k, v]) => { const seg = h('span', `seg rating-${k}`); seg.style.width = pct(v as number); bar.append(seg); });
+          card.append(bar, h('p', 'status-note', `Goal ≤ ${fmt(m, d.thresholds[m][0])} · ${s.n.toLocaleString('en-US')} ${s.n === 1 ? 'sample' : 'samples'}`));
+        }
+        return card;
+      }));
+      // Uptime
+      const up = slot('uptime');
+      if (!d.uptime.length) empty(up, 'The first checks run within 10 minutes of the agent starting.');
+      else up.replaceChildren(...d.uptime.map((u) => {
+        const c = h('div', 'up'); c.append(h('h3', undefined, TARGETS[u.target] ?? u.target), h('p', 'vital-value', pct(u.uptime)),
+          h('p', 'status-note', `${u.checks} ${u.checks === 1 ? 'check' : 'checks'} · average ${u.avgMs} ms · last ${u.last.ok ? 'OK' : 'failed'} ${when(u.last.ts)}`));
+        return c;
+      }));
+      // Trend
+      const trend = slot('trend');
+      const pts = d.daily.filter((x) => x.LCP != null);
+      if (pts.length < 2) empty(trend, 'A trend appears after two days of data.');
+      else {
+        const W = 640, H = 160, P = 28, goal = d.thresholds.LCP[0];
+        const max = Math.max(goal * 1.3, ...pts.map((p) => p.LCP!));
+        const x = (i: number) => P + (i * (W - 2 * P)) / (pts.length - 1), y = (v: number) => H - P - (v / max) * (H - 2 * P);
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'trend');
+        svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `Daily LCP p75 from ${fmt('LCP', pts[0].LCP)} to ${fmt('LCP', pts.at(-1)!.LCP)}`);
+        const line = (attrs: Record<string, string>, tag = 'line') => { const e = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); svg.append(e); return e; };
+        line({ x1: `${P}`, x2: `${W - P}`, y1: `${y(goal)}`, y2: `${y(goal)}`, class: 'trend-goal' });
+        line({ points: pts.map((p, i) => `${x(i)},${y(p.LCP!)}`).join(' '), class: 'trend-line' }, 'polyline');
+        pts.forEach((p, i) => line({ cx: `${x(i)}`, cy: `${y(p.LCP!)}`, r: '3.5', class: 'trend-dot' }, 'circle'));
+        const lab = (t: string, xx: number, anchor: string) => { const e = line({ x: `${xx}`, y: `${H - 6}`, 'text-anchor': anchor, class: 'trend-label' }, 'text'); e.textContent = t; };
+        lab(pts[0].day.slice(5), P, 'start'); lab(pts.at(-1)!.day.slice(5), W - P, 'end');
+        trend.replaceChildren(svg);
+      }
+      // A/B and devices
+      const vRows = Object.entries(d.variants).map(([k, s]) => [VARIANTS[k] ?? k, cell('LCP', s.LCP), cell('INP', s.INP), cell('CLS', s.CLS), `${s.LCP?.n ?? 0}`]);
+      vRows.length ? slot('variants').replaceChildren(table(['Version', 'LCP', 'INP', 'CLS', 'Views'], vRows, 'A/B test results table')) : empty(slot('variants'), 'No home page visits in this period.');
+      const dRows = Object.entries(d.devices).map(([k, s]) => [k[0].toUpperCase() + k.slice(1), cell('LCP', s.LCP), cell('INP', s.INP), cell('CLS', s.CLS)]);
+      dRows.length ? slot('devices').replaceChildren(table(['Device', 'LCP', 'INP', 'CLS'], dRows, 'Device results table')) : empty(slot('devices'), 'No data yet.');
+      // Pages
+      d.pages.length ? slot('pages').replaceChildren(table(['Page', 'Views', 'LCP p75'], d.pages.map((p) => [p.page, `${p.views}`, fmt('LCP', p.LCP)]), 'Top pages table')) : empty(slot('pages'), 'No data yet.');
+      // Incidents
+      const inc = slot('incidents');
+      if (!d.incidents.length) empty(inc, `No incidents in the last ${d.days} days.`);
+      else inc.replaceChildren(...d.incidents.map((i) => {
+        const li = h('div', `incident ${i.resolved ? 'is-resolved' : 'is-open'}`);
+        li.append(h('span', 'rating ' + (i.resolved ? 'rating-good' : 'rating-poor'), i.resolved ? 'Resolved' : 'Open'),
+          h('span', undefined, i.detail), h('span', 'status-note', i.resolved ? `${when(i.started)} – ${when(i.resolved)}` : `since ${when(i.started)}`));
+        return li;
+      }));
+    }
+
+    async function load(days: number) {
+      meta.textContent = 'Loading…';
+      try {
+        const res = await fetch(`${endpoint}/summary?days=${days}`);
+        if (!res.ok) throw new Error(String(res.status));
+        render(await res.json());
+      } catch {
+        meta.textContent = "Couldn't reach the observability agent. Try again in a minute.";
+      }
+    }
+    document.querySelectorAll<HTMLButtonElement>('[data-days]').forEach((b, _, all) => b.addEventListener('click', () => {
+      all.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      load(Number(b.dataset.days));
+    }));
+    load(7);
+  }
+</script>

@@ -231,6 +231,10 @@ const analytics = defineCollection({
     consent_text: z.string().default('This site uses analytics cookies to see which content is useful.'),
     consent_accept: z.string().default('Accept'),
     consent_decline: z.string().default('Decline'),
+    // Real-user monitoring through the observability agent (workers/observability).
+    rum_endpoint: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.string().url().optional()),
+    rum_sample: z.number().min(0).max(100).default(100),
+    status_page: z.boolean().default(true),
   }),
 });
 

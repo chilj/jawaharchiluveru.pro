@@ -36,10 +36,30 @@ jobs:
       - id: pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
+      # Observability agent (workers/observability): a Cloudflare Worker + D1 database that collects
+      # real-user Web Vitals, checks uptime every 10 minutes and serves the Site health page's data.
+      # Its address is handed to the site build. A failure here never stops the site deploy.
+      - name: Deploy observability agent
+        id: agent
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        continue-on-error: true
+        working-directory: workers/observability
+        run: |
+          W="npx --yes wrangler@4.45.0"
+          $W d1 create jc-observability >/dev/null 2>&1 || true
+          ID=$($W d1 list --json | jq -r '.[] | select(.name == "jc-observability") | (.uuid // .id)' | head -1)
+          if [ -z "$ID" ]; then echo "::warning::Couldn't create or find the jc-observability D1 database (token needs D1 Edit)"; exit 1; fi
+          sed -i "s/00000000-0000-0000-0000-000000000000/$ID/" wrangler.toml
+          $W d1 migrations apply jc-observability --remote
+          $W deploy | tee deploy.log
+          URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "Agent address: $URL"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
       - run: npm run build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          RUM_ENDPOINT: ${{ steps.agent.outputs.url }}
       - if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:

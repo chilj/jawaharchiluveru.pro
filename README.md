@@ -163,6 +163,31 @@ booked until you reply.
 **Book time:** set `booking.url` in `content/connect.md` to your Calendly, Cal.com or Google
 Calendar appointment-schedule link. Set `embed: true` to show the scheduler inline.
 
+## Observability agent and Site health
+
+`workers/observability/` is a Cloudflare Worker with a D1 database, deployed by the same workflow:
+
+- **Real-user monitoring (RUM):** every page measures Core Web Vitals (LCP, INP, CLS, FCP, TTFB) in
+  the visitor's browser with `web-vitals` and sends them when the page is hidden: page path, values,
+  A/B version; the agent adds device type and country. No cookies or identifiers; Do Not Track and
+  Global Privacy Control are honored; bots are ignored; data is kept 90 days.
+- **Uptime checks** every 10 minutes for the main site and the backup copy.
+- **Goals:** an incident opens when a site fails two checks in a row, or when a Web Vital's 24-hour
+  75th percentile misses Google's "good" threshold (with at least 20 samples), and closes on recovery.
+- **Site health page** at `/status/` (footer link) shows 7- or 30-day results, the daily LCP trend,
+  results by device and by A/B version, top pages, uptime and incidents.
+
+Settings: Profile & settings → Analytics (agent address, share of page views measured, page on/off).
+The agent's address is filled in automatically from each deploy; set it in the editor to pin it.
+
+One-time setup, on top of the backup copy's token: in Cloudflare, edit the API token and add
+**Account → Workers Scripts → Edit** and **Account → D1 → Edit**, and make sure your account has a
+workers.dev subdomain (Workers & Pages → Overview shows it). The first deploy creates the
+`jc-observability` database and Worker; the step's log prints the agent's address.
+
+Local test: `cd workers/observability`, then `npx wrangler@4.45.0 d1 migrations apply jc-observability --local`
+and `npx wrangler@4.45.0 dev --local --test-scheduled`.
+
 ## Develop
 
 Requires Node 22 (see `.nvmrc`).

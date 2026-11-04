@@ -130,6 +130,9 @@ collections:
           - { name: consent_text, label: Banner text, widget: text }
           - { name: consent_accept, label: Accept button, widget: string, default: Accept }
           - { name: consent_decline, label: Decline button, widget: string, default: Decline }
+          - { name: rum_endpoint, label: Observability agent address, widget: string, required: false, pattern: ['^(https://.+)?$', 'An https:// address'], hint: 'Leave empty to use the agent deployed with the site (jc-observability on Cloudflare). Real-user Web Vitals are sent here, cookie-free.' }
+          - { name: rum_sample, label: Share of page views measured (%), widget: number, value_type: int, min: 0, max: 100, default: 100, hint: '0 turns real-user measurement off.' }
+          - { name: status_page, label: Show the Site health page, widget: boolean, default: true, hint: 'Public page at /status/ with real-user performance, uptime and incidents. Linked from the footer.' }
 
       - name: feedback
         label: Feedback form
