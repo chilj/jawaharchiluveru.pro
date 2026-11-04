@@ -1,0 +1,114 @@
+---
+// A/B version D: everything at a glance in tiles. Both skill views are rendered in the HTML;
+// the script only switches between them (without it, Breadth shows).
+import Icon from './Icon.astro';
+import LogoTile from './LogoTile.astro';
+
+interface Props {
+  about: { name: string; role: string; location?: string; tagline: string; stats: { value: string; label: string }[] };
+  now?: { org: string; title: string; product?: string };
+  breadth: { label: string; count: number }[];
+  depth: { name: string; levelLabel: string; score: number }[];
+  certs: { name: string; issuer: string; badge?: string; logo?: string; mark?: string }[];
+  post?: { title: string; href: string };
+  intro?: string;
+  primary: { href: string; label: string; track: string };
+  resume?: { href: string; label: string; title?: string };
+}
+const { about, now, breadth, depth, certs, post, intro, primary, resume } = Astro.props;
+const max = Math.max(1, ...breadth.map((b) => b.count));
+const base = import.meta.env.BASE_URL;
+---
+<section class="bento wrap" aria-labelledby="bento-name">
+  <div class="bento-grid">
+    <div class="tile-b bento-intro">
+      <p class="eyebrow">{about.role}{about.location && <> · <span class="nowrap">{about.location}</span></>}</p>
+      <h1 id="bento-name">{about.name}</h1>
+      <p>{about.tagline}</p>
+      <div class="cta">
+        <a class="btn primary" href={primary.href} data-track={primary.track} data-track-label="hero-bento"><Icon name="calendar" />{primary.label}</a>
+        {resume && <a class="btn" href={resume.href} title={resume.title} target="_blank" rel="noopener" data-track="resume_download" data-track-label="hero-bento"><Icon name="file-text" />{resume.label}</a>}
+      </div>
+    </div>
+
+    {now && (
+      <a class="tile-b bento-now" href={`${base}#career`} data-track="bento_tile" data-track-label="now">
+        <span class="bento-kicker">Now</span>
+        <span class="bento-title">{now.org}</span>
+        <span class="bento-text">{now.title}{now.product && <> · {now.product}</>}</span>
+        <span class="bento-more">Career journey →</span>
+      </a>
+    )}
+
+    {about.stats.length > 0 && (
+      <dl class="tile-b bento-stats">{about.stats.map((s) => <div><dt>{s.value}</dt><dd>{s.label}</dd></div>)}</dl>
+    )}
+
+    <div class="tile-b bento-skills">
+      <div class="bento-skills-head">
+        <h2>Skills</h2>
+        <div class="bento-toggle" role="group" aria-label="Skills view">
+          <button type="button" aria-pressed="true" data-view="breadth">Breadth</button>
+          <button type="button" aria-pressed="false" data-view="depth">Depth</button>
+        </div>
+      </div>
+      <div data-skill-view="breadth">
+        <p class="bento-text">{breadth.reduce((n, b) => n + b.count, 0)} skills across {breadth.length} groups.</p>
+        <ul class="bento-bars">
+          {breadth.map((b) => (
+            <li><span>{b.label}</span><span class="bento-bar" aria-hidden="true"><span style={`width:${Math.round((b.count / max) * 100)}%`}></span></span><span>{b.count}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div data-skill-view="depth" hidden>
+        <p class="bento-text">Where I go deepest.</p>
+        <ul class="bento-bars bento-depth">
+          {depth.map((d) => (
+            <li><span>{d.name}</span><span class="bento-bar" aria-hidden="true"><span style={`width:${Math.round((d.score / 4) * 100)}%`}></span></span><span>{d.levelLabel}</span></li>
+          ))}
+        </ul>
+      </div>
+      <a class="bento-more" href={`${base}#toolkit`} data-track="bento_tile" data-track-label="toolkit">Open the full Toolkit →</a>
+    </div>
+
+    {certs.length > 0 && (
+      <div class="tile-b bento-certs">
+        <h2>Certifications</h2>
+        <ul>
+          {certs.map((c) => (
+            <li>
+              {c.badge ? <span class="tile tile-md tile-badge"><img src={c.badge} alt="" width="44" height="44" loading="lazy" decoding="async" /></span>
+                : <LogoTile name={c.issuer} logo={c.logo} mark={c.mark} />}
+              <span>{c.name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {post && (
+      <a class="tile-b bento-post" href={post.href} data-track="bento_tile" data-track-label="blog">
+        <span class="bento-kicker">Latest post</span>
+        <span class="bento-title bento-title-sm">{post.title}</span>
+        <span class="bento-more">Read →</span>
+      </a>
+    )}
+
+    <a class="tile-b bento-open" href={`${base}#connect`} data-track="bento_tile" data-track-label="open-to">
+      <span class="bento-kicker">Open to</span>
+      <span class="bento-title bento-title-sm">{intro ?? "Let's talk"}</span>
+      <span class="bento-more">Let's talk →</span>
+    </a>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.bento');
+  if (root) {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-view]')];
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      root.querySelectorAll<HTMLElement>('[data-skill-view]').forEach((v) => { v.hidden = v.dataset.skillView !== b.dataset.view; });
+    }));
+  }
+</script>

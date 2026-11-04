@@ -139,6 +139,21 @@ behind the cookie banner, or cover the end of a page. Events: `chat_open`, `chat
 `chat_close`, `chat_faq` (the question), `chat_faq_link`, `chat_message` (the channel), `chat_live_start`,
 `chat_live_connected`, `chat_message_failed`.
 
+**A/B test (home page):** Profile & settings → **A/B test (home page)** splits visitors between two
+versions of the top of the home page: **B · Career journey** (a clickable timeline of roles) and
+**D · Bento dashboard** (tiles: intro, current role, stats, skills, certifications, latest post).
+The current hero is the control (0% by default). Each visitor is assigned once (stored in their
+browser) and keeps the same version; the choice is made before the page paints, so there is no
+flicker. Preview any version with `?variant=journey`, `?variant=bento` or `?variant=classic`;
+previews aren't stored or counted. To end the test, give the winner 100 and the others 0, or turn
+it off to go back to the current hero. Changing **Test name** starts a fresh test.
+Analytics: every event carries `ab_variant`, GA4 gets the user property `landing_variant`, Clarity
+gets the tag `landing_variant`, and each test page view sends `experiment_exposure`. In GA4, add
+custom dimensions once (Admin → Custom definitions): **landing_variant** (User scope) and
+**ab_variant** (Event scope). Then compare, per version, `resume_download`, `contact_click` and
+`feedback_submit` against `experiment_exposure` (Explore → Free form, rows: ab_variant).
+In Clarity, filter recordings and heatmaps by **Custom tags → landing_variant**.
+
 **Meeting requests:** the form in Let's Talk offers open slots from the availability under
 Profile & settings → Let's Talk → Meeting request form (time zone, days, hours, length, notice,
 weeks ahead, unavailable dates). Submitting opens the visitor's email app with the request,

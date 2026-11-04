@@ -1,0 +1,99 @@
+---
+// A/B version B: the career journey. A clickable timeline of roles (oldest to newest, current
+// role selected) with what shipped at each stop. Panels are rendered in the HTML; the script only
+// switches which one shows, so everything works without it (the current role stays visible).
+import Icon from './Icon.astro';
+import { yearRange } from '../lib/content';
+
+interface Role { org: string; short?: string; title: string; product?: string; start: string; end?: string; highlights: string[]; skills: { name: string }[] }
+interface Props {
+  about: { name: string; role: string; location?: string; tagline: string; stats: { value: string; label: string }[] };
+  roles: Role[];               // newest first, as on the page
+  intro?: string;              // Let's Talk intro, e.g. the roles you are open to
+  primary: { href: string; label: string; track: string };
+  resume?: { href: string; label: string; title?: string };
+}
+const { about, roles, intro, primary, resume } = Astro.props;
+const stops = [...roles].reverse().map((r) => ({
+  label: r.short?.trim() || r.org, org: r.org, years: yearRange(r.start, r.end || undefined), title: r.title,
+  product: r.product?.trim(), wins: r.highlights.slice(0, 3), skills: r.skills.slice(0, 5).map((s) => s.name),
+}));
+const last = stops.length - 1;
+---
+<section class="cj wrap" aria-labelledby="journey-name">
+  <div class="cj-head">
+    <div>
+      <p class="eyebrow">{about.role}{about.location && <> · <span class="nowrap">{about.location}</span></>}</p>
+      <h1 id="journey-name">{about.name}</h1>
+      <p class="cj-lede">{about.tagline} Pick any stop to see what shipped there.</p>
+    </div>
+    {about.stats.length > 0 && <dl class="stats cj-stats">{about.stats.map((s) => <div><dt>{s.value}</dt><dd>{s.label}</dd></div>)}</dl>}
+  </div>
+
+  <div class="cj-track" role="group" aria-label="Career stops">
+    {stops.map((s, i) => (
+      <button type="button" class="cj-stop" data-stop={i} aria-pressed={i === last ? 'true' : 'false'} aria-controls={`cj-panel-${i}`}
+        data-track="journey_stop" data-track-label={s.org}>
+        <span class="cj-dot" aria-hidden="true"></span>
+        <span class="cj-stop-name">{s.label}</span>
+        <span class="cj-stop-years">{s.years}</span>
+      </button>
+    ))}
+  </div>
+
+  <div class="cj-body">
+    <div class="cj-panels">
+      {stops.map((s, i) => (
+        <article class="cj-panel" id={`cj-panel-${i}`} data-panel={i} hidden={i !== last}>
+          <p class="cj-org">{s.org} · {s.years}</p>
+          <h2>{s.title}</h2>
+          {s.product && <p class="cj-product">{s.product}</p>}
+          {s.wins.length > 0 && <ul class="cj-wins">{s.wins.map((w) => <li>{w}</li>)}</ul>}
+          {s.skills.length > 0 && <p class="cj-skills">{s.skills.map((k) => <span>{k}</span>)}</p>}
+          <div class="cj-nav">
+            <button type="button" class="btn" data-step="-1" disabled={i === 0}>← Earlier</button>
+            <button type="button" class="btn" data-step="1" disabled={i === last}>Later →</button>
+          </div>
+        </article>
+      ))}
+    </div>
+    <aside class="cj-next">
+      <p class="cj-next-title">Next stop: your team?</p>
+      {intro && <p>{intro}</p>}
+      <div class="cta">
+        <a class="btn primary" href={primary.href} data-track={primary.track} data-track-label="hero-journey"><Icon name="calendar" />{primary.label}</a>
+        {resume && <a class="btn" href={resume.href} title={resume.title} target="_blank" rel="noopener" data-track="resume_download" data-track-label="hero-journey"><Icon name="file-text" />{resume.label}</a>}
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.cj');
+  if (root) {
+    const stopEls = [...root.querySelectorAll<HTMLButtonElement>('.cj-stop')];
+    const panels = [...root.querySelectorAll<HTMLElement>('.cj-panel')];
+    let current = stopEls.findIndex((b) => b.getAttribute('aria-pressed') === 'true');
+    const show = (i: number, focusPanel = false) => {
+      if (i < 0 || i >= panels.length) return;
+      current = i;
+      stopEls.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+      panels.forEach((p, k) => { p.hidden = k !== i; });
+      if (focusPanel) {
+        // Earlier/Later buttons sit inside the panel that just hid, so move focus to the new heading.
+        const h = panels[i].querySelector<HTMLElement>('h2');
+        h?.setAttribute('tabindex', '-1');
+        h?.focus();
+      }
+    };
+    // On narrow screens the track scrolls sideways: start it at the selected (current) role.
+    const track = root.querySelector<HTMLElement>('.cj-track');
+    const sel = stopEls[current];
+    if (track && sel && track.scrollWidth > track.clientWidth) track.scrollLeft = sel.offsetLeft - (track.clientWidth - sel.offsetWidth) / 2;
+    stopEls.forEach((b, i) => b.addEventListener('click', () => show(i)));
+    root.addEventListener('click', (e) => {
+      const step = (e.target as Element).closest<HTMLElement>('[data-step]');
+      if (step) show(current + Number(step.dataset.step), true);
+    });
+  }
+</script>

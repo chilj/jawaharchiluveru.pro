@@ -6,6 +6,8 @@ import Section from '../components/Section.astro';
 import Icon from '../components/Icon.astro';
 import LogoTile from '../components/LogoTile.astro';
 import LevelMeter from '../components/LevelMeter.astro';
+import HeroJourney from '../components/HeroJourney.astro';
+import HeroBento from '../components/HeroBento.astro';
 import MeetingRequest from '../components/MeetingRequest.astro';
 import { brandFor } from '../lib/icons';
 import { getResume } from '../lib/resume';
@@ -106,13 +108,66 @@ const website = {
 const section = (id: string) => ({
   id, title: byId[id]?.label ?? id, icon: byId[id]?.icon ?? 'circle', open: !byId[id]?.collapsed,
 });
+
+// A/B test for the top of the page (content/experiment.yaml). Every version is in the HTML; a tiny
+// script in <head> picks one per visitor before the page paints and remembers it.
+const exp = (await getEntry('experiment', 'experiment'))?.data;
+const abListed = exp?.enabled ? exp.variants : [];
+const abVariants = abListed.filter((v) => v.weight > 0);   // versions visitors can be assigned
+const abOn = abVariants.some((v) => v.id !== 'classic');
+// Every listed version can be previewed with ?variant=<id>, even at 0%.
+const abConfig = abOn ? { name: exp!.name, variants: abVariants.map((v) => ({ id: v.id, weight: v.weight })), preview: [...new Set(['classic', ...abListed.map((v) => v.id)])] } : null;
+const heroPrimary = {
+  href: booking ?? '#connect',
+  label: booking ? connect.booking.label : section('connect').title,
+  track: booking ? 'contact_click' : 'nav_click',
+};
+const heroResume = resume ? { href: withBase(resume.href), label: resume.label, title: resumeTitle } : undefined;
+const heroRoles = roles.map((r) => ({ ...r.data, end: r.data.end || undefined }));
+const nowRole = roles.find((r) => !r.data.end)?.data;
+const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))).sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
 ---
 <Base>
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(person)} />
     <script type="application/ld+json" set:html={JSON.stringify(website)} />
+    {abConfig && (
+      <script is:inline define:vars={{ ab: abConfig }}>
+        (function () {
+          var ids = ab.variants.map(function (v) { return v.id; }), key = 'jc-ab-' + ab.name, v = null;
+          // ?variant=<id> previews a version without storing it or counting it in analytics.
+          try { var q = new URLSearchParams(location.search).get('variant'); if (q && ab.preview.indexOf(q) !== -1) { v = q; document.documentElement.setAttribute('data-ab-preview', ''); } } catch (e) {}
+          if (!v) { try { v = localStorage.getItem(key); } catch (e) {} }
+          if (v && document.documentElement.hasAttribute('data-ab-preview')) { document.documentElement.setAttribute('data-ab', v); document.documentElement.setAttribute('data-ab-name', ab.name); return; }
+          if (!v || ids.indexOf(v) === -1) {
+            var total = ab.variants.reduce(function (n, x) { return n + x.weight; }, 0), r = Math.random() * total;
+            for (var i = 0; i < ab.variants.length; i++) { r -= ab.variants[i].weight; if (r < 0) { v = ab.variants[i].id; break; } }
+            v = v || ids[0];
+            try { localStorage.setItem(key, v); } catch (e) {}
+          }
+          document.documentElement.setAttribute('data-ab', v);
+          document.documentElement.setAttribute('data-ab-name', ab.name);
+        })();
+      </script>
+    )}
   </Fragment>
-  <section class="hero wrap" id="top">
+  {abOn && abListed.some((v) => v.id === 'journey') && (
+    <div class="ab-variant" data-variant-block="journey">
+      <HeroJourney about={about} roles={heroRoles} intro={connect.intro} primary={heroPrimary} resume={heroResume} />
+    </div>
+  )}
+  {abOn && abListed.some((v) => v.id === 'bento') && (
+    <div class="ab-variant" data-variant-block="bento">
+      <HeroBento about={about}
+        now={nowRole && { org: nowRole.org, title: nowRole.title, product: nowRole.product?.trim() || undefined }}
+        breadth={breadth.map((b) => ({ label: b.label, count: b.count }))}
+        depth={depth.map((d) => ({ name: d.name, levelLabel: LEVELS[d.level].label, score: LEVELS[d.level].score }))}
+        certs={certifications.slice(0, 5).map((c) => ({ name: c.name, issuer: c.issuer, badge: c.badge, logo: c.logo, mark: c.mark }))}
+        post={latestPost && { title: latestPost.data.title, href: `${import.meta.env.BASE_URL}blog/${latestPost.id}/` }}
+        intro={connect.intro} primary={heroPrimary} resume={heroResume} />
+    </div>
+  )}
+  <section class={abOn ? 'hero wrap ab-classic' : 'hero wrap'} id="top">
     <p class="eyebrow">{about.role}{about.location && <> · <span class="nowrap">{about.location}</span></>}</p>
     <h1>{about.name}</h1>
     <p class="lede">{about.tagline}</p>

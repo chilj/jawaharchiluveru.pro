@@ -35,12 +35,18 @@ const config = {
       window.jcTrack = function (name, label, extra) {
         if (!cookieLoaded) return; // nothing is sent before consent (Cloudflare takes no events)
         var params = Object.assign(label ? { label: String(label).slice(0, 100) } : {}, extra || {});
+        if (ab()) params.ab_variant = ab(); // A/B test version on every event
         if (config.ga4) window.gtag('event', name, params);
         if (config.clarity) {
           window.clarity('event', name);
           for (var k in params) window.clarity('set', name + '_' + k, String(params[k]).slice(0, 100));
         }
       };
+
+      // A/B test version picked by the home page's <head> script, which runs after this one, so read it
+      // when needed (absent on other pages and when the test is off).
+      // A ?variant= preview is not counted.
+      function ab() { var d = document.documentElement; return d.hasAttribute('data-ab-preview') ? null : d.getAttribute('data-ab'); }
 
       function add(src, attrs) {
         var s = document.createElement('script'); s.async = true; s.src = src;
@@ -64,8 +70,17 @@ const config = {
       var cookieLoaded = false;
       function loadCookieBased() {
         if (cookieLoaded) return; cookieLoaded = true;
-        if (config.ga4) { add('https://www.googletagmanager.com/gtag/js?id=' + config.ga4); window.gtag('js', new Date()); window.gtag('config', config.ga4); }
-        if (config.clarity) { add('https://www.clarity.ms/tag/' + config.clarity); if (needsConsent) window.clarity('consent'); }
+        if (config.ga4) {
+          add('https://www.googletagmanager.com/gtag/js?id=' + config.ga4); window.gtag('js', new Date());
+          if (ab()) window.gtag('set', 'user_properties', { landing_variant: ab() });
+          window.gtag('config', config.ga4);
+        }
+        if (config.clarity) {
+          add('https://www.clarity.ms/tag/' + config.clarity); if (needsConsent) window.clarity('consent');
+          if (ab()) window.clarity('set', 'landing_variant', ab());
+        }
+        // One exposure event per page view of a test version: the denominator for conversion rates.
+        if (ab()) window.jcTrack('experiment_exposure', ab(), { experiment: document.documentElement.getAttribute('data-ab-name') || '' });
       }
       function load() {
         document.querySelectorAll('[data-consent-settings]').forEach(function (b) { b.hidden = !needsConsent; });

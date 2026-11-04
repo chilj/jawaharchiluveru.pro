@@ -719,3 +719,105 @@ form.chat-compose + .chat-live-row .chat-live { background: var(--surface); colo
 .cert-media-icon .icon { width: 1.5rem; height: 1.5rem; }
 .cert-media-title { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .cert { align-items: start; }
+
+/* A/B test: the script in <head> sets html[data-ab]; only that version shows.
+   No script (or test off): the classic hero shows and the variants stay hidden. */
+.ab-variant { display: none; }
+html[data-ab="journey"] [data-variant-block="journey"],
+html[data-ab="bento"] [data-variant-block="bento"] { display: block; }
+html[data-ab="journey"] .ab-classic, html[data-ab="bento"] .ab-classic { display: none; }
+html[data-ab="classic"] .ab-classic { display: block; }
+
+/* Version B: career journey */
+.cj { padding-top: 4rem; padding-bottom: 2rem; }
+.cj-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.5rem 3rem; }
+.cj-head > div:first-child { flex: 1 1 26rem; min-width: 0; }
+.cj h1 { font-size: clamp(2.25rem, 6.5vw, 3.75rem); letter-spacing: -0.03em; }
+.cj-lede { color: var(--muted); font-size: clamp(1.0625rem, 2.2vw, 1.1875rem); max-width: 40em; margin: 0.875rem 0 0; }
+.cj-stats { margin: 0; }
+.cj-track {
+  position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(5.5rem, 1fr); gap: 0.25rem;
+  margin: 2.25rem 0 1.5rem; padding: 0.75rem 0 0.25rem; overflow-x: auto; scrollbar-width: thin;
+}
+.cj-track::before { content: ""; position: absolute; left: 2.75rem; right: 2.75rem; top: 1.6rem; height: 2px; background: linear-gradient(90deg, var(--line), var(--teal)); }
+.cj-stop {
+  position: relative; display: grid; justify-items: center; gap: 0.35rem; min-height: 5.5rem; padding: 0.25rem;
+  cursor: pointer; font: inherit; color: var(--muted); background: none; border: 0; border-radius: 0.75rem;
+}
+.cj-dot { width: 1rem; height: 1rem; margin: 0.1rem 0; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); transition: transform .15s ease; }
+.cj-stop-name { font: 600 0.9062rem var(--font-display); text-align: center; line-height: 1.2; }
+.cj-stop-years { font-size: 0.75rem; }
+.cj-stop:hover .cj-dot { border-color: var(--teal); }
+.cj-stop[aria-pressed="true"] { color: var(--text); }
+.cj-stop[aria-pressed="true"] .cj-dot { background: var(--teal); border-color: var(--teal); transform: scale(1.3); box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--teal) 20%, transparent); }
+.cj-stop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cj-body { display: flex; flex-wrap: wrap; gap: 1rem; }
+.cj-panels { flex: 999 1 30rem; min-width: 0; }
+.cj-panel, .cj-next { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem 1.625rem; }
+.cj-panel { display: grid; gap: 0.625rem; height: 100%; box-sizing: border-box; align-content: start; }
+.cj-panel[hidden] { display: none; }
+.cj-panel h2 { font-size: clamp(1.25rem, 3vw, 1.625rem); }
+.cj-panel h2:focus { outline: none; }
+.cj-org { margin: 0; color: var(--teal); font-weight: 600; font-size: 0.9062rem; }
+.cj-product { margin: 0; color: var(--muted); }
+.cj-wins { margin: 0.25rem 0 0; padding-left: 1.2rem; display: grid; gap: 0.5rem; }
+.cj-wins li::marker { color: var(--teal); }
+.cj-skills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.25rem 0 0; }
+.cj-skills span { font-size: 0.8125rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.cj-nav { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.cj-nav .btn { cursor: pointer; font: inherit; font-size: 0.875rem; }
+.cj-nav .btn:disabled { opacity: 0.45; cursor: default; }
+.cj-next { flex: 1 1 16rem; display: grid; gap: 0.75rem; align-content: start; }
+.cj-next p { margin: 0; color: var(--muted); }
+.cj-next .cj-next-title { font: 600 1.25rem/1.3 var(--font-display); color: var(--text); }
+
+/* Version D: bento dashboard */
+.bento { padding-top: 3.5rem; padding-bottom: 2rem; }
+.bento-grid { display: grid; gap: 0.875rem; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; }
+.tile-b {
+  background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 0.25rem);
+  padding: 1.375rem 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; color: var(--text);
+}
+a.tile-b { text-decoration: none; transition: border-color .15s ease, transform .15s ease; }
+a.tile-b:hover { border-color: var(--teal); transform: translateY(-2px); }
+.bento-intro { grid-column: span 2; background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--teal))); color: var(--on-accent); border: 0; padding: 1.75rem; }
+.bento-intro .eyebrow { color: inherit; opacity: 0.8; margin: 0; }
+.bento-intro h1 { font-size: clamp(2rem, 4.5vw, 2.75rem); letter-spacing: -0.03em; }
+.bento-intro p { margin: 0; opacity: 0.92; }
+.bento-intro .cta { margin-top: auto; padding-top: 0.75rem; }
+.bento-intro .btn { color: var(--on-accent); border-color: color-mix(in srgb, var(--on-accent) 45%, transparent); background: transparent; }
+.bento-intro .btn.primary { background: var(--on-accent); color: var(--accent); border-color: var(--on-accent); }
+.bento-kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
+.bento-title { font: 600 1.1875rem/1.3 var(--font-display); }
+.bento-title-sm { font-size: 1rem; }
+.bento-text { margin: 0; color: var(--muted); font-size: 0.9062rem; line-height: 1.5; }
+.bento-more { margin-top: auto; font-weight: 600; font-size: 0.875rem; color: var(--teal); }
+.bento-stats { margin: 0; display: grid; gap: 0.75rem; align-content: center; }
+.bento-stats dt { font: 700 1.875rem/1.1 var(--font-display); letter-spacing: -0.02em; background: linear-gradient(120deg, var(--accent), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bento-stats dd { margin: 0.125rem 0 0; color: var(--muted); font-size: 0.8125rem; }
+.bento-skills { grid-column: span 2; grid-row: span 2; }
+.bento-skills-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.bento-skills h2, .bento-certs h2 { font-size: 1.1875rem; }
+.bento-toggle { display: flex; gap: 0.25rem; padding: 0.25rem; border-radius: 999px; background: var(--accent-soft); }
+.bento-toggle button { cursor: pointer; font: 600 0.8125rem var(--font-body); min-height: 2.25rem; padding: 0 0.875rem; border: 0; border-radius: 999px; background: transparent; color: var(--accent); }
+.bento-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.bento-toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[data-skill-view][hidden] { display: none; }
+.bento-bars { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.55rem; }
+.bento-bars li { display: grid; grid-template-columns: minmax(0, 13rem) minmax(3rem, 1fr) auto; gap: 0.75rem; align-items: center; font-size: 0.875rem; }
+.bento-bars li > span:last-child { color: var(--muted); font-size: 0.8125rem; text-align: right; font-variant-numeric: tabular-nums; }
+.bento-bar { height: 0.5rem; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.bento-bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.bento-depth .bento-bar span { background: var(--teal); }
+.bento-certs { grid-column: span 2; }
+.bento-certs ul { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: 0.75rem; }
+.bento-certs li { display: grid; justify-items: center; gap: 0.4rem; text-align: center; font-size: 0.8125rem; line-height: 1.3; }
+@media (max-width: 900px) {
+  .bento-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .bento-grid { grid-template-columns: minmax(0, 1fr); }
+  .bento-intro, .bento-skills, .bento-certs { grid-column: auto; grid-row: auto; }
+  .bento-bars li { grid-template-columns: minmax(0, 1fr) 4rem auto; }
+  .cj { padding-top: 2.5rem; }
+}

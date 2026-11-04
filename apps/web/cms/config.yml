@@ -213,6 +213,23 @@ collections:
           - { name: input_placeholder, label: Message box placeholder, widget: string, default: Type a message… }
           - { name: handoff_note, label: Note under the message box, widget: string, hint: "{channel} is replaced with your email app, WhatsApp, Telegram or live chat." }
 
+      - name: experiment
+        label: A/B test (home page)
+        file: content/experiment.yaml
+        fields:
+          - { name: enabled, label: Run the test, widget: boolean, default: false, hint: "Off: everyone sees the current hero. On: each visitor is assigned one version below (by weight) and keeps it on return visits." }
+          - { name: name, label: Test name, widget: string, default: landing, pattern: ['^[a-z0-9-]{1,40}$', 'Lowercase letters, numbers and dashes'], hint: "Shown in analytics. Change it to start a fresh test: everyone is reassigned." }
+          - name: variants
+            label: Versions
+            label_singular: Version
+            widget: list
+            summary: '{{fields.label}} — {{fields.weight}}%'
+            hint: "Weights are relative shares of visitors (50/50 splits evenly; 0 turns a version off). To end the test and keep a winner, give the winner 100 and the others 0. Preview any version with ?variant=journey, ?variant=bento or ?variant=classic after the address."
+            fields:
+              - { name: id, label: Version, widget: select, options: [{ label: 'B · Career journey', value: journey }, { label: 'D · Bento dashboard', value: bento }, { label: 'Current hero (control)', value: classic }] }
+              - { name: label, label: Label, widget: string, required: false }
+              - { name: weight, label: Share of visitors, widget: number, value_type: int, min: 0, max: 100, default: 50 }
+
       - name: privacy
         label: Privacy page
         file: content/privacy.md

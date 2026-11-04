@@ -184,6 +184,20 @@ const certifications = defineCollection({
   }),
 });
 
+// A/B test for the top of the home page (content/experiment.yaml).
+const experiment = defineCollection({
+  loader: file(`${CONTENT}/experiment.yaml`, { parser: (text) => [{ id: 'experiment', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    enabled: z.boolean().default(false),
+    name: z.string().regex(/^[a-z0-9-]{1,40}$/).default('landing'),
+    variants: z.array(z.object({
+      id: z.enum(['journey', 'bento', 'classic']),
+      label: z.string().optional(),
+      weight: z.number().min(0).max(100).default(0),
+    })).default([]),
+  }),
+});
+
 const theme = defineCollection({
   loader: file(`${CONTENT}/theme.yaml`, { parser: (text) => [{ id: 'theme', ...(parseYaml(text) ?? {}) }] }),
   schema: z.object({
@@ -313,7 +327,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
-  resume, analytics, privacy, feedback, chat,
+  resume, analytics, privacy, feedback, chat, experiment,
   education: credentialList('education'), certifications,
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

@@ -1,0 +1,14 @@
+# A/B test for the top of the home page. Edit here or in the site editor at /admin
+# (Profile & settings → A/B test). Each visitor is assigned a version once and keeps it.
+enabled: true
+name: landing-2026-11
+variants:
+  - id: journey
+    label: B · Career journey
+    weight: 50
+  - id: bento
+    label: D · Bento dashboard
+    weight: 50
+  - id: classic
+    label: Current hero (control)
+    weight: 0
