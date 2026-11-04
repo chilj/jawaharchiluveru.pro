@@ -3,8 +3,10 @@
 // The numbers load in the browser from the agent's /summary, so the page is always current.
 import Base from '../layouts/Base.astro';
 import { rumConfig } from '../lib/rum';
+import { worldMap, MAP_W, MAP_H } from '../lib/worldmap';
 const rum = await rumConfig();
 const home = import.meta.env.BASE_URL;
+const world = rum.statusPage ? worldMap() : [];
 ---
 <Base title="Site health" description="Live real-user performance, uptime and incidents for this site, measured by a Cloudflare Worker agent.">
   <Fragment slot="head"><meta name="robots" content="noindex"></Fragment>
@@ -27,6 +29,19 @@ const home = import.meta.env.BASE_URL;
             <div class="vitals" data-vitals></div>
           </section>
           <section aria-labelledby="h-uptime"><h2 id="h-uptime">Uptime</h2><div class="uptime" data-uptime></div></section>
+          <section aria-labelledby="h-geo"><h2 id="h-geo">Visitors by country</h2>
+            <p class="status-note">Page views by the visitor's country, as reported by Cloudflare. These are page views, not unique visitors: the site doesn't track individuals. Countries with fewer than 5 page views are grouped as "Other countries" and not shaded.</p>
+            <div class="geo">
+              <svg class="world" viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-labelledby="geo-desc">
+                <desc id="geo-desc" data-geo-desc>World map of page views by country</desc>
+                {world.map((c) => <path d={c.d} data-cc={c.code}><title>{c.name}</title></path>)}
+              </svg>
+              <div class="geo-side">
+                <div class="geo-legend" aria-hidden="true"><span>Fewer</span>{[1, 2, 3, 4, 5].map((n) => <i class={`geo-${n}`}></i>)}<span>More</span></div>
+                <div data-geo-table></div>
+              </div>
+            </div>
+          </section>
           <section aria-labelledby="h-trend"><h2 id="h-trend">Loading speed by day</h2>
             <p class="status-note">Largest Contentful Paint, 75th percentile per day; the dashed line is the 2.5 s goal.</p>
             <div data-trend></div>
@@ -51,6 +66,7 @@ const home = import.meta.env.BASE_URL;
     generated: number; days: number; views: number; thresholds: Record<string, [number, number]>;
     metrics: Record<string, Stat>; devices: Record<string, Record<string, Stat>>; variants: Record<string, Record<string, Stat>>;
     daily: { day: string; LCP: number | null; views: number }[]; pages: { page: string; views: number; LCP: number | null }[];
+    countries?: { country: string; views: number }[];
     uptime: { target: string; checks: number; uptime: number; avgMs: number; last: { ts: number; ok: boolean; status: number | null; ms: number } }[];
     incidents: { kind: string; started: number; resolved: number | null; detail: string }[];
   };
@@ -136,6 +152,27 @@ const home = import.meta.env.BASE_URL;
       dRows.length ? slot('devices').replaceChildren(table(['Device', 'LCP', 'INP', 'CLS'], dRows, 'Device results table')) : empty(slot('devices'), 'No data yet.');
       // Pages
       d.pages.length ? slot('pages').replaceChildren(table(['Page', 'Views', 'LCP p75'], d.pages.map((p) => [p.page, `${p.views}`, fmt('LCP', p.LCP)]), 'Top pages table')) : empty(slot('pages'), 'No data yet.');
+      // Countries: shade each country on a log scale (5 steps), list the top 10 beside the map.
+      const regions = new Intl.DisplayNames(['en'], { type: 'region' });
+      const countryName = (cc: string) => { if (cc === 'other') return 'Other countries'; try { return regions.of(cc) ?? cc; } catch { return cc; } };
+      const byCountry = d.countries ?? [];
+      const maxViews = Math.max(1, ...byCountry.filter((c) => c.country !== 'other').map((c) => c.views));
+      const total = byCountry.reduce((n, c) => n + c.views, 0);
+      const views = new Map(byCountry.map((c) => [c.country, c.views]));
+      document.querySelectorAll<SVGPathElement>('.world path').forEach((path) => {
+        const cc = path.dataset.cc ?? '';
+        const v = views.get(cc) ?? 0;
+        path.setAttribute('class', v ? `geo-${Math.max(1, Math.ceil((5 * Math.log(v + 1)) / Math.log(maxViews + 1)))}` : '');
+        const title = path.querySelector('title');
+        if (title) title.textContent = `${cc ? countryName(cc) : title.textContent!.split(':')[0]}: ${v ? `${v.toLocaleString('en-US')} page ${v === 1 ? 'view' : 'views'}` : 'no visits'}`;
+      });
+      document.querySelector('[data-geo-desc]')!.textContent = byCountry.length
+        ? `World map of page views by country. Top: ${byCountry.slice(0, 3).map((c) => `${countryName(c.country)} ${c.views}`).join(', ')}.`
+        : 'World map of page views by country. No data yet.';
+      byCountry.length
+        ? slot('geo-table').replaceChildren(table(['Country', 'Views', 'Share'],
+          byCountry.slice(0, 10).map((c) => [countryName(c.country), c.views.toLocaleString('en-US'), pct(c.views / total)]), 'Countries table'))
+        : empty(slot('geo-table'), 'No country data yet.');
       // Incidents
       const inc = slot('incidents');
       if (!d.incidents.length) empty(inc, `No incidents in the last ${d.days} days.`);

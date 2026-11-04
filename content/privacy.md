@@ -20,7 +20,13 @@ The chat button answers common questions right on the page; nothing you click th
 
 ## Performance measurement
 
-To keep the site fast, your browser reports how quickly each page loaded and responded (Core Web Vitals), with the page address, device type (phone or computer) and, from Cloudflare, your country. This is sent to the site's own monitoring service on Cloudflare without cookies or any identifier, and kept for 90 days. The combined results are public on the [Site health](/status/) page. Visitors with Do Not Track or Global Privacy Control turned on aren't measured.
+To keep the site fast, your browser reports how quickly each page loaded and responded (Core Web Vitals). Each report holds only: which page of this site it was, the timings, phone or computer, the home page version you saw, and your country as a two-letter code from Cloudflare.
+
+- **Not stored:** your IP address, your browser's identification string, cookies or any identifier, so reports can't be linked to you or to each other.
+- **Minimized:** times are kept to the hour, and the page is recorded by its site address, never anything typed into the address bar.
+- **Kept 90 days**, in the site's own database on Cloudflare, then deleted automatically.
+- **Public totals only:** the [Site health](/status/) page shows combined results; countries with fewer than 5 page views are grouped together.
+- Visitors with Do Not Track or Global Privacy Control turned on aren't measured.
 
 ## Layout testing
 

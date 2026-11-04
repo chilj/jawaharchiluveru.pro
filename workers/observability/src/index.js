@@ -17,6 +17,8 @@ const MAX_VALUE = { LCP: 120000, INP: 60000, CLS: 50, FCP: 120000, TTFB: 120000 
 const METRICS = Object.keys(THRESHOLDS);
 const BOTS = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|gtmetrix|pingdom|uptime/i;
 const DAY = 86400000;
+const MIN_PUBLIC_COUNT = 5;      // countries with fewer page views are grouped as "other" in the public summary
+const HOUR = 3600000;
 const DAILY_WRITE_GUARD = 80000; // rows/day; D1's free plan allows 100,000 written rows a day
 
 export default {
@@ -74,7 +76,9 @@ async function collect(request, env, cors, allowedOrigin, origin) {
   if (!page || !rows.length) return new Response(null, { status: 204, headers: cors });
 
   const insert = env.DB.prepare('INSERT INTO rum (ts, page, metric, value, rating, device, country, variant, host) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-  await env.DB.batch(rows.map((m) => insert.bind(now, page, m.n, round(m.v, m.n === 'CLS' ? 4 : 0), rate(m.n, m.v), device, country, variant, host)));
+  // Data minimization: times are stored to the hour, enough for daily charts and 24-hour goals.
+  const hour = Math.floor(now / HOUR) * HOUR;
+  await env.DB.batch(rows.map((m) => insert.bind(hour, page, m.n, round(m.v, m.n === 'CLS' ? 4 : 0), rate(m.n, m.v), device, country, variant, host)));
   return new Response(null, { status: 204, headers: cors });
 }
 
@@ -110,7 +114,7 @@ async function storeSummaries(env) {
 
 // Percentiles and rating shares are computed in SQL (window functions), grouped by `by`.
 // p75 = the value at row ceil(0.75 × count) of each group, sorted.
-const CTE = "WITH r AS (SELECT strftime('%Y-%m-%d', ts / 1000, 'unixepoch') AS day, page, metric, value, rating, device, variant FROM rum WHERE ts > ?1)";
+const CTE = "WITH r AS (SELECT strftime('%Y-%m-%d', ts / 1000, 'unixepoch') AS day, page, metric, value, rating, device, variant, country FROM rum WHERE ts > ?1)";
 const p75Sql = (by, where = '') => `${CTE} SELECT ${by}, value AS p75 FROM (SELECT ${by}, value, ROW_NUMBER() OVER (PARTITION BY ${by} ORDER BY value) AS rn, COUNT(*) OVER (PARTITION BY ${by}) AS cnt FROM r WHERE 1 = 1 ${where}) WHERE rn = (3 * cnt + 3) / 4`;
 const shareSql = (by, where = '') => `${CTE} SELECT ${by}, COUNT(*) AS n, SUM(rating = 'good') AS good, SUM(rating = 'poor') AS poor FROM r WHERE 1 = 1 ${where} GROUP BY ${by}`;
 
@@ -125,6 +129,7 @@ async function computeSummary(env, days, now) {
     q(`${CTE} SELECT day, COUNT(*) AS views FROM r WHERE metric = 'TTFB' GROUP BY day`),
     q(`${CTE} SELECT page, COUNT(*) AS views FROM r WHERE metric = 'TTFB' GROUP BY page ORDER BY views DESC LIMIT 6`),
     q(p75Sql('page, metric', "AND metric = 'LCP'")),
+    q(`${CTE} SELECT country, COUNT(*) AS views FROM r WHERE metric = 'TTFB' AND country IS NOT NULL AND country != 'XX' AND country != 'T1' GROUP BY country ORDER BY views DESC`),
     q('SELECT target, COUNT(*) AS checks, SUM(ok) AS ok, AVG(ms) AS avg FROM checks WHERE ts > ?1 GROUP BY target'),
     env.DB.prepare('SELECT target, ts, ok, status, ms FROM checks c WHERE ts = (SELECT MAX(ts) FROM checks WHERE target = c.target)'),
     q('SELECT kind, started, resolved, detail FROM incidents WHERE resolved IS NULL OR started > ?1 ORDER BY started DESC LIMIT 10'),
@@ -141,7 +146,7 @@ async function computeSummary(env, days, now) {
     }
     return out;
   };
-  const [allP, allS, devP, devS, varP, varS, dayP, dayViews, topPages, pageP, upAgg, upLast, incidents] = res;
+  const [allP, allS, devP, devS, varP, varS, dayP, dayViews, topPages, pageP, byCountry, upAgg, upLast, incidents] = res;
   const metrics = merge(allP, allS, null)._ ?? {};
   const dayList = [...new Set(dayP.map((x) => x.day))].sort();
   return {
@@ -158,6 +163,12 @@ async function computeSummary(env, days, now) {
       views: dayViews.find((x) => x.day === day)?.views ?? 0,
     })),
     pages: topPages.map((p) => ({ page: p.page, views: p.views, LCP: pageP.find((x) => x.page === p.page)?.p75 ?? null })),
+    // Page views by country (two-letter codes from Cloudflare; XX = unknown and T1 = Tor are left out).
+    // Countries with fewer than MIN_PUBLIC_COUNT page views are grouped so no single visitor stands out.
+    countries: [
+      ...byCountry.filter((c) => c.views >= MIN_PUBLIC_COUNT).map((c) => ({ country: c.country, views: c.views })),
+      ...(() => { const n = byCountry.filter((c) => c.views < MIN_PUBLIC_COUNT).reduce((t, c) => t + c.views, 0); return n ? [{ country: 'other', views: n }] : []; })(),
+    ],
     uptime: upAgg.map((u) => {
       const last = upLast.find((x) => x.target === u.target);
       return { target: u.target, checks: u.checks, uptime: u.ok / u.checks, avgMs: Math.round(u.avg || 0), last: last ? { ts: last.ts, ok: !!last.ok, status: last.status, ms: last.ms } : null };

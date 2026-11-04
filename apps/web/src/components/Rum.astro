@@ -1,19 +1,21 @@
 ---
 // Real-user monitoring: measures Core Web Vitals in the visitor's browser and sends them to the
 // observability agent (workers/observability) when the page is hidden. Cookie-free: no IDs, no
-// storage; only the page path, the metric values and the home page's A/B version.
+// storage. The page path sent is the page's own built address (a 404 page sends its own), never the
+// address the visitor typed, so nothing personal can travel in a URL. Plus the metric values and the
+// home page's A/B version.
 import { rumConfig } from '../lib/rum';
 const rum = await rumConfig();
 const on = !!rum.endpoint && rum.sample > 0;
 ---
-{on && <span hidden data-rum={JSON.stringify(rum)}></span>}
+{on && <span hidden data-rum={JSON.stringify({ ...rum, page: Astro.url.pathname })}></span>}
 
 <script>
   import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 
   const el = document.querySelector<HTMLElement>('[data-rum]');
   if (el) {
-    const cfg: { endpoint: string; sample: number; respectPrivacy: boolean } = JSON.parse(el.dataset.rum!);
+    const cfg: { endpoint: string; sample: number; respectPrivacy: boolean; page: string } = JSON.parse(el.dataset.rum!);
     const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
     const optedOut = cfg.respectPrivacy && (nav.doNotTrack === '1' || nav.globalPrivacyControl === true);
     if (!optedOut && Math.random() * 100 < cfg.sample && 'sendBeacon' in navigator) {
@@ -24,7 +26,7 @@ const on = !!rum.endpoint && rum.sample > 0;
         if (!queue.length) return;
         const d = document.documentElement;
         const variant = d.hasAttribute('data-ab-preview') ? null : d.getAttribute('data-ab');
-        navigator.sendBeacon(`${cfg.endpoint}/rum`, JSON.stringify({ p: location.pathname, v: variant, m: queue.splice(0) }));
+        navigator.sendBeacon(`${cfg.endpoint}/rum`, JSON.stringify({ p: cfg.page, v: variant, m: queue.splice(0) }));
       };
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
       addEventListener('pagehide', flush);
