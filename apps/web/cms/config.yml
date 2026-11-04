@@ -216,6 +216,17 @@ collections:
           - { name: input_placeholder, label: Message box placeholder, widget: string, default: Type a message… }
           - { name: handoff_note, label: Note under the message box, widget: string, hint: "{channel} is replaced with your email app, WhatsApp, Telegram or live chat." }
 
+      - name: maintenance
+        label: Maintenance
+        file: content/maintenance.yaml
+        fields:
+          - { name: enabled, label: Maintenance mode on, widget: boolean, default: false, hint: "Goes live about a minute after you save. Turn it off the same way. /admin and the Site health page keep working." }
+          - { name: mode, label: Show as, widget: select, default: banner, options: [{ label: 'Banner (the site still works)', value: banner }, { label: 'Maintenance page (covers the site)', value: page }], hint: "With the maintenance page on, add ?maintenance=off to an address to see the site yourself." }
+          - { name: heading, label: Heading, widget: string, default: Scheduled maintenance }
+          - { name: message, label: Message, widget: text }
+          - { name: back_by, label: Expected back by, widget: datetime, required: false, hint: "Optional. Visitors see it in their own time zone." }
+          - { name: show_contact, label: Show email and LinkedIn on the maintenance page, widget: boolean, default: true }
+
       - name: experiment
         label: A/B test (home page)
         file: content/experiment.yaml

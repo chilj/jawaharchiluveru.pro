@@ -8,7 +8,7 @@ const rum = await rumConfig();
 const home = import.meta.env.BASE_URL;
 const world = rum.statusPage ? worldMap() : [];
 ---
-<Base title="Site health" description="Live real-user performance, uptime and incidents for this site, measured by a Cloudflare Worker agent.">
+<Base noMaintenance title="Site health" description="Live real-user performance, uptime and incidents for this site, measured by a Cloudflare Worker agent.">
   <Fragment slot="head"><meta name="robots" content="noindex"></Fragment>
   <div class="wrap detail status-page">
     <a class="back" href={home}>← Home</a>

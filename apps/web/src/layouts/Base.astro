@@ -6,6 +6,7 @@ import Analytics from '../components/Analytics.astro';
 import Feedback from '../components/Feedback.astro';
 import Chat from '../components/Chat.astro';
 import Rum from '../components/Rum.astro';
+import Maintenance from '../components/Maintenance.astro';
 import { rumConfig } from '../lib/rum';
 import { buildTheme } from '../lib/theme';
 import { brandMark } from '../lib/favicon';
@@ -18,7 +19,8 @@ import '../styles/global.css';
 import soraFont from '@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url';
 import plexFont from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url';
 
-interface Props { title?: string; description?: string; type?: 'website' | 'article' }
+// noMaintenance: pages that stay visible during full-page maintenance (Site health).
+interface Props { title?: string; description?: string; type?: 'website' | 'article'; noMaintenance?: boolean }
 const about = (await getEntry('about', 'about'))!.data;
 const { nav } = await getSections();
 const feedback = (await getEntry('feedback', 'feedback'))?.data;
@@ -28,6 +30,8 @@ const description = Astro.props.description ?? about.description;
 const home = import.meta.env.BASE_URL;
 const brand = await brandMark();
 const rum = await rumConfig();
+const maint = (await getEntry('maintenance', 'maintenance'))?.data;
+const maintPage = !!maint?.enabled && maint.mode === 'page' && !Astro.props.noMaintenance;
 const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
 // WCAG 2.1 AA guardrail: report colors that were adjusted, and refuse to build if anything still fails.
 for (const a of theme.adjusted) console.warn(`[theme] ${a.mode} ${a.color} ${a.requested} → ${a.used} to meet WCAG AA contrast`);
@@ -73,7 +77,8 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
   <link rel="apple-touch-icon" href={`${home}apple-touch-icon.png`}>
   <link rel="manifest" href={`${home}site.webmanifest`}>
 </head>
-<body>
+<body class={maintPage ? 'maint-on' : undefined}>
+  {(maintPage || (maint?.enabled && maint.mode === 'banner')) && <Maintenance />}
   <div class="backdrop" aria-hidden="true">
     <span class="glow glow-a"></span><span class="glow glow-b"></span><span class="glow glow-c"></span>
   </div>

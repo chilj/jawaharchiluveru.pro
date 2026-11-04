@@ -873,3 +873,26 @@ a.tile-b:hover { border-color: var(--teal); transform: translateY(-2px); }
 .geo-legend { display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: var(--muted); }
 .geo-legend i { display: block; width: 1.5rem; height: 0.625rem; border-radius: 2px; }
 .geo-legend span:first-child { margin-right: 0.25rem; } .geo-legend span:last-child { margin-left: 0.25rem; }
+
+/* Maintenance mode */
+.maint-banner {
+  display: flex; align-items: center; justify-content: center; gap: 0.6rem; padding: 0.6rem max(16px, env(safe-area-inset-left, 0px));
+  background: var(--warn-soft); color: var(--text); border-bottom: 1px solid var(--line); font-size: 0.9062rem; text-align: center;
+}
+.maint-banner p { margin: 0; }
+.maint-banner .icon { flex: none; width: 1.1rem; height: 1.1rem; color: var(--warn); }
+.maint-page { display: none; }
+body.maint-on > :not(.maint-page):not(script):not(.backdrop) { display: none !important; }
+body.maint-on .maint-page { display: grid; place-items: center; min-height: 100dvh; padding: 2rem max(16px, env(safe-area-inset-left, 0px)); box-sizing: border-box; }
+body.maint-on { padding-bottom: 0; }
+.maint-card {
+  width: min(34rem, 100%); text-align: center; display: grid; justify-items: center; gap: 0.875rem; padding: 2.5rem 2rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 0.25rem); box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.08);
+}
+.maint-card h1 { font-size: clamp(1.75rem, 5vw, 2.375rem); letter-spacing: -0.02em; }
+.maint-card p { margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.6; }
+.maint-card .cta { justify-content: center; margin-top: 0.5rem; }
+.maint-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 1rem; background: var(--warn-soft); color: var(--warn); }
+.maint-icon .icon { width: 1.75rem; height: 1.75rem; }
+.maint-back { font-weight: 600; color: var(--text) !important; }
+.maint-note { font-size: 0.875rem !important; }

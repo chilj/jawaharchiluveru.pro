@@ -1,0 +1,109 @@
+name: Roll back site
+
+# Restores an earlier version of the site in about two minutes: rebuilds it and deploys it to
+# GitHub Pages and the Cloudflare backup copy. Run it from Actions → Roll back site → Run workflow.
+# main is not changed. To stop the next push (or a site-editor save) from redeploying main, set the
+# repository variable DEPLOY_HOLD to true, fix forward, then remove it. See README, "Rollback".
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Version to restore: "previous" (the release before the newest), a deploy-… tag, or a commit'
+        required: true
+        default: previous
+      agent:
+        description: Also roll back the observability agent (Cloudflare Worker) to its previous version
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-refs/heads/main
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'jawaharchiluveru' }}
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Resolve the version to restore
+        id: resolve
+        env:
+          WANT: ${{ inputs.ref }}
+        run: |
+          git fetch -q --tags
+          if [ "$WANT" = "previous" ]; then
+            newest=$(git tag -l 'deploy-*' | sort -r | head -1)
+            [ -n "$newest" ] || { echo "::error::No deploy-* tags yet. Give a commit instead."; exit 1; }
+            live=$(git rev-list -n1 "$newest")
+            # The newest release whose commit differs from the newest one.
+            for t in $(git tag -l 'deploy-*' | sort -r); do
+              c=$(git rev-list -n1 "$t"); if [ "$c" != "$live" ]; then WANT="$t"; break; fi
+            done
+            [ "$WANT" != "previous" ] || { echo "::error::No earlier release found."; exit 1; }
+          fi
+          sha=$(git rev-parse --verify "$WANT^{commit}") || { echo "::error::Unknown version: $WANT"; exit 1; }
+          echo "Restoring $WANT ($sha): $(git log -1 --format='%s (%cs)' "$sha")"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          { echo "### Rolling back to \`$WANT\`"; echo; echo "Commit \`${sha:0:7}\`: $(git log -1 --format='%s (%cs)' "$sha")"; } >> "$GITHUB_STEP_SUMMARY"
+          git checkout -q "$sha"
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: npm run build
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          RUM_ENDPOINT: ${{ vars.RUM_ENDPOINT || 'https://jc-observability.jawahar-ch14.workers.dev' }}
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/web/dist
+      - name: Restore the backup copy on Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        continue-on-error: true
+        run: |
+          cp -r apps/web/dist mirror
+          printf '/*\n  X-Robots-Tag: noindex\n' > mirror/_headers
+          npx --yes wrangler@4.45.0 pages deploy mirror --project-name="$CF_PAGES_PROJECT" --branch=main --commit-dirty=true
+      - name: Roll back the observability agent
+        if: inputs.agent && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        continue-on-error: true
+        working-directory: workers/observability
+        run: |
+          # Returns the Worker to its previous version. The database is left as it is: its
+          # migrations only ever add tables and columns, so older agent versions keep working.
+          npx --yes wrangler@4.45.0 rollback --message "Rollback from GitHub Actions (run ${{ github.run_id }})"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Next steps
+        run: |
+          {
+            echo "### Site rolled back to \`${{ needs.build.outputs.sha }}\`"
+            echo
+            echo "- To keep it while you fix forward, set the repository variable **DEPLOY_HOLD** to \`true\` (Settings → Secrets and variables → Actions → Variables). Otherwise the next push or site-editor save redeploys main."
+            echo "- When main is fixed, remove DEPLOY_HOLD and run **Build & deploy** (or push)."
+          } >> "$GITHUB_STEP_SUMMARY"

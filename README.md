@@ -163,6 +163,30 @@ booked until you reply.
 **Book time:** set `booking.url` in `content/connect.md` to your Calendly, Cal.com or Google
 Calendar appointment-schedule link. Set `embed: true` to show the scheduler inline.
 
+## Rollback and maintenance
+
+**Rollback.** Every production deploy is tagged `deploy-YYYYMMDD-HHMMSS` (the 30 newest are kept).
+If a release breaks something:
+
+1. **Actions → Roll back site → Run workflow.** Leave **Version** as `previous` (the release before
+   the newest) or enter a `deploy-…` tag or a commit. Tick the agent box to also return the
+   observability Worker to its previous version. The site is restored in about two minutes, on the
+   main domain and the backup copy. `main` itself is not changed.
+2. **Hold deploys while you fix:** Settings → Secrets and variables → Actions → Variables → add
+   `DEPLOY_HOLD` = `true`. Pushes and site-editor saves are then built but not deployed (the run
+   shows a warning).
+3. **Fix forward** on a branch, merge, then delete `DEPLOY_HOLD` and run **Build & deploy**.
+
+Other undo paths: the backup copy can also be rolled back in Cloudflare (Workers & Pages →
+jawaharchiluveru → Deployments), and the agent with `npx wrangler rollback` in
+`workers/observability`. Database migrations only add tables and columns, so they never need undoing.
+
+**Maintenance mode.** Profile & settings → **Maintenance** (live about a minute after saving):
+**Banner** keeps the site usable with a notice at the top; **Maintenance page** covers the site with
+your message, an optional return time (shown in each visitor's time zone) and email/LinkedIn links.
+The page's real content stays in the HTML so search engines keep seeing it; /admin and Site health
+keep working; add `?maintenance=off` to an address to see the site yourself during maintenance.
+
 ## Observability agent and Site health
 
 `workers/observability/` is a Cloudflare Worker with a D1 database, deployed by the same workflow:

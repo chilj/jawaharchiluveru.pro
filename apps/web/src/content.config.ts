@@ -184,6 +184,19 @@ const certifications = defineCollection({
   }),
 });
 
+// Maintenance mode (content/maintenance.yaml).
+const maintenance = defineCollection({
+  loader: file(`${CONTENT}/maintenance.yaml`, { parser: (text) => [{ id: 'maintenance', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    enabled: z.boolean().default(false),
+    mode: z.enum(['banner', 'page']).default('banner'),
+    heading: z.string().default('Scheduled maintenance'),
+    message: z.string().default('The site is being updated. Please check back shortly.'),
+    back_by: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.coerce.date().optional()),
+    show_contact: z.boolean().default(true),
+  }),
+});
+
 // A/B test for the top of the home page (content/experiment.yaml).
 const experiment = defineCollection({
   loader: file(`${CONTENT}/experiment.yaml`, { parser: (text) => [{ id: 'experiment', ...(parseYaml(text) ?? {}) }] }),
@@ -331,7 +344,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
-  resume, analytics, privacy, feedback, chat, experiment,
+  resume, analytics, privacy, feedback, chat, experiment, maintenance,
   education: credentialList('education'), certifications,
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

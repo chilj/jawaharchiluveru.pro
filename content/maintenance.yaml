@@ -1,0 +1,8 @@
+# Maintenance mode. Edit in /admin → Profile & settings → Maintenance. Goes live about a minute after saving.
+# mode: banner (site works, notice at the top) | page (maintenance screen instead of the site)
+enabled: false
+mode: banner
+heading: Scheduled maintenance
+message: I'm making some improvements to the site. Everything will be back shortly.
+back_by: ''          # optional, e.g. 2026-11-08T18:00:00-06:00
+show_contact: true   # show email and LinkedIn on the maintenance screen

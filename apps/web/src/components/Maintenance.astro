@@ -1,0 +1,59 @@
+---
+// Maintenance mode (content/maintenance.yaml, editor: Profile & settings → Maintenance).
+//   banner: the site works as usual, with a notice at the top of every page.
+//   page:   a maintenance screen covers the site. The page's real content stays in the HTML (hidden),
+//           so search engines keep seeing it during a short maintenance window.
+// Add ?maintenance=off to any address to see the site anyway (remembered for that browser tab).
+import { getEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+const m = (await getEntry('maintenance', 'maintenance'))?.data;
+const connect = (await getEntry('connect', 'connect'))?.data;
+const on = !!m?.enabled;
+const back = m?.back_by;
+const backText = back?.toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+const linkedin = connect?.links.find((l) => /linkedin\.com/i.test(l.url));
+const home = import.meta.env.BASE_URL;
+---
+{on && m!.mode === 'banner' && (
+  <div class="maint-banner" role="status">
+    <Icon name="wrench" />
+    <p><strong>{m!.heading}.</strong> {m!.message}{back && <> Expected back by <time datetime={back.toISOString()} data-local-time>{backText}</time>.</>}</p>
+  </div>
+)}
+{on && m!.mode === 'page' && (
+  <>
+    <script is:inline>
+      // Bypass for checking the site during maintenance: ?maintenance=off (this tab only).
+      (function () {
+        try {
+          if (new URLSearchParams(location.search).get('maintenance') === 'off') sessionStorage.setItem('jc-maint-off', '1');
+          if (sessionStorage.getItem('jc-maint-off')) document.body.classList.remove('maint-on');
+        } catch (e) {}
+      })();
+    </script>
+    <main class="maint-page" aria-labelledby="maint-title">
+      <div class="maint-card">
+        <span class="maint-icon" aria-hidden="true"><Icon name="wrench" /></span>
+        <h1 id="maint-title">{m!.heading}</h1>
+        <p>{m!.message}</p>
+        {back && <p class="maint-back">Expected back by <time datetime={back.toISOString()} data-local-time>{backText}</time>.</p>}
+        {m!.show_contact && (connect?.email || linkedin) && (
+          <div class="cta">
+            {connect?.email && <a class="btn primary" href={`mailto:${connect.email}`} data-track="contact_click" data-track-label="maintenance"><Icon name="mail" />Email me</a>}
+            {linkedin && <a class="btn" href={linkedin.url} target="_blank" rel="noopener">LinkedIn<Icon name="external-link" /></a>}
+          </div>
+        )}
+        <p class="maint-note"><a href={`${home}status/`}>Site health</a></p>
+      </div>
+    </main>
+  </>
+)}
+{on && back && (
+  <script is:inline>
+    // Show the return time in the visitor's own time zone.
+    document.querySelectorAll('[data-local-time]').forEach(function (t) {
+      try { t.textContent = new Date(t.getAttribute('datetime')).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }); } catch (e) {}
+    });
+  </script>
+)}
