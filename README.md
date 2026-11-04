@@ -177,6 +177,15 @@ Calendar appointment-schedule link. Set `embed: true` to show the scheduler inli
 - **Site health page** at `/status/` (footer link) shows 7- or 30-day results, the daily LCP trend,
   results by device and by A/B version, top pages, uptime and incidents.
 
+**Free plans only.** Everything runs on free tiers: GitHub Pages and Actions (public repo), Cloudflare
+Workers, D1 and Pages, Clarity, GA4, Web3Forms (with hCaptcha) and Tawk.to. Free plans don't bill for
+going over a limit; they pause or return errors until the next day. The agent is built to stay well
+inside Cloudflare's free limits: percentiles and grouping run in D1's SQL (the free plan gives a
+Worker very little CPU time), the 7- and 30-day summaries are computed once an hour so each Site
+health visit reads one row, and collection pauses for the rest of the day (UTC) if 80,000 rows were
+written (D1's free allowance is 100,000 a day, about 20,000 page views). Lower **Share of page views
+measured** if traffic ever gets near that.
+
 Settings: Profile & settings → Analytics (agent address, share of page views measured, page on/off).
 The agent's address is filled in automatically from each deploy; set it in the editor to pin it.
 
