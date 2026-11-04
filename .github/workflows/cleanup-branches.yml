@@ -1,0 +1,38 @@
+name: Delete merged branches
+
+# Deletes remote branches whose work is already in main, so merged preview branches don't pile up.
+# Runs after every push to main (that is, after each merge), weekly as a safety net, and on demand.
+# A branch with commits that aren't in main is never touched.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1'   # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cleanup-branches
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Delete branches already merged into main
+        run: |
+          git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'
+          KEEP='^(main|gh-pages)$'
+          merged=$(git branch -r --merged origin/main --format='%(refname:lstrip=3)' | grep -vE "$KEEP" | grep -v '^HEAD$' || true)
+          if [ -z "$merged" ]; then echo "No merged branches to delete."; exit 0; fi
+          for b in $merged; do
+            echo "Deleting $b (merged into main at $(git log -1 --format=%cs "origin/$b"))"
+            git push origin --delete "$b" || echo "::warning::Couldn't delete $b"
+          done
+          echo "Kept (not merged into main):"
+          git branch -r --no-merged origin/main --format='  %(refname:lstrip=3)' || true
