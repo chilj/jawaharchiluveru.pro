@@ -216,6 +216,22 @@ collections:
           - { name: input_placeholder, label: Message box placeholder, widget: string, default: Type a message… }
           - { name: handoff_note, label: Note under the message box, widget: string, hint: "{channel} is replaced with your email app, WhatsApp, Telegram or live chat." }
 
+      - name: navigation
+        label: Header menu links
+        file: content/navigation.yaml
+        fields:
+          - name: links
+            label: Links
+            label_singular: Link
+            widget: list
+            summary: '{{fields.label}}'
+            hint: "Shown in the header menu after the section links, in this order (drag to reorder)."
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: url, label: Address, widget: string, pattern: ['^(https?://|/)', 'A full https:// address or a site path such as /blog/'] }
+              - { name: show, label: Show in the menu, widget: boolean, default: true, hint: "Turn off to hide the link without deleting it." }
+              - { name: new_tab, label: Open in a new tab, widget: boolean, default: false }
+
       - name: experiment
         label: A/B test (home page)
         file: content/experiment.yaml

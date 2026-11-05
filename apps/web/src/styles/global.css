@@ -873,3 +873,7 @@ a.tile-b:hover { border-color: var(--teal); transform: translateY(-2px); }
 .geo-legend { display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: var(--muted); }
 .geo-legend i { display: block; width: 1.5rem; height: 0.625rem; border-radius: 2px; }
 .geo-legend span:first-child { margin-right: 0.25rem; } .geo-legend span:last-child { margin-left: 0.25rem; }
+
+/* Header menu: extra links (Profile & settings → Header menu links) */
+.nav-external { display: inline-flex; align-items: center; gap: 0.2rem; }
+.nav-external .icon { width: 0.85rem; height: 0.85rem; opacity: 0.7; }

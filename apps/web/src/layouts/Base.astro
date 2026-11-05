@@ -28,6 +28,9 @@ const description = Astro.props.description ?? about.description;
 const home = import.meta.env.BASE_URL;
 const brand = await brandMark();
 const rum = await rumConfig();
+const navLinks = ((await getEntry('navigation', 'navigation'))?.data.links ?? [])
+  .filter((l) => l.show)
+  .map((l) => ({ ...l, href: l.url.startsWith('/') ? withBase(l.url) : l.url, external: /^https?:/.test(l.url) }));
 const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
 // WCAG 2.1 AA guardrail: report colors that were adjusted, and refuse to build if anything still fails.
 for (const a of theme.adjusted) console.warn(`[theme] ${a.mode} ${a.color} ${a.requested} → ${a.used} to meet WCAG AA contrast`);
@@ -89,6 +92,10 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
       <nav id="site-nav" aria-label="Primary">
         {nav.filter((s) => s.id !== 'about').map((s) => <a href={`${home}#${s.id}`}>{s.label}</a>)}
         {hasBlog && <a href={`${home}blog/`}>Blog</a>}
+        {navLinks.map((l) => (
+          <a href={l.href} class={l.external ? 'nav-external' : undefined}
+            {...(l.new_tab ? { target: '_blank', rel: 'noopener' } : {})}>{l.label}{l.external && <Icon name="arrow-up-right" />}</a>
+        ))}
       </nav>
     </div>
   </header>
