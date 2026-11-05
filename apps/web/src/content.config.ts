@@ -197,6 +197,19 @@ const maintenance = defineCollection({
   }),
 });
 
+// Extra header menu links (content/navigation.yaml).
+const navigation = defineCollection({
+  loader: file(`${CONTENT}/navigation.yaml`, { parser: (text) => [{ id: 'navigation', ...(parseYaml(text) ?? {}) }] }),
+  schema: z.object({
+    links: z.array(z.object({
+      label: z.string(),
+      url: z.string().regex(/^(https?:\/\/|\/)/, 'A full https:// address or a site path such as /blog/'),
+      show: z.boolean().default(true),
+      new_tab: z.boolean().default(false),
+    })).default([]),
+  }),
+});
+
 // A/B test for the top of the home page (content/experiment.yaml).
 const experiment = defineCollection({
   loader: file(`${CONTENT}/experiment.yaml`, { parser: (text) => [{ id: 'experiment', ...(parseYaml(text) ?? {}) }] }),
@@ -344,7 +357,7 @@ const connect = defineCollection({
 
 export const collections = {
   sections, about, career, 'case-studies': caseStudies, playbook, blog, toolkit, connect,
-  resume, analytics, privacy, feedback, chat, experiment, maintenance,
+  resume, analytics, privacy, feedback, chat, experiment, maintenance, navigation,
   education: credentialList('education'), certifications,
   'skill-profile': skillProfile, 'toolkit-meta': toolkitMeta, theme,
 };

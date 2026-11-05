@@ -1,0 +1,7 @@
+# Extra links in the header menu, after the section links. Edit in /admin → Profile & settings →
+# Header menu links. Turn "show" off to hide a link without deleting it.
+links:
+  - label: PerfLoop
+    url: https://perfloop.jawaharchiluveru.pro/
+    show: true
+    new_tab: false

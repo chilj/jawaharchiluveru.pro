@@ -896,3 +896,7 @@ body.maint-on { padding-bottom: 0; }
 .maint-icon .icon { width: 1.75rem; height: 1.75rem; }
 .maint-back { font-weight: 600; color: var(--text) !important; }
 .maint-note { font-size: 0.875rem !important; }
+
+/* Header menu: extra links (Profile & settings → Header menu links) */
+.nav-external { display: inline-flex; align-items: center; gap: 0.2rem; }
+.nav-external .icon { width: 0.85rem; height: 0.85rem; opacity: 0.7; }
