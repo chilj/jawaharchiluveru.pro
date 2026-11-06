@@ -10,10 +10,14 @@ workers_dev = true
 crons = ["*/10 * * * *"]
 
 [vars]
-# Pages allowed to send measurements and read the summary.
-ALLOWED_ORIGINS = "https://www.jawaharchiluveru.pro,https://jawaharchiluveru.pro,https://jawaharchiluveru.pages.dev"
-# Addresses the agent checks: name=url, comma separated.
-TARGETS = "main=https://www.jawaharchiluveru.pro/,backup=https://jawaharchiluveru.pages.dev/"
+# Sites the agent measures: id|label|hostnames, separated by ";". The first is this portfolio, whose
+# pages send their own built paths; other sites include the agent's /rum.js snippet.
+SITES = "portfolio|This site|www.jawaharchiluveru.pro,jawaharchiluveru.pro,jawaharchiluveru.pages.dev;ready4peak|Ready4Peak|ready4peak.jawaharchiluveru.pro"
+# Extra origins allowed to send measurements and read summaries (for local testing); every site's
+# hostnames above are allowed automatically.
+ALLOWED_ORIGINS = ""
+# Addresses the agent checks: name=url, comma separated. Each belongs to the site with its hostname.
+TARGETS = "main=https://www.jawaharchiluveru.pro/,backup=https://jawaharchiluveru.pages.dev/,ready4peak=https://ready4peak.jawaharchiluveru.pro/"
 RETENTION_DAYS = "90"
 
 [[d1_databases]]
@@ -21,3 +25,9 @@ binding = "DB"
 database_name = "jc-observability"
 database_id = "00000000-0000-0000-0000-000000000000" # replaced at deploy time with the real id
 migrations_dir = "migrations"
+
+# web-vitals (vendored, MIT) is served inside /rum.js for other sites.
+[[rules]]
+type = "Text"
+globs = ["**/*.txt"]
+fallthrough = true

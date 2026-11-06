@@ -15,8 +15,9 @@ const world = rum.statusPage ? worldMap() : [];
     <h1>Site health</h1>
     {rum.statusPage ? (
       <>
-        <p class="lede">How fast this site is for real visitors, measured in their browsers, plus uptime checks every 10 minutes. Collected by an observability agent running on Cloudflare: no cookies, no personal data.</p>
+        <p class="lede">How fast my sites are for real visitors, measured in their browsers, plus uptime checks every 10 minutes. Collected by an observability agent running on Cloudflare: no cookies, no personal data.</p>
         <div class="status-bar">
+          <div class="bento-toggle" role="group" aria-label="Site" data-site-toggle hidden></div>
           <div class="bento-toggle" role="group" aria-label="Time range">
             <button type="button" aria-pressed="true" data-days="7">7 days</button>
             <button type="button" aria-pressed="false" data-days="30">30 days</button>
@@ -47,7 +48,7 @@ const world = rum.statusPage ? worldMap() : [];
             <div data-trend></div>
           </section>
           <div class="status-cols">
-            <section aria-labelledby="h-ab"><h2 id="h-ab">Home page A/B test</h2><div data-variants></div></section>
+            <section aria-labelledby="h-ab" data-ab-section><h2 id="h-ab">Home page A/B test</h2><div data-variants></div></section>
             <section aria-labelledby="h-dev"><h2 id="h-dev">By device</h2><div data-devices></div></section>
           </div>
           <section aria-labelledby="h-pages"><h2 id="h-pages">Most visited pages</h2><div data-pages></div></section>
@@ -79,7 +80,10 @@ const world = rum.statusPage ? worldMap() : [];
       CLS: ['Cumulative Layout Shift', 'Visual stability'], FCP: ['First Contentful Paint', 'First content'], TTFB: ['Time to First Byte', 'Server response'],
     };
     const VARIANTS: Record<string, string> = { journey: 'B · Career journey', bento: 'D · Bento dashboard', classic: 'Current hero' };
-    const TARGETS: Record<string, string> = { main: 'Main site', backup: 'Backup copy (pages.dev)' };
+    const TARGETS: Record<string, string> = { main: 'Main site', backup: 'Backup copy (pages.dev)', ready4peak: 'Ready4Peak' };
+    // Which site and range to show; ?site=ready4peak links straight to a site.
+    let site = new URLSearchParams(location.search).get('site') || '';
+    let days = 7;
     const RATING: Record<string, string> = { good: 'Good', 'needs-improvement': 'Needs improvement', poor: 'Poor' };
     const fmt = (m: string, v: number | null | undefined) => v == null ? '–' : m === 'CLS' ? v.toFixed(3) : v < 1000 ? `${Math.round(v)} ms` : `${(v / 1000).toFixed(2)} s`;
     const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -105,6 +109,19 @@ const world = rum.statusPage ? worldMap() : [];
 
     function render(d: Summary) {
       meta.textContent = `${d.views.toLocaleString('en-US')} page views measured in the last ${d.days} days · updated ${when(d.generated)}`;
+      // Site switcher, built from the sites the agent measures.
+      const sites = (d as Summary & { sites?: { id: string; label: string }[]; site?: string }).sites ?? [];
+      site = (d as { site?: string }).site ?? site;
+      const toggle = document.querySelector<HTMLElement>('[data-site-toggle]')!;
+      toggle.hidden = sites.length < 2;
+      toggle.replaceChildren(...sites.map((x) => {
+        const b = h('button', undefined, x.label); b.type = 'button';
+        b.setAttribute('aria-pressed', String(x.id === site));
+        b.addEventListener('click', () => { if (x.id !== site) { site = x.id; load(); } });
+        return b;
+      }));
+      // The A/B test only runs on this site's home page.
+      document.querySelector<HTMLElement>('[data-ab-section]')!.hidden = !Object.keys(d.variants).length;
       // Vitals
       const vitals = slot('vitals');
       vitals.replaceChildren(...['LCP', 'INP', 'CLS', 'FCP', 'TTFB'].map((m) => {
@@ -184,10 +201,10 @@ const world = rum.statusPage ? worldMap() : [];
       }));
     }
 
-    async function load(days: number) {
+    async function load() {
       meta.textContent = 'Loading…';
       try {
-        const res = await fetch(`${endpoint}/summary?days=${days}`);
+        const res = await fetch(`${endpoint}/summary?days=${days}${site ? `&site=${encodeURIComponent(site)}` : ''}`);
         if (!res.ok) throw new Error(String(res.status));
         render(await res.json());
       } catch {
@@ -196,8 +213,9 @@ const world = rum.statusPage ? worldMap() : [];
     }
     document.querySelectorAll<HTMLButtonElement>('[data-days]').forEach((b, _, all) => b.addEventListener('click', () => {
       all.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      load(Number(b.dataset.days));
+      days = Number(b.dataset.days);
+      load();
     }));
-    load(7);
+    load();
   }
 </script>

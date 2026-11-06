@@ -210,6 +210,14 @@ health visit reads one row, and collection pauses for the rest of the day (UTC) 
 written (D1's free allowance is 100,000 a day, about 20,000 page views). Lower **Share of page views
 measured** if traffic ever gets near that.
 
+**Other sites (ready4peak.jawaharchiluveru.pro).** The agent measures more than one site: `SITES` in
+`workers/observability/wrangler.toml` lists each site's id, label and hostnames, and `TARGETS` its
+uptime check. Another site adds one line to its pages, before `</body>`:
+`<script src="https://jc-observability.jawahar-ch14.workers.dev/rum.js" defer></script>`.
+Its data is kept separate (Site health has a site switcher, or link `/status/?site=ready4peak`). Its
+page paths come from the visitor's address bar, so the agent replaces ID-like segments (numbers,
+long hex or token strings, anything with @) with `:id`, and lists only pages with 5+ views.
+
 Settings: Profile & settings → Analytics (agent address, share of page views measured, page on/off).
 The agent's address is filled in automatically from each deploy; set it in the editor to pin it.
 

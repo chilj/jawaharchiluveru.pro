@@ -900,3 +900,4 @@ body.maint-on { padding-bottom: 0; }
 /* Header menu: extra links (Profile & settings → Header menu links) */
 .nav-external { display: inline-flex; align-items: center; gap: 0.2rem; }
 .nav-external .icon { width: 0.85rem; height: 0.85rem; opacity: 0.7; }
+[data-ab-section][hidden], [data-site-toggle][hidden] { display: none; }
