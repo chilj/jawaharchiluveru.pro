@@ -118,14 +118,19 @@ function rumScript(url) {
   const js = `/* jc-observability RUM: Core Web Vitals, cookie-free. web-vitals (MIT, Google). */
 (function () {
   var n = navigator;
-  if (n.doNotTrack === '1' || window.doNotTrack === '1' || n.globalPrivacyControl === true || !('sendBeacon' in n)) return;
+  if (n.doNotTrack === '1' || window.doNotTrack === '1' || n.globalPrivacyControl === true || !(window.fetch || 'sendBeacon' in n)) return;
   ${WEB_VITALS}
   var endpoint = ${JSON.stringify(url.origin)}, queue = [];
   var add = function (m) { queue.push({ n: m.name, v: m.value }); };
   webVitals.onLCP(add); webVitals.onINP(add); webVitals.onCLS(add); webVitals.onFCP(add); webVitals.onTTFB(add);
+  // fetch with keepalive and mode "cors" always sends the Origin header, even on pages with
+  // Referrer-Policy: no-referrer (where a beacon would arrive with Origin: null and be refused).
   var flush = function () {
     if (!queue.length) return;
-    n.sendBeacon(endpoint + '/rum', JSON.stringify({ p: location.pathname, m: queue.splice(0) }));
+    var body = JSON.stringify({ p: location.pathname, m: queue.splice(0) });
+    try {
+      fetch(endpoint + '/rum', { method: 'POST', body: body, keepalive: true, mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'text/plain' } }).catch(function () {}); // never disturb the page
+    } catch (e) { n.sendBeacon(endpoint + '/rum', body); }
   };
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
   addEventListener('pagehide', flush);
