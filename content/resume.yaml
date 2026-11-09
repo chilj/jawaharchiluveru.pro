@@ -1,7 +1,5 @@
-# Résumé button (hero and Let's Talk). Edit in /admin → Profile & settings → Résumé.
-# The current file is always published at /resume.pdf and at /<download_name>.
-file: /files/Jawahar_C_sTPM_Resume-1126.pdf
+file: /files/Jawahar-Ch_sTPM_1126.pdf
 show: true
 label: Résumé
 download_name: Jawahar-Chiluveru-Resume.pdf
-updated: 2026-11-02
+updated: 2026-11-09
