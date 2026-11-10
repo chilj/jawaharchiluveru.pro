@@ -75,4 +75,8 @@ skills:
     evidence: ''
   - name: Data Analysis
     evidence: ''
+  - name: SEO
+    evidence: ''
+  - name: QR Code Generation
+    evidence: ''
 ---
