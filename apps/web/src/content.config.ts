@@ -207,6 +207,8 @@ const navigation = defineCollection({
       show: z.boolean().default(true),
       new_tab: z.boolean().default(false),
     })).default([]),
+    // Header "Search skills" button (also opens with / or Ctrl/⌘ K).
+    skill_search: z.boolean().default(true),
   }),
 });
 

@@ -1,0 +1,198 @@
+---
+// Site-wide skill lookup: a header button (or "/" or Ctrl/⌘ K) opens a search over every skill in the
+// Toolkit, with its level, group, evidence and the roles it was used in. The index (/skills.json)
+// downloads the first time the search opens. Choosing a result goes to that skill in the Toolkit.
+import Icon from './Icon.astro';
+const base = import.meta.env.BASE_URL;
+---
+<button type="button" class="skill-search-btn" data-skill-search-open aria-haspopup="dialog" aria-keyshortcuts="/ Control+K Meta+K">
+  <Icon name="search" /><span class="skill-search-label">Search skills</span><kbd aria-hidden="true">/</kbd>
+</button>
+
+<dialog class="skill-search" aria-label="Search skills" data-skills-url={`${base}skills.json`} data-home={base}>
+  <div class="ss-bar">
+    <Icon name="search" />
+    <input type="text" role="combobox" aria-expanded="true" aria-controls="ss-results" aria-autocomplete="list"
+      aria-label="Search skills" placeholder="Search skills, e.g. Kafka, APIs, loyalty" autocomplete="off" spellcheck="false" />
+    <button type="button" class="ss-close" data-ss-close aria-label="Close search"><Icon name="x" /></button>
+  </div>
+  <p class="ss-status" aria-live="polite"></p>
+  <ul id="ss-results" class="ss-results" role="listbox" aria-label="Matching skills"></ul>
+  <p class="ss-foot"><kbd>↑</kbd><kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</p>
+</dialog>
+
+<script>
+  type Skill = { id: string; name: string; group: string; level?: string; score: number; evidence?: string; roles: { role: string; evidence?: string }[] };
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.skill-search');
+  if (dialog) {
+    const input = dialog.querySelector<HTMLInputElement>('input')!;
+    const list = dialog.querySelector<HTMLUListElement>('.ss-results')!;
+    const status = dialog.querySelector<HTMLElement>('.ss-status')!;
+    const home = dialog.dataset.home!;
+    let skills: Skill[] | null = null;
+    let results: Skill[] = [];
+    let active = 0;
+    let total = 0;
+    let lastTracked = '';
+    const track = (name: string, label: string, extra?: Record<string, string>) => (window as any).jcTrack?.(name, label, extra);
+
+    const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9+#.]+/g, ' ').trim();
+    const load = async () => {
+      if (skills) return skills;
+      status.textContent = 'Loading skills…';
+      try {
+        skills = await (await fetch(dialog.dataset.skillsUrl!)).json();
+      } catch {
+        status.textContent = "Couldn't load the skills. Check your connection and try again.";
+        skills = null;
+      }
+      return skills;
+    };
+
+    // Ranking: every word must match somewhere; the skill name counts most, then group, evidence and roles.
+    function search(q: string) {
+      const words = norm(q).split(' ').filter(Boolean);
+      if (!skills) return [];
+      total = skills.length;
+      if (!words.length) return [...skills].sort((a, b) => b.score - a.score || b.roles.length - a.roles.length).slice(0, 8);
+      const scored: { s: Skill; score: number }[] = [];
+      for (const s of skills) {
+        const name = norm(s.name), group = norm(s.group);
+        const rest = norm(`${s.evidence ?? ''} ${s.roles.map((r) => `${r.role} ${r.evidence ?? ''}`).join(' ')}`);
+        let total = 0;
+        let ok = true;
+        for (const w of words) {
+          const nameWords = name.split(' ');
+          const sc = name === w ? 100 : name.startsWith(w) ? 80 : nameWords.some((x) => x.startsWith(w)) ? 60 : name.includes(w) ? 40
+            : group.includes(w) ? 20 : rest.includes(w) ? 10 : 0;
+          if (!sc) { ok = false; break; }
+          total += sc;
+        }
+        if (ok) scored.push({ s, score: total + s.score });
+      }
+      total = scored.length;
+      return scored.sort((a, b) => b.score - a.score).slice(0, 20).map((x) => x.s);
+    }
+
+    // Wraps matched words in <mark>, built with text nodes (no HTML from the data is ever parsed).
+    function highlight(text: string, q: string) {
+      const frag = document.createDocumentFragment();
+      const words = norm(q).split(' ').filter((w) => w.length > 1);
+      if (!words.length) { frag.append(text); return frag; }
+      const re = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'ig');
+      let last = 0;
+      for (const m of text.matchAll(re)) {
+        frag.append(text.slice(last, m.index));
+        const mark = document.createElement('mark'); mark.textContent = m[0]; frag.append(mark);
+        last = m.index! + m[0].length;
+      }
+      frag.append(text.slice(last));
+      return frag;
+    }
+
+    function render() {
+      const q = input.value;
+      results = search(q);
+      active = Math.min(active, Math.max(0, results.length - 1));
+      list.replaceChildren(...results.map((s, i) => {
+        const li = document.createElement('li');
+        li.id = `ss-opt-${i}`; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', String(i === active));
+        li.className = 'ss-item';
+        const top = document.createElement('div'); top.className = 'ss-top';
+        const name = document.createElement('span'); name.className = 'ss-name'; name.append(highlight(s.name, q));
+        top.append(name);
+        if (s.level) { const lv = document.createElement('span'); lv.className = 'ss-level'; const dot = document.createElement('i'); dot.className = `ss-dot lv-${String(s.score).replace('.', '')}`; lv.append(dot, s.level); top.append(lv); }
+        const group = document.createElement('p'); group.className = 'ss-group'; group.textContent = s.group;
+        li.append(top, group);
+        if (s.evidence) { const ev = document.createElement('p'); ev.className = 'ss-evidence'; ev.append(highlight(s.evidence, q)); li.append(ev); }
+        if (s.roles.length) {
+          const roles = document.createElement('p'); roles.className = 'ss-roles';
+          roles.append('Used at: ');
+          s.roles.forEach((r, k) => {
+            const chip = document.createElement('span'); chip.className = 'ss-role'; chip.textContent = r.role;
+            if (r.evidence) chip.title = r.evidence;
+            roles.append(chip); if (k < s.roles.length - 1) roles.append(' ');
+          });
+          li.append(roles);
+        }
+        li.addEventListener('click', () => go(i));
+        li.addEventListener('mousemove', () => { if (active !== i) { active = i; mark(); } });
+        return li;
+      }));
+      input.setAttribute('aria-activedescendant', results.length ? `ss-opt-${active}` : '');
+      status.textContent = !skills ? status.textContent
+        : q.trim() ? (!total ? 'No skills match. Try a shorter word.'
+          : `${total} ${total === 1 ? 'skill matches' : 'skills match'}${total > results.length ? ` · showing the top ${results.length}` : ''}`)
+        : `Top skills · ${skills.length} in total`;
+    }
+    function mark() {
+      list.querySelectorAll('[role=option]').forEach((li, i) => li.setAttribute('aria-selected', String(i === active)));
+      input.setAttribute('aria-activedescendant', results.length ? `ss-opt-${active}` : '');
+      list.querySelector(`#ss-opt-${active}`)?.scrollIntoView({ block: 'nearest' });
+    }
+    function go(i: number) {
+      const s = results[i];
+      if (!s) return;
+      track('skill_lookup_open', s.name, { query: input.value.trim().slice(0, 60) });
+      dialog!.close();
+      const onHome = document.getElementById(s.id)?.tagName === 'LI';
+      if (onHome) { history.pushState(null, '', `#${s.id}`); revealSkill(s.id); }
+      else location.href = `${home}#${s.id}`;
+    }
+
+    async function open() {
+      if (dialog!.open) return;
+      dialog!.showModal();
+      input.value = ''; active = 0;
+      track('skill_lookup', location.pathname);
+      if (await load()) render();
+      input.focus();
+    }
+    document.addEventListener('click', (e) => {
+      if ((e.target as Element).closest?.('[data-skill-search-open]')) open();
+      if ((e.target as Element).closest?.('[data-ss-close]')) dialog.close();
+    });
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    // "/" (outside text fields) or Ctrl/⌘ K opens the search.
+    document.addEventListener('keydown', (e) => {
+      const t = e.target as HTMLElement;
+      const typing = t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+      if (((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey)) {
+        e.preventDefault(); open();
+      }
+    });
+    let timer: number | undefined;
+    input.addEventListener('input', () => {
+      active = 0; render();
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const q = input.value.trim().toLowerCase();
+        if (q.length >= 2 && q !== lastTracked) { lastTracked = q; track('skill_search', q, { results: String(results.length), where: 'lookup' }); }
+      }, 1200);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(results.length - 1, active + 1); mark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); mark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); go(active); }
+    });
+
+    // Opening a skill: expand its section and group, scroll to it and highlight it briefly.
+    function revealSkill(id: string) {
+      const row = document.getElementById(id);
+      if (!row || row.tagName !== 'LI') return;
+      let el: HTMLElement | null = row;
+      while ((el = el.parentElement)) if (el instanceof HTMLDetailsElement) el.open = true;
+      row.classList.remove('skill-flash');
+      // Highlight once the scroll has finished (a long smooth scroll would otherwise use up the fade).
+      let done = false;
+      const flash = () => { if (done) return; done = true; void row.offsetWidth; row.classList.add('skill-flash'); };
+      addEventListener('scrollend', flash, { once: true });
+      setTimeout(flash, 1600);
+      row.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      if (Math.abs(row.getBoundingClientRect().top + row.offsetHeight / 2 - innerHeight / 2) < 4) flash();
+      row.setAttribute('tabindex', '-1'); row.focus({ preventScroll: true });
+    }
+    if (location.hash.startsWith('#skill-')) addEventListener('load', () => revealSkill(decodeURIComponent(location.hash.slice(1))));
+    addEventListener('hashchange', () => { if (location.hash.startsWith('#skill-')) revealSkill(decodeURIComponent(location.hash.slice(1))); });
+  }
+</script>

@@ -7,6 +7,7 @@ import Feedback from '../components/Feedback.astro';
 import Chat from '../components/Chat.astro';
 import Rum from '../components/Rum.astro';
 import Maintenance from '../components/Maintenance.astro';
+import SkillSearch from '../components/SkillSearch.astro';
 import { rumConfig } from '../lib/rum';
 import { buildTheme } from '../lib/theme';
 import { brandMark } from '../lib/favicon';
@@ -32,7 +33,9 @@ const brand = await brandMark();
 const rum = await rumConfig();
 const maint = (await getEntry('maintenance', 'maintenance'))?.data;
 const maintPage = !!maint?.enabled && maint.mode === 'page' && !Astro.props.noMaintenance;
-const navLinks = ((await getEntry('navigation', 'navigation'))?.data.links ?? [])
+const navData = (await getEntry('navigation', 'navigation'))?.data;
+const skillSearch = (navData?.skill_search ?? true) && !maintPage;
+const navLinks = (navData?.links ?? [])
   .filter((l) => l.show)
   .map((l) => ({ ...l, href: l.url.startsWith('/') ? withBase(l.url) : l.url, external: /^https?:/.test(l.url) }));
 const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
@@ -102,6 +105,7 @@ const image = about.social_image ? new URL(withBase(about.social_image), Astro.s
             {...(l.new_tab ? { target: '_blank', rel: 'noopener' } : {})}>{l.label}{l.external && <Icon name="arrow-up-right" />}</a>
         ))}
       </nav>
+      {skillSearch && <SkillSearch />}
     </div>
   </header>
   <main id="main"><slot /></main>
