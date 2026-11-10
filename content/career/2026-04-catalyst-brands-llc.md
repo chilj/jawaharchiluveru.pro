@@ -53,4 +53,6 @@ skills:
     evidence: ''
   - name: Technical Specification Document - TSD
     evidence: ''
+  - name: Salesforce Marketing Cloud
+    evidence: ''
 ---
