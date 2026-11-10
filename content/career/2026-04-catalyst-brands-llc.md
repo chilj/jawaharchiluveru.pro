@@ -47,12 +47,14 @@ skills:
     evidence: ''
   - name: Runbook Development
     evidence: ''
-  - name: PRD
+  - name: Product Requirements Document (PRD)
     evidence: ''
-  - name: BRD
+  - name: Business requirements (BRD)
     evidence: ''
-  - name: Technical Specification Document - TSD
+  - name: Technical Specification Document (TSD)
     evidence: ''
   - name: Salesforce Marketing Cloud
+    evidence: ''
+  - name: Functional Requirements (FRD)
     evidence: ''
 ---
