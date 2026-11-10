@@ -23,7 +23,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
     <div class="sbr-wrap sbr-bar-inner">
       <div>
         <h1>Skills by role</h1>
-        <p class="sbr-sub">Edits the map in Toolkit. Saving commits to <code>main</code>; the site updates about a minute later.</p>
+        <p class="sbr-sub">Edits the map in Toolkit, one cell at a time (Grid) or many skills for one role at once (By role). Saving commits to <code>main</code>; the site updates about a minute later.</p>
       </div>
       <nav class="sbr-links"><a href={`${home}admin/`}>Content editor</a><a href={home}>View site</a></nav>
     </div>
@@ -43,24 +43,69 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
     </section>
 
     <section id="editor" hidden>
+      <div class="sbr-tabs" role="tablist" aria-label="Editing mode">
+        <button type="button" role="tab" id="tab-grid" aria-controls="view-grid" aria-selected="true">Grid</button>
+        <button type="button" role="tab" id="tab-role" aria-controls="view-role" aria-selected="false" tabindex="-1">By role (bulk)</button>
+      </div>
       <div class="sbr-toolbar">
-        <form id="add-form" class="sbr-row">
+        <form id="add-form" class="sbr-row" data-grid-only>
           <label class="sr-only" for="add-skill">Add a skill row</label>
           <input id="add-skill" list="matrix-skills" placeholder="Add a skill from your matrix, e.g. MuleSoft" autocomplete="off">
           <datalist id="matrix-skills"></datalist>
           <button type="submit" class="btn">Add row</button>
         </form>
-        <label class="sbr-check"><input id="show-earlier" type="checkbox"> Show earlier roles</label>
+        <label class="sbr-check" data-grid-only><input id="show-earlier" type="checkbox"> Show earlier roles</label>
         <span id="change-count" class="sbr-status"></span>
         <button id="save" type="button" class="btn primary" disabled>Save to GitHub</button>
       </div>
       <p id="editor-status" class="sbr-status" role="status"></p>
 
-      <div class="sbr-layout">
+      <div class="sbr-layout" id="view-grid" role="tabpanel" aria-labelledby="tab-grid">
         <div class="sbr-grid-wrap"><table id="grid" class="ev sbr-grid"></table></div>
         <aside id="panel" class="sbr-card sbr-panel">
           <p class="sbr-muted">Click an empty cell to add a skill to that role. Click a filled cell to edit its evidence.</p>
         </aside>
+      </div>
+
+      <div id="view-role" class="sbr-bulk" role="tabpanel" aria-labelledby="tab-role" hidden>
+        <div class="sbr-card sbr-bulk-head">
+          <div class="sbr-row sbr-role-row">
+            <label for="role-pick">Role</label>
+            <select id="role-pick"></select>
+            <span id="role-summary" class="sbr-muted"></span>
+          </div>
+          <div class="sbr-bulk-actions">
+            <button type="button" class="btn" id="suggest-btn">Suggest from highlights</button>
+            <button type="button" class="btn" id="fill-btn">Fill missing evidence</button>
+            <span class="sbr-copy">
+              <label class="sr-only" for="copy-from">Copy skills from another role</label>
+              <select id="copy-from"></select>
+              <button type="button" class="btn" id="copy-btn">Copy skills</button>
+            </span>
+            <button type="button" class="btn sbr-danger" id="clear-btn">Remove all</button>
+          </div>
+          <details class="sbr-paste">
+            <summary>Paste a list of skills</summary>
+            <label class="sr-only" for="paste-list">Skills to add, one per line or separated by commas</label>
+            <textarea id="paste-list" rows="4" placeholder="Kafka, MuleSoft, Jira&#10;or one per line"></textarea>
+            <div class="sbr-row"><button type="button" class="btn primary" id="paste-add">Add to this role</button><button type="button" class="btn" id="paste-remove">Remove from this role</button></div>
+          </details>
+          <p id="bulk-status" class="sbr-status" role="status"></p>
+        </div>
+
+        <section id="suggest-review" class="sbr-card sbr-review" hidden aria-labelledby="suggest-title">
+          <h2 id="suggest-title">Suggested from this role's highlights</h2>
+          <p class="sbr-muted">Skills from your matrix that this role's highlights mention. Untick any you don't want; evidence can be edited after adding.</p>
+          <ul id="suggest-list"></ul>
+          <div class="sbr-row"><button type="button" class="btn primary" id="suggest-add">Add selected</button><button type="button" class="btn" id="suggest-cancel">Cancel</button></div>
+        </section>
+
+        <div class="sbr-row sbr-filter-row">
+          <label class="sr-only" for="role-filter">Filter skills</label>
+          <input id="role-filter" type="search" placeholder="Filter skills, e.g. API" autocomplete="off">
+          <label class="sbr-check"><input id="only-on" type="checkbox"> Only skills in this role</label>
+        </div>
+        <div id="role-list" class="sbr-role-list"></div>
       </div>
     </section>
   </main>
@@ -220,6 +265,214 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
       );
     }
 
+    // ---- By role (bulk) ----
+    let mode: 'grid' | 'role' = 'grid';
+    let current: Role | null = null;
+    const roleLabel = (r: Role) => `${r.short ?? r.org} · ${years(r)}`;
+    const esc = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // A skill's names to look for in highlight text: "Google Cloud / GCP" → "Google Cloud", "GCP".
+    const aliases = (n: string) => [...new Set([n, ...n.split(/\s*\/\s*|\s*\(|\)\s*/)].map((x) => x.trim()).filter((x) => x.length >= 2))];
+    const mentions = (text: string, n: string) => aliases(n).some((a) => new RegExp(`(^|[^a-z0-9])${esc(a)}($|[^a-z0-9])`, 'i').test(text));
+    // Evidence from a highlight: the sentence that mentions the skill, kept to about one line.
+    function evidenceFor(r: Role, n: string) {
+      for (const h of r.highlights) {
+        if (!mentions(h, n)) continue;
+        let t = (h.split(/(?<=[.!?])\s+(?=[A-Z])/).find((x) => mentions(x, n)) ?? h).replace(/\.$/, '').trim();
+        // Drop a heading such as "Omnichannel Messaging: " unless the skill is only named in the heading.
+        const head = t.match(/^([^:]{3,60}):\s+(.+)$/);
+        if (head && mentions(head[2], n)) t = head[2];
+        if (t.length <= 150) return t;
+        // Too long: end at the last clause break that keeps the skill, else at a word with "…".
+        const breaks = [...t.slice(0, 150).matchAll(/[,;]\s|\s(?:and|by|to|with|while)\s/g)].map((m) => m.index!).reverse();
+        const cut = breaks.find((i) => i >= 50 && mentions(t.slice(0, i), n));
+        return cut !== undefined ? t.slice(0, cut) : `${t.slice(0, 147).replace(/\s+\S*$/, '')}…`;
+      }
+      return '';
+    }
+    const touch = (r: Role) => { dirty.add(r.path); };
+    function setRoleSkill(r: Role, name: string, on: boolean, evidence = '') {
+      const k = key(name);
+      if (on && !r.skills.has(k)) { r.skills.set(k, { name: matrix.get(k)?.name ?? name, evidence }); touch(r); return true; }
+      if (!on && r.skills.has(k)) { r.skills.delete(k); touch(r); return true; }
+      return false;
+    }
+
+    function setMode(m: 'grid' | 'role') {
+      mode = m;
+      $('#tab-grid').setAttribute('aria-selected', String(m === 'grid')); $('#tab-grid').tabIndex = m === 'grid' ? 0 : -1;
+      $('#tab-role').setAttribute('aria-selected', String(m === 'role')); $('#tab-role').tabIndex = m === 'role' ? 0 : -1;
+      $('#view-grid').hidden = m !== 'grid'; $('#view-role').hidden = m !== 'role';
+      document.querySelectorAll<HTMLElement>('[data-grid-only]').forEach((e) => (e.hidden = m !== 'grid'));
+      if (m === 'grid') { renderGrid(); renderPanel(); } else renderRole();
+    }
+    function fillRolePickers() {
+      const opts = (sel: HTMLSelectElement, first?: string) => {
+        const keep = sel.value;
+        sel.replaceChildren(...(first ? [el('option', { value: '' }, first)] : []),
+          ...roles.map((r) => el('option', { value: r.path }, `${roleLabel(r)}${r.earlier ? ' (earlier)' : ''}`)));
+        if (keep && roles.some((r) => r.path === keep)) sel.value = keep;
+      };
+      opts($<HTMLSelectElement>('#role-pick'));
+      opts($<HTMLSelectElement>('#copy-from'), 'Copy from…');
+      current = roles.find((r) => r.path === $<HTMLSelectElement>('#role-pick').value) ?? roles[0] ?? null;
+    }
+    function renderRole() {
+      const r = current;
+      if (!r) return;
+      const missing = [...r.skills.values()].filter((s) => !s.evidence.trim()).length;
+      $('#role-summary').textContent = `${r.skills.size} skill${r.skills.size === 1 ? '' : 's'}${missing ? ` · ${missing} without evidence` : ''}${dirty.has(r.path) ? ' · changed' : ''}`;
+      [...$<HTMLSelectElement>('#copy-from').options].forEach((o) => (o.disabled = o.value === r.path));
+      const q = $<HTMLInputElement>('#role-filter').value.trim().toLowerCase();
+      const onlyOn = $<HTMLInputElement>('#only-on').checked;
+      // Matrix skills by group, plus any of this role's skills that aren't in the matrix.
+      const groups = new Map<string, { k: string; name: string; level?: string }[]>();
+      [...matrix.entries()].sort((a, b) => a[1].pos - b[1].pos).forEach(([k, m]) => {
+        if (!groups.has(m.group)) groups.set(m.group, []);
+        groups.get(m.group)!.push({ k, name: m.name, level: m.level });
+      });
+      const orphans = [...r.skills.entries()].filter(([k]) => !matrix.has(k)).map(([k, s]) => ({ k, name: s.name }));
+      if (orphans.length) groups.set('Not in skill matrix', orphans);
+      const out: HTMLElement[] = [];
+      for (const [g, items] of groups) {
+        const shown = items.filter((i) => (!onlyOn || r.skills.has(i.k)) && (!q || i.name.toLowerCase().includes(q) || g.toLowerCase().includes(q)));
+        if (!shown.length) continue;
+        const on = items.filter((i) => r.skills.has(i.k)).length;
+        const all = el('button', { type: 'button', className: 'sbr-linkbtn', 'data-group': g }, shown.every((i) => r.skills.has(i.k)) ? 'Untick all' : 'Tick all');
+        const ul = el('ul');
+        for (const i of shown) {
+          const entry = r.skills.get(i.k);
+          const id = `rs-${i.k.replace(/[^a-z0-9]+/g, '-')}`;
+          const box = el('input', { type: 'checkbox', id, checked: !!entry, 'data-key': i.k, 'data-name': i.name });
+          const li = el('li', { className: entry ? 'on' : '' },
+            el('label', { htmlFor: id }, box, el('span', {}, i.name), i.level ? el('small', {}, LEVEL_LABEL[i.level] ?? i.level) : el('small', { className: 'sbr-warn' }, matrix.has(i.k) ? '' : 'Not in matrix')));
+          if (entry) {
+            const ev = el('input', { type: 'text', className: 'sbr-ev', value: entry.evidence, placeholder: 'Evidence from this role (optional)', 'data-key': i.k, 'aria-label': `Evidence for ${i.name}` });
+            li.append(ev);
+          }
+          ul.append(li);
+        }
+        out.push(el('section', { className: 'sbr-group' }, el('header', {}, el('h3', {}, g), el('span', { className: 'sbr-muted' }, `${on} of ${items.length}`), all), ul));
+      }
+      if (!out.length) out.push(el('p', { className: 'sbr-muted' }, onlyOn ? 'This role has no skills yet. Untick "Only skills in this role" to choose some.' : 'No skills match the filter.'));
+      $('#role-list').replaceChildren(...out);
+      $('#change-count').textContent = dirty.size ? `${dirty.size} role${dirty.size > 1 ? 's' : ''} changed` : 'No changes';
+      $<HTMLButtonElement>('#save').disabled = dirty.size === 0;
+    }
+    const bulkStatus = (msg: string, error = false) => setStatus('#bulk-status', msg, error);
+    // Parse a pasted list: commas, semicolons, new lines or bullets.
+    const parseList = (t: string) => [...new Set(t.split(/[,;\n]|\s•\s/).map((x) => x.replace(/^[\s•*-]+/, '').trim()).filter(Boolean))];
+    // Match a pasted name to the matrix: exact, then by alias ("GCP" → "Google Cloud / GCP").
+    function findSkill(n: string) {
+      const k = key(n);
+      if (matrix.has(k)) return matrix.get(k)!;
+      return [...matrix.values()].find((m) => aliases(m.name).some((a) => key(a) === k));
+    }
+
+    $('#tab-grid').addEventListener('click', () => setMode('grid'));
+    $('#tab-role').addEventListener('click', () => setMode('role'));
+    $('.sbr-tabs').addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      setMode(mode === 'grid' ? 'role' : 'grid'); $(mode === 'grid' ? '#tab-grid' : '#tab-role').focus();
+    });
+    $('#role-pick').addEventListener('change', () => {
+      current = roles.find((r) => r.path === $<HTMLSelectElement>('#role-pick').value) ?? null;
+      $('#suggest-review').hidden = true; bulkStatus(''); renderRole();
+    });
+    $('#role-filter').addEventListener('input', renderRole);
+    $('#only-on').addEventListener('change', renderRole);
+    $('#role-list').addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (!current || t.type !== 'checkbox') return;
+      setRoleSkill(current, t.dataset.name!, t.checked, t.checked ? evidenceFor(current, t.dataset.name!) : '');
+      renderRole();
+      document.getElementById(t.id)?.focus();
+    });
+    $('#role-list').addEventListener('input', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (!current || !t.classList.contains('sbr-ev')) return;
+      const entry = current.skills.get(t.dataset.key!);
+      if (entry) { entry.evidence = t.value; touch(current); $('#change-count').textContent = `${dirty.size} role${dirty.size > 1 ? 's' : ''} changed`; $<HTMLButtonElement>('#save').disabled = false; }
+    });
+    $('#role-list').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-group]');
+      if (!b || !current) return;
+      const boxes = [...b.closest('section')!.querySelectorAll<HTMLInputElement>('input[type=checkbox]')];
+      const on = !boxes.every((x) => x.checked);
+      let n = 0;
+      boxes.forEach((x) => { if (setRoleSkill(current!, x.dataset.name!, on, on ? evidenceFor(current!, x.dataset.name!) : '')) n++; });
+      bulkStatus(`${on ? 'Added' : 'Removed'} ${n} skill${n === 1 ? '' : 's'} in ${b.dataset.group}.`);
+      renderRole();
+    });
+    $('#paste-add').addEventListener('click', () => pasteApply(true));
+    $('#paste-remove').addEventListener('click', () => pasteApply(false));
+    function pasteApply(on: boolean) {
+      if (!current) return;
+      const names = parseList($<HTMLTextAreaElement>('#paste-list').value);
+      if (!names.length) { bulkStatus('Paste some skill names first.', true); return; }
+      let changed = 0, already = 0;
+      const unknown: string[] = [];
+      for (const n of names) {
+        const m = findSkill(n);
+        if (!m) { unknown.push(n); continue; }
+        if (setRoleSkill(current, m.name, on, on ? evidenceFor(current, m.name) : '')) changed++; else already++;
+      }
+      const parts = [`${on ? 'Added' : 'Removed'} ${changed}`];
+      if (already) parts.push(`${already} ${on ? 'already in' : 'not in'} this role`);
+      if (unknown.length) parts.push(`not in your skill matrix (add them in Toolkit first): ${unknown.join(', ')}`);
+      bulkStatus(parts.join(' · ') + '.', unknown.length > 0 && changed === 0);
+      if (!unknown.length) $<HTMLTextAreaElement>('#paste-list').value = '';
+      else $<HTMLTextAreaElement>('#paste-list').value = unknown.join('\n');
+      renderRole();
+    }
+    $('#suggest-btn').addEventListener('click', () => {
+      if (!current) return;
+      const text = current.highlights.join('\n');
+      const found = [...matrix.entries()].filter(([k, m]) => !current!.skills.has(k) && mentions(text, m.name)).sort((a, b) => a[1].pos - b[1].pos);
+      if (!found.length) { $('#suggest-review').hidden = true; bulkStatus(current.highlights.length ? 'No new suggestions: every skill the highlights mention is already in this role.' : 'This role has no highlights to suggest from.'); return; }
+      $('#suggest-list').replaceChildren(...found.map(([k, m]) => {
+        const id = `sg-${k.replace(/[^a-z0-9]+/g, '-')}`;
+        return el('li', {}, el('label', { htmlFor: id }, el('input', { type: 'checkbox', id, checked: true, 'data-name': m.name }), el('strong', {}, m.name), el('small', {}, m.group)),
+          el('p', {}, evidenceFor(current!, m.name)));
+      }));
+      $('#suggest-review').hidden = false;
+      bulkStatus(`${found.length} suggestion${found.length === 1 ? '' : 's'} to review.`);
+      $('#suggest-title').scrollIntoView({ block: 'nearest' });
+    });
+    $('#suggest-add').addEventListener('click', () => {
+      if (!current) return;
+      let n = 0;
+      $('#suggest-list').querySelectorAll<HTMLInputElement>('input:checked').forEach((x) => { if (setRoleSkill(current!, x.dataset.name!, true, evidenceFor(current!, x.dataset.name!))) n++; });
+      $('#suggest-review').hidden = true;
+      bulkStatus(`Added ${n} suggested skill${n === 1 ? '' : 's'} with evidence from the highlights.`);
+      renderRole();
+    });
+    $('#suggest-cancel').addEventListener('click', () => { $('#suggest-review').hidden = true; bulkStatus(''); });
+    $('#fill-btn').addEventListener('click', () => {
+      if (!current) return;
+      let n = 0, left = 0;
+      current.skills.forEach((s) => { if (s.evidence.trim()) return; const ev = evidenceFor(current!, s.name); if (ev) { s.evidence = ev; n++; } else left++; });
+      if (n) touch(current);
+      bulkStatus(n ? `Filled evidence for ${n} skill${n === 1 ? '' : 's'} from the highlights${left ? `; ${left} still need it written by hand` : ''}.`
+        : left ? `None of the ${left} skills without evidence are mentioned in the highlights; write theirs by hand.` : 'Every skill in this role already has evidence.');
+      renderRole();
+    });
+    $('#copy-btn').addEventListener('click', () => {
+      const from = roles.find((r) => r.path === $<HTMLSelectElement>('#copy-from').value);
+      if (!current || !from) { bulkStatus('Choose a role to copy from.', true); return; }
+      let n = 0;
+      // Copies the skills, not the evidence (that belongs to the other role); fills evidence from this role's highlights.
+      from.skills.forEach((s) => { if (setRoleSkill(current!, s.name, true, evidenceFor(current!, s.name))) n++; });
+      bulkStatus(n ? `Copied ${n} skill${n === 1 ? '' : 's'} from ${from.short ?? from.org}. Evidence was filled where this role's highlights mention them.` : `This role already has every skill ${from.short ?? from.org} has.`);
+      renderRole();
+    });
+    $('#clear-btn').addEventListener('click', () => {
+      if (!current || !current.skills.size) return;
+      if (!confirm(`Remove all ${current.skills.size} skills from ${roleLabel(current)}? Nothing is saved until you click Save to GitHub.`)) return;
+      current.skills.clear(); touch(current);
+      bulkStatus('Removed every skill from this role. Save to GitHub to keep the change, or reload the page to undo.');
+      renderRole();
+    });
+
     // ---- Events ----
     $('#grid').addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.ev-cell');
@@ -256,7 +509,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
         try { $<HTMLInputElement>('#remember').checked ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY); } catch {}
         $('#signin').hidden = true; $('#editor').hidden = false;
         setStatus('#editor-status', `Loaded ${roles.length} roles and your skill matrix from main.`);
-        renderGrid(); renderPanel();
+        fillRolePickers(); setMode(mode);
       } catch (err) { setStatus('#signin-status', (err as Error).message, true); }
     });
 
@@ -280,7 +533,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
         const names = changed.map((r) => r.short ?? r.org).join(', ');
         const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message: `Update skills by role: ${names}`, tree: newTree.sha, parents: [ref.object.sha] }) });
         await gh(`/git/refs/heads/${BRANCH}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
-        await load(); renderGrid(); renderPanel();
+        await load(); fillRolePickers(); setMode(mode);
         setStatus('#editor-status', `Saved ${changed.length} role${changed.length > 1 ? 's' : ''}. The site updates in about a minute.`);
       } catch (err) {
         setStatus('#editor-status', (err as Error).message, true);

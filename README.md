@@ -58,6 +58,11 @@ Things to know:
     GitHub token, click cells to add or remove a skill for a role, pick or type the evidence,
     then **Save to GitHub** (one commit for all changed roles). Skill names come from the matrix,
     so levels always match. Behind the scenes each role's **Skills shown in Toolkit** list holds it.
+    **By role (bulk)** tab: pick one role and tick or untick any number of skills from the whole
+    matrix (or a whole group at once), paste a list of names (commas or one per line; "GCP" finds
+    "Google Cloud / GCP"), **Suggest from highlights** (matrix skills the role's highlights mention,
+    with evidence taken from them, to review before adding), **Fill missing evidence**, or **Copy
+    skills** from another role. Nothing is saved until **Save to GitHub**.
   - *Every skill*: change any skill's level or evidence in **Toolkit → Skill groups**.
 - The editor rewrites YAML when it saves, so comments in edited files are dropped.
 - **Theme & colors** (Profile & settings): pick a preset (Ocean, Emerald, Indigo, Graphite, Sunset,

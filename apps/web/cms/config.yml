@@ -478,7 +478,7 @@ collections:
         widget: list
         required: false
         summary: '{{fields.name}}'
-        hint: 'Each entry fills one cell in the Skills by role map. Easier: edit every role at once at /admin/skills-by-role/.'
+        hint: 'Each entry fills one cell in the Skills by role map. Easier: edit every role at once, or many skills for one role (By role tab), at /admin/skills-by-role/.'
         fields:
           - { name: name, label: Skill, widget: string }
           - { name: evidence, label: Evidence from this role, widget: string, required: false, hint: Shown when a visitor selects the cell. }
