@@ -47,4 +47,10 @@ skills:
     evidence: ''
   - name: Runbook Development
     evidence: ''
+  - name: PRD
+    evidence: ''
+  - name: BRD
+    evidence: ''
+  - name: Technical Specification Document - TSD
+    evidence: ''
 ---
