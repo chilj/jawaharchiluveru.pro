@@ -12,6 +12,7 @@ import MeetingRequest from '../components/MeetingRequest.astro';
 import { brandFor } from '../lib/icons';
 import { getResume } from '../lib/resume';
 import { getCertifications } from '../lib/certifications';
+import { skillId } from '../lib/skills';
 import {
   byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase, LEVELS,
 } from '../lib/content';
@@ -440,7 +441,7 @@ const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))
                   {g.items.map((i) => {
                     const svg = brandFor(i.name, i.logo);
                     return (
-                      <li data-score={score(i)} data-text={`${i.name} ${i.evidence ?? ''}`.toLowerCase()} class={isPlaceholder(i.name) ? 'chip-placeholder' : ''}>
+                      <li id={isPlaceholder(i.name) ? undefined : skillId(i.name)} data-score={score(i)} data-text={`${i.name} ${i.evidence ?? ''}`.toLowerCase()} class={isPlaceholder(i.name) ? 'chip-placeholder' : ''}>
                         <span class="skill-name">
                           <span>{svg && <Fragment set:html={svg} />}<span class="hl">{i.name}</span></span>
                           {i.evidence && <span class="evidence hl">{i.evidence}</span>}

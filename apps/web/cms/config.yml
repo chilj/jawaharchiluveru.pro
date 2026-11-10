@@ -228,9 +228,10 @@ collections:
           - { name: show_contact, label: Show email and LinkedIn on the maintenance page, widget: boolean, default: true }
 
       - name: navigation
-        label: Header menu links
+        label: Header menu and search
         file: content/navigation.yaml
         fields:
+          - { name: skill_search, label: Skill search in the header, widget: boolean, default: true, hint: "A Search skills button (also / or Ctrl/⌘ K) that looks up any skill in the Toolkit, with its level and the roles it was used in." }
           - name: links
             label: Links
             label_singular: Link
