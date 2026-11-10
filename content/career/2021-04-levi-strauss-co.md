@@ -48,35 +48,26 @@ skills:
   - name: GitHub Copilot
     evidence: Drove adoption of GitHub Copilot and Amazon Q/Kiro across 6 engineers
   - name: Platform Product Management
-    evidence: ''
   - name: Backlog Management
-    evidence: ''
   - name: MVP Definition
-    evidence: ''
   - name: Stakeholder Management
-    evidence: ''
   - name: Systems Integration
-    evidence: ''
   - name: Platform Engineering
-    evidence: ''
   - name: DevOps
-    evidence: ''
   - name: AI-Assisted Discovery
-    evidence: ''
   - name: AI-Assisted Documentation
-    evidence: ''
   - name: Scrum Master
-    evidence: ''
   - name: UAT
-    evidence: ''
   - name: E-Commerce
-    evidence: ''
   - name: Vendor Management
-    evidence: ''
   - name: Data Analysis
-    evidence: ''
   - name: SEO
-    evidence: ''
   - name: QR Code Generation
-    evidence: ''
+  - name: Technical Specification Document (TSD)
+  - name: Non-Functional Requirements (NFR)
+  - name: Workflow Redesign
+  - name: Data Mapping
+  - name: Data Quality
+  - name: AI Agents
+  - name: Product Ownership
 ---

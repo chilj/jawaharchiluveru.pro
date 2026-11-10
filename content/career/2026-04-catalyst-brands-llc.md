@@ -22,7 +22,7 @@ to_verify: []
 short: Catalyst
 skills:
   - name: Platform Product Management
-    evidence: 'Modernization of a Platform-as-a-Product offering: infrastructure, security, observability, developer experience'
+    evidence: "Modernization of a Platform-as-a-Product offering: infrastructure, security, observability, developer experience"
   - name: Requirements Engineering
     evidence: Turned the architecture vision into a backlog of 50+ user stories
   - name: MVP Definition
@@ -44,17 +44,17 @@ skills:
   - name: AI Agents
     evidence: Prototyped an AI agent that runs performance tests and performs root-cause analysis
   - name: Data Analysis
-    evidence: ''
   - name: Runbook Development
-    evidence: ''
   - name: Product Requirements Document (PRD)
-    evidence: ''
   - name: Business requirements (BRD)
-    evidence: ''
   - name: Technical Specification Document (TSD)
-    evidence: ''
   - name: Salesforce Marketing Cloud
-    evidence: ''
   - name: Functional Requirements (FRD)
-    evidence: ''
+  - name: Non-Functional Requirements (NFR)
+  - name: Data Mapping
+  - name: Data Quality
+  - name: GitHub Copilot
+  - name: DevOps
+  - name: Stakeholder Management
+  - name: Product Ownership
 ---

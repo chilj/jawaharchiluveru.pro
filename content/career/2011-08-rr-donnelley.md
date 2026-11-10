@@ -15,12 +15,9 @@ highlights:
 to_verify: []
 short: RRD
 skills:
-  - name: Business Requirements - BRD
-    evidence: ''
-  - name: Functional Requirements - FRD
-    evidence: ''
-  - name: TSD
-    evidence: ''
-  - name: NFR - Non-functional requirements
-    evidence: ''
+  - name: Non-Functional Requirements (NFR)
+  - name: Functional Requirements (FRD)
+  - name: Business requirements (BRD)
+  - name: Stakeholder Management
+  - name: Backlog Management
 ---

@@ -26,7 +26,16 @@ skills:
   - name: Release Governance
     evidence: Managed release plans
   - name: Data Analysis
-    evidence: ''
   - name: UAT
-    evidence: ''
+  - name: Functional Requirements (FRD)
+  - name: Business requirements (BRD)
+  - name: Workflow Redesign
+  - name: Scrum Master
+  - name: Data Mapping
+  - name: Data Quality
+  - name: DevOps
+  - name: Stakeholder Management
+  - name: Vendor Management
+  - name: KPI / Success Metrics
+  - name: Technical Specification Document (TSD)
 ---

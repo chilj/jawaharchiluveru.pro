@@ -26,11 +26,15 @@ skills:
   - name: Scrum Master
     evidence: Senior Business Systems Analyst & Scrum Master
   - name: UAT
-    evidence: ''
   - name: Runbook Development
-    evidence: ''
   - name: Data Analysis
-    evidence: ''
   - name: Data Mapping
-    evidence: ''
+  - name: Functional Requirements (FRD)
+  - name: Workflow Redesign
+  - name: Release Governance
+  - name: Data Migration
+  - name: Data Quality
+  - name: KPI / Success Metrics
+  - name: Backlog Management
+  - name: Product Ownership
 ---

@@ -26,13 +26,11 @@ skills:
   - name: Workflow Redesign
     evidence: Redesigned workflows and UI, migrating legacy systems to IBM BPM
   - name: Business requirements (BRD)
-    evidence: ''
   - name: Functional Requirements (FRD)
-    evidence: ''
   - name: Non-Functional Requirements (NFR)
-    evidence: ''
   - name: UAT
-    evidence: ''
   - name: Technical Specification Document (TSD)
-    evidence: ''
+  - name: Data Migration
+  - name: Stakeholder Management
+  - name: Backlog Management
 ---
