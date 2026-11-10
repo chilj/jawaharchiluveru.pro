@@ -89,8 +89,13 @@ Things to know:
   token. Each switches on when its ID is set and loads after the page renders. Every tappable
   control sends `ui_click` (label, section, and open/close state for collapsible headers). Named
   events on top: `resume_download`, `contact_click` (email, LinkedIn, booking), `case_study_open`,
-  `playbook_open`, `playbook_download`, `file_download`, `outbound_click`, `skill_search`,
+  `playbook_open`, `playbook_download`, `file_download`, `outbound_click`,
   `feedback_open`, `feedback_submit`, and the `chat_*` events below.
+  Skill searches send GA4's recommended `search` event: `search_term` (shows under GA4's built-in
+  **Search term** dimension), `search_location` (`header` or `toolkit`), `search_results` and
+  `search_found` (`yes`/`no`, so you can see what people looked for and didn't find). Terms that look
+  like an email address or a long number are never sent. Opening the header search sends
+  `skill_search_open`; choosing a result sends `select_content` (`content_type: skill`).
   Visitors with Do Not Track or Global Privacy Control get no analytics (switchable).
   Cookie consent: visitors in Europe (by time zone; or everyone, or no one) see a banner, and
   Clarity/GA4 load only after **Accept**. The choice lasts 6 months; **Cookie settings** in the

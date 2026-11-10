@@ -33,8 +33,11 @@ const base = import.meta.env.BASE_URL;
     let results: Skill[] = [];
     let active = 0;
     let total = 0;
-    let lastTracked = '';
     const track = (name: string, label: string, extra?: Record<string, string>) => (window as any).jcTrack?.(name, label, extra);
+    // Keyword tracking (Analytics.astro): sent after a pause in typing, or straight away when a result is
+    // chosen or the search is closed.
+    let timer: number | undefined;
+    const sendTerm = () => { clearTimeout(timer); if (skills) (window as any).jcSearch?.(input.value, 'header', total); };
 
     const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9+#.]+/g, ' ').trim();
     const load = async () => {
@@ -133,7 +136,8 @@ const base = import.meta.env.BASE_URL;
     function go(i: number) {
       const s = results[i];
       if (!s) return;
-      track('skill_lookup_open', s.name, { query: input.value.trim().slice(0, 60) });
+      sendTerm();
+      track('select_content', s.name, { content_type: 'skill', item_id: s.id, search_location: 'header' });
       dialog!.close();
       const onHome = document.getElementById(s.id)?.tagName === 'LI';
       if (onHome) { history.pushState(null, '', `#${s.id}`); revealSkill(s.id); }
@@ -142,9 +146,10 @@ const base = import.meta.env.BASE_URL;
 
     async function open() {
       if (dialog!.open) return;
+      sendTerm(); // the last search, if the close event hasn't sent it yet
       dialog!.showModal();
       input.value = ''; active = 0;
-      track('skill_lookup', location.pathname);
+      track('skill_search_open', location.pathname);
       if (await load()) render();
       input.focus();
     }
@@ -155,21 +160,19 @@ const base = import.meta.env.BASE_URL;
     dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
     // "/" (outside text fields) or Ctrl/⌘ K opens the search.
     document.addEventListener('keydown', (e) => {
+      if (dialog.open) return;
       const t = e.target as HTMLElement;
-      const typing = t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+      const typing = !dialog.contains(t) && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
       if (((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !e.altKey)) {
         e.preventDefault(); open();
       }
     });
-    let timer: number | undefined;
     input.addEventListener('input', () => {
       active = 0; render();
       clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        const q = input.value.trim().toLowerCase();
-        if (q.length >= 2 && q !== lastTracked) { lastTracked = q; track('skill_search', q, { results: String(results.length), where: 'lookup' }); }
-      }, 1200);
+      timer = window.setTimeout(sendTerm, 1200);
     });
+    dialog.addEventListener('close', sendTerm);
     input.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(results.length - 1, active + 1); mark(); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); mark(); }

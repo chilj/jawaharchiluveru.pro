@@ -43,6 +43,20 @@ const config = {
         }
       };
 
+      // Search keywords, sent as GA4's recommended "search" event so they appear under the built-in
+      // "Search term" dimension. where: header (Search skills dialog) or toolkit (the Toolkit filter box).
+      // results: how many skills matched (0 = searched for something that isn't listed).
+      // Terms are lowercased and trimmed; anything that looks like an email address or a phone or ID number
+      // is never sent. Each term is counted once per page view and location.
+      var sentTerms = {};
+      window.jcSearch = function (term, where, results) {
+        var t = String(term || '').toLowerCase().replace(/\s+/g, ' ').trim().slice(0, 50);
+        if (t.length < 2 || /@|\d{5,}/.test(t)) return;
+        if (sentTerms[where + '|' + t]) return; sentTerms[where + '|' + t] = 1;
+        var n = Number(results) || 0;
+        window.jcTrack('search', '', { search_term: t, search_location: where, search_results: n, search_found: n > 0 ? 'yes' : 'no' });
+      };
+
       // A/B test version picked by the home page's <head> script, which runs after this one, so read it
       // when needed (absent on other pages and when the test is off).
       // A ?variant= preview is not counted.
@@ -162,7 +176,9 @@ const config = {
         if (!e.target || e.target.id !== 'skill-search') return;
         clearTimeout(timer);
         var box = e.target;
-        timer = setTimeout(function () { var q = box.value.trim().toLowerCase(); if (q.length >= 2) window.jcTrack('skill_search', q); }, 1500);
+        timer = setTimeout(function () {
+          window.jcSearch(box.value, 'toolkit', document.querySelectorAll('.skill-rows li:not([hidden])').length);
+        }, 1500);
       });
     })();
   </script>
