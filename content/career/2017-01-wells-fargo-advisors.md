@@ -29,10 +29,10 @@ skills:
     evidence: ''
   - name: Functional Requirements (FRD)
     evidence: ''
-  - name: non-functional requirements (FRD)
+  - name: Non-Functional Requirements (NFR)
     evidence: ''
   - name: UAT
     evidence: ''
-  - name: Technical Specification Document - TSD
+  - name: Technical Specification Document (TSD)
     evidence: ''
 ---
