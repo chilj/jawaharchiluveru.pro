@@ -13,4 +13,14 @@ status: published
 highlights:
   - Supported logistics metrics platform analyzing warehouse and shipment performance.
 to_verify: []
+short: RRD
+skills:
+  - name: Business Requirements - BRD
+    evidence: ''
+  - name: Functional Requirements - FRD
+    evidence: ''
+  - name: TSD
+    evidence: ''
+  - name: NFR - Non-functional requirements
+    evidence: ''
 ---
