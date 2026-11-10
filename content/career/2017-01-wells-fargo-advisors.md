@@ -33,4 +33,6 @@ skills:
     evidence: ''
   - name: UAT
     evidence: ''
+  - name: Technical Specification Document - TSD
+    evidence: ''
 ---
