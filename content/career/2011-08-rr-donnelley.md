@@ -14,10 +14,5 @@ highlights:
   - Supported logistics metrics platform analyzing warehouse and shipment performance.
 to_verify: []
 short: RRD
-skills:
-  - name: Non-Functional Requirements (NFR)
-  - name: Functional Requirements (FRD)
-  - name: Business requirements (BRD)
-  - name: Stakeholder Management
-  - name: Backlog Management
+skills: []
 ---
