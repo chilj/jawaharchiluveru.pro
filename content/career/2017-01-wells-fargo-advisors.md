@@ -25,4 +25,12 @@ skills:
     evidence: Supported production releases and post-implementation validation
   - name: Workflow Redesign
     evidence: Redesigned workflows and UI, migrating legacy systems to IBM BPM
+  - name: Business requirements (BRD)
+    evidence: ''
+  - name: Functional Requirements (FRD)
+    evidence: ''
+  - name: non-functional requirements (FRD)
+    evidence: ''
+  - name: UAT
+    evidence: ''
 ---
