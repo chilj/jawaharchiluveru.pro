@@ -57,4 +57,6 @@ skills:
   - name: DevOps
   - name: Stakeholder Management
   - name: Product Ownership
+  - name: Systems Integration
+  - name: Workflow Redesign
 ---

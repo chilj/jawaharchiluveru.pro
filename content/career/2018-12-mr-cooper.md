@@ -38,4 +38,10 @@ skills:
   - name: Vendor Management
   - name: KPI / Success Metrics
   - name: Technical Specification Document (TSD)
+  - name: Systems Integration
+  - name: Runbook Development
+  - name: Data Migration
+  - name: Data Reconciliation
+  - name: ERD
+  - name: Non-Functional Requirements (NFR)
 ---

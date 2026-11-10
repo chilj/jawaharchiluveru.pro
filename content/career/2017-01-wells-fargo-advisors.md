@@ -33,4 +33,10 @@ skills:
   - name: Data Migration
   - name: Stakeholder Management
   - name: Backlog Management
+  - name: Systems Integration
+  - name: Data Analysis
+  - name: Data Quality
+  - name: Data Mapping
+  - name: Scrum Master
+  - name: ERD
 ---

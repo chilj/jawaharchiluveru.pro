@@ -37,4 +37,8 @@ skills:
   - name: KPI / Success Metrics
   - name: Backlog Management
   - name: Product Ownership
+  - name: Incident Response
+  - name: ERD
+  - name: Non-Functional Requirements (NFR)
+  - name: Technical Specification Document (TSD)
 ---

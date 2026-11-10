@@ -70,4 +70,8 @@ skills:
   - name: Data Quality
   - name: AI Agents
   - name: Product Ownership
+  - name: Data Reconciliation
+  - name: ERD
+  - name: Functional Requirements (FRD)
+  - name: Product Requirements Document (PRD)
 ---
