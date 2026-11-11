@@ -31,8 +31,8 @@ collections:
           - { name: tagline, label: Tagline, widget: text, hint: One or two sentences under your name. }
           - { name: seo_title, label: Search title, widget: string, required: false, hint: 'Browser tab and search result title. Keep under 60 characters. Default: Name | Role.' }
           - { name: description, label: Search description, widget: text, hint: 'Shown in search results and link previews. Keep to about 150 characters.' }
-          - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Use 1200×630 pixels (PNG or JPG).' }
-          - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe the image for screen readers.' }
+          - { name: social_image, label: Social preview image, widget: image, required: false, hint: 'Shown when the site is shared on LinkedIn, Slack or X. Leave empty to use the card generated from your name, role, location and stats (in your theme colors). Your own image: 1200×630 pixels, PNG or JPG.' }
+          - { name: social_image_alt, label: Social preview image description, widget: text, required: false, hint: 'Describe your own image for screen readers. Not needed for the generated card (its description is written from your content).' }
           - { name: site_icon, label: Site icon (large), widget: image, required: false, hint: 'Square image, at least 512×512. Used for phone home screens and other large icons. Leave empty to use the JC icon in your theme colors.' }
           - { name: header_logo, label: Header logo, widget: select, default: site_icon, options: [{ label: 'Site icon (small)', value: site_icon }, { label: 'My own image', value: image }, { label: 'Initials on a color tile', value: initials }], hint: 'The square in the top-left corner of every page.' }
           - { name: header_logo_image, label: Header logo image, widget: image, required: false, hint: 'Used when Header logo is "My own image". Square, shown at about 36×36 pixels (SVG or PNG at least 72×72).' }
