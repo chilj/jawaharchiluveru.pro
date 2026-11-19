@@ -54,6 +54,11 @@ Things to know:
 - **Toolkit** has three parts, all editable:
   - *T-shaped profile*: breadth comes from the skill groups; depth lists the Advanced–Expert and
     Expert domains in **Toolkit → Overall profile**. Edit the depth heading under **T-shaped profile**.
+  - *Profile photo*: **/admin/photo/** (same GitHub token). Drop in a photo, drag and zoom to frame
+    it (4:5), set where round crops sit, add a description, and save: the browser re-encodes it to a
+    1200×1500 JPEG, which removes location and camera data, and commits it with the About settings
+    in one commit. The build makes the sizes the site uses (`/photo/*.webp`, `.jpg`); it appears
+    beside the bio and on the generated link-preview card (each switchable in About).
   - *Skills by role*: edit the whole map at **/admin/skills-by-role/**. Sign in with the same
     GitHub token, click cells to add or remove a skill for a role, pick or type the evidence,
     then **Save to GitHub** (one commit for all changed roles). Skill names come from the matrix,

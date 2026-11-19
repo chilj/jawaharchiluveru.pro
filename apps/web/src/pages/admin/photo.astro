@@ -1,0 +1,344 @@
+---
+// Profile photo tool: drop in a photo, frame it, see where it appears, save. The browser crops and
+// re-encodes it (which drops camera and location data) and commits the photo plus About settings
+// to main in one commit with the owner's GitHub token, like the Skills by role editor.
+import '@fontsource-variable/ibm-plex-sans/wght.css';
+import '@fontsource-variable/sora/wght.css';
+import '../../styles/global.css';
+import { getEntry } from 'astro:content';
+import { buildTheme } from '../../lib/theme';
+const home = import.meta.env.BASE_URL;
+const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
+---
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Profile photo · Jawahar Chiluveru</title>
+  <style is:inline set:html={theme.css}></style>
+</head>
+<body class="sbr">
+  <header class="sbr-bar">
+    <div class="sbr-wrap sbr-bar-inner">
+      <div>
+        <h1>Profile photo</h1>
+        <p class="sbr-sub">Drop in a photo, frame it, save. Location and camera details are removed. Saving commits to <code>main</code>; the site updates about a minute later.</p>
+      </div>
+      <nav class="sbr-links"><a href={`${home}admin/`}>Content editor</a><a href={`${home}admin/skills-by-role/`}>Skills by role</a><a href={home}>View site</a></nav>
+    </div>
+  </header>
+
+  <main class="sbr-wrap">
+    <section id="signin" class="sbr-card">
+      <h2>Sign in</h2>
+      <p>Paste the same fine-grained GitHub token you use in the content editor (access to <code>chilj/jawaharchiluveru.pro</code>, Contents: Read and write).</p>
+      <form id="signin-form" class="sbr-row">
+        <label class="sr-only" for="token">GitHub token</label>
+        <input id="token" type="password" autocomplete="off" placeholder="github_pat_…" required>
+        <button type="submit" class="btn primary">Load</button>
+      </form>
+      <label class="sbr-check"><input id="remember" type="checkbox"> Remember on this browser</label>
+      <p id="signin-status" class="sbr-status" role="status"></p>
+    </section>
+
+    <section id="editor" hidden>
+      <div class="ph-layout">
+        <div class="sbr-card ph-main">
+          <div id="drop" class="ph-drop" tabindex="-1">
+            <p class="ph-drop-title">Drop a photo here</p>
+            <p class="sbr-muted">JPEG, PNG or WebP, at least 800 pixels on the short side. On an iPhone, choose Photo Library; it converts to JPEG.</p>
+            <label class="btn primary ph-pick">Choose a photo<input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="sr-only"></label>
+          </div>
+
+          <div id="cropper" class="ph-cropper" hidden>
+            <div class="ph-frame-wrap">
+              <div id="frame" class="ph-frame" tabindex="0" role="application" aria-label="Photo framing. Drag, or use the arrow keys, to move the photo; plus and minus to zoom.">
+                <img id="img" alt="" draggable="false">
+                <div class="ph-guide" aria-hidden="true"></div>
+              </div>
+              <p class="sbr-muted ph-tip">Drag to move · scroll or use the slider to zoom</p>
+            </div>
+            <div class="ph-controls">
+              <label for="zoom">Zoom</label>
+              <input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
+              <label for="circle">Circle crops: move up or down</label>
+              <input id="circle" type="range" min="10" max="70" step="1" value="40" aria-describedby="circle-hint">
+              <p id="circle-hint" class="sbr-muted">Sets what the round versions show (link-preview card, small avatars).</p>
+              <label for="alt">Photo description</label>
+              <input id="alt" type="text" placeholder="e.g. Jawahar Chiluveru, smiling, in a navy blazer">
+              <label class="sbr-check"><input id="in-about" type="checkbox" checked> Show beside the bio</label>
+              <label class="sbr-check"><input id="on-card" type="checkbox" checked> Show on the link-preview card</label>
+              <p id="quality" class="sbr-status" role="status"></p>
+              <div class="sbr-row ph-actions">
+                <button id="save" type="button" class="btn primary">Save to GitHub</button>
+                <button id="another" type="button" class="btn">Use a different photo</button>
+              </div>
+            </div>
+          </div>
+          <p id="editor-status" class="sbr-status" role="status"></p>
+        </div>
+
+        <aside class="sbr-card ph-previews" aria-label="Previews">
+          <h2>Where it appears</h2>
+          <figure><canvas id="pv-about" width="240" height="300"></canvas><figcaption>Beside your bio</figcaption></figure>
+          <figure class="ph-card-pv">
+            <div class="ph-card-mini"><span class="ph-card-text"><b>Jawahar Chiluveru</b><br>Senior Technical Product Manager</span><canvas id="pv-card" width="160" height="160"></canvas></div>
+            <figcaption>Link-preview card (LinkedIn, Slack, X, iMessage)</figcaption>
+          </figure>
+          <figure><canvas id="pv-avatar" width="96" height="96"></canvas><figcaption>Small avatar</figcaption></figure>
+          <div id="current" class="ph-current" hidden>
+            <h3>Current photo</h3>
+            <img id="current-img" alt="Your current profile photo">
+            <div class="sbr-row"><button id="recrop" type="button" class="btn">Re-frame it</button><button id="remove" type="button" class="btn sbr-danger">Remove photo</button></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import { parse, parseDocument } from 'yaml';
+
+    const REPO = 'chilj/jawaharchiluveru.pro';
+    const BRANCH = 'main';
+    const TOKEN_KEY = 'jc-sbr-token'; // shared with the Skills by role editor
+    const ABOUT = 'content/about.md';
+    const PHOTO_PATH = 'content/public/files/profile-photo.jpg';
+    const PHOTO_URL = '/files/profile-photo.jpg';
+    const OUT_W = 1200, OUT_H = 1500, MIN_SIDE = 800;
+
+    const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+    let token = '';
+    let about: { sha: string; text: string; data: any } | null = null;
+    let currentPath: string | undefined;
+
+    // ---- GitHub API ----
+    async function gh(path: string, init: RequestInit = {}) {
+      const res = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+        ...init,
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(init.headers ?? {}) },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(res.status === 401 ? 'GitHub rejected the token. Check it hasn’t expired.'
+          : res.status === 403 || res.status === 404 ? 'The token can’t access this repository. Give it access to chilj/jawaharchiluveru.pro with Contents: Read and write.'
+          : `GitHub returned ${res.status}${body.message ? `: ${body.message}` : ''}.`);
+      }
+      return res.json();
+    }
+    const decode = (b64: string) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+    function toBase64(buf: ArrayBuffer) {
+      const bytes = new Uint8Array(buf); let s = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return btoa(s);
+    }
+    const splitFm = (raw: string) => {
+      const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+      if (!m) throw new Error('About has no front matter.');
+      return { fm: m[1], body: m[2] };
+    };
+    const setStatus = (sel: string, msg: string, error = false) => { const s = $(sel); s.textContent = msg; s.classList.toggle('error', error); };
+
+    async function loadAbout() {
+      const f = await gh(`/contents/${ABOUT}?ref=${BRANCH}`);
+      const text = decode(f.content);
+      about = { sha: f.sha, text, data: parse(splitFm(text).fm) ?? {} };
+      currentPath = about.data.photo?.trim() || undefined;
+      $<HTMLInputElement>('#alt').value = about.data.photo_alt ?? '';
+      $<HTMLInputElement>('#in-about').checked = about.data.photo_in_about !== false;
+      $<HTMLInputElement>('#on-card').checked = about.data.photo_on_card !== false;
+      const fy = parseInt(String(about.data.photo_focus ?? '50% 40%').split(' ')[1]);
+      if (!Number.isNaN(fy)) $<HTMLInputElement>('#circle').value = String(Math.min(70, Math.max(10, fy)));
+      $('#current').hidden = !currentPath;
+      if (currentPath) {
+        // Read the current photo through the API (works before the site has redeployed).
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/content/public${currentPath}?ref=${BRANCH}`,
+          { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw' } });
+        if (res.ok) $<HTMLImageElement>('#current-img').src = URL.createObjectURL(await res.blob());
+      }
+    }
+
+    // ---- Cropper: the frame shows a 4:5 window onto the photo ----
+    const img = $<HTMLImageElement>('#img');
+    const frame = $('#frame');
+    let nat = { w: 0, h: 0 }, zoom = 1, pos = { x: 0, y: 0 }; // pos = image top-left inside the frame, in frame px
+    const fw = () => frame.clientWidth, fh = () => frame.clientHeight;
+    const baseScale = () => Math.max(fw() / nat.w, fh() / nat.h);
+    function clamp() {
+      const s = baseScale() * zoom, w = nat.w * s, h = nat.h * s;
+      pos.x = Math.min(0, Math.max(fw() - w, pos.x));
+      pos.y = Math.min(0, Math.max(fh() - h, pos.y));
+    }
+    function layout() {
+      clamp();
+      const s = baseScale() * zoom;
+      img.style.width = `${nat.w * s}px`; img.style.height = `${nat.h * s}px`;
+      img.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+      drawPreviews();
+    }
+    function zoomTo(z: number, cx = fw() / 2, cy = fh() / 2) {
+      const old = baseScale() * zoom;
+      zoom = Math.min(4, Math.max(1, z));
+      const s = baseScale() * zoom;
+      pos.x = cx - (cx - pos.x) * (s / old); pos.y = cy - (cy - pos.y) * (s / old);
+      $<HTMLInputElement>('#zoom').value = String(zoom);
+      layout();
+    }
+    // The framed 4:5 region, in source pixels.
+    function region() {
+      const s = baseScale() * zoom;
+      return { x: -pos.x / s, y: -pos.y / s, w: fw() / s, h: fh() / s };
+    }
+    function render(canvas: HTMLCanvasElement, shape: 'portrait' | 'square') {
+      const r = region(), ctx = canvas.getContext('2d')!;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (shape === 'portrait') { ctx.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, canvas.width, canvas.height); return; }
+      // Square: the full width of the frame, its center at the circle position down the frame.
+      const fy = Number($<HTMLInputElement>('#circle').value) / 100;
+      const side = r.w, top = Math.min(Math.max(r.y + r.h * fy - side / 2, r.y), r.y + r.h - side);
+      ctx.save(); ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2); ctx.clip();
+      ctx.drawImage(img, r.x, top, side, side, 0, 0, canvas.width, canvas.height); ctx.restore();
+    }
+    function drawPreviews() {
+      if (!nat.w) return;
+      render($<HTMLCanvasElement>('#pv-about'), 'portrait');
+      render($<HTMLCanvasElement>('#pv-card'), 'square');
+      render($<HTMLCanvasElement>('#pv-avatar'), 'square');
+    }
+
+    async function openImage(src: string, label: string) {
+      setStatus('#editor-status', '');
+      try {
+        img.src = src;
+        await img.decode();
+      } catch {
+        setStatus('#editor-status', `Couldn’t read ${label}. Save it as a JPEG or PNG and try again.`, true);
+        return;
+      }
+      nat = { w: img.naturalWidth, h: img.naturalHeight };
+      $('#drop').hidden = true; $('#cropper').hidden = false;
+      zoom = 1; $<HTMLInputElement>('#zoom').value = '1';
+      // Start centered horizontally and a little above the middle (faces sit high in portraits).
+      const s = baseScale();
+      pos = { x: (fw() - nat.w * s) / 2, y: (fh() - nat.h * s) * 0.3 };
+      layout();
+      const short = Math.min(nat.w, nat.h);
+      setStatus('#quality', short < MIN_SIDE
+        ? `This photo is ${nat.w}×${nat.h}. It may look soft on large screens; ${MIN_SIDE}+ pixels on the short side is best.`
+        : `${nat.w}×${nat.h} pixels. Good.`, short < MIN_SIDE);
+      frame.focus();
+    }
+    function openFile(file?: File | null) {
+      if (!file) return;
+      if (!file.type.startsWith('image/') && !/\.(heic|heif)$/i.test(file.name)) { setStatus('#editor-status', 'That isn’t an image. Choose a JPEG, PNG or WebP photo.', true); return; }
+      if (file.size > 25 * 1024 * 1024) { setStatus('#editor-status', 'That file is over 25 MB. Choose a smaller photo.', true); return; }
+      openImage(URL.createObjectURL(file), file.name);
+    }
+
+    $('#file').addEventListener('change', (e) => openFile((e.target as HTMLInputElement).files?.[0]));
+    const drop = $('#drop');
+    ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, () => drop.classList.remove('over')));
+    drop.addEventListener('drop', (e) => { e.preventDefault(); openFile((e as DragEvent).dataTransfer?.files[0]); });
+    document.addEventListener('paste', (e) => { const f = [...(e.clipboardData?.files ?? [])].find((x) => x.type.startsWith('image/')); if (f) openFile(f); });
+
+    let drag: { x: number; y: number; px: number; py: number } | null = null;
+    frame.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, px: pos.x, py: pos.y }; frame.setPointerCapture(e.pointerId); frame.classList.add('dragging'); });
+    frame.addEventListener('pointermove', (e) => { if (!drag) return; pos.x = drag.px + e.clientX - drag.x; pos.y = drag.py + e.clientY - drag.y; layout(); });
+    const endDrag = () => { drag = null; frame.classList.remove('dragging'); };
+    frame.addEventListener('pointerup', endDrag); frame.addEventListener('pointercancel', endDrag);
+    frame.addEventListener('wheel', (e) => { e.preventDefault(); const b = frame.getBoundingClientRect(); zoomTo(zoom * (e.deltaY < 0 ? 1.06 : 1 / 1.06), e.clientX - b.left, e.clientY - b.top); }, { passive: false });
+    frame.addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 40 : 8;
+      const moves: Record<string, [number, number]> = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+      if (moves[e.key]) { e.preventDefault(); pos.x += moves[e.key][0]; pos.y += moves[e.key][1]; layout(); }
+      else if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomTo(zoom * 1.1); }
+      else if (e.key === '-') { e.preventDefault(); zoomTo(zoom / 1.1); }
+    });
+    $('#zoom').addEventListener('input', (e) => zoomTo(Number((e.target as HTMLInputElement).value)));
+    $('#circle').addEventListener('input', drawPreviews);
+    addEventListener('resize', () => nat.w && layout());
+    $('#another').addEventListener('click', () => { $('#cropper').hidden = true; $('#drop').hidden = false; nat = { w: 0, h: 0 }; $<HTMLInputElement>('#file').value = ''; });
+    $('#recrop').addEventListener('click', () => { const src = $<HTMLImageElement>('#current-img').src; if (src) openImage(src, 'the current photo'); });
+
+    // ---- Save: the framed photo + About settings, one commit ----
+    async function commit(message: string, files: { path: string; content?: string; encoding?: 'utf-8' | 'base64'; remove?: boolean }[]) {
+      // Refuse to overwrite About if it changed on GitHub after it was loaded.
+      const now = await gh(`/contents/${ABOUT}?ref=${BRANCH}`);
+      if (now.sha !== about!.sha) throw new Error('About was changed on GitHub after you opened this page. Reload, then save again.');
+      const ref = await gh(`/git/ref/heads/${BRANCH}`);
+      const parent = await gh(`/git/commits/${ref.object.sha}`);
+      const tree = await Promise.all(files.map(async (f) => f.remove
+        ? { path: f.path, mode: '100644', type: 'blob', sha: null }
+        : { path: f.path, mode: '100644', type: 'blob', sha: (await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: f.content, encoding: f.encoding }) })).sha }));
+      const newTree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: parent.tree.sha, tree }) });
+      const c = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message, tree: newTree.sha, parents: [ref.object.sha] }) });
+      await gh(`/git/refs/heads/${BRANCH}`, { method: 'PATCH', body: JSON.stringify({ sha: c.sha }) });
+    }
+    function aboutWith(fields: Record<string, unknown>) {
+      const { fm, body } = splitFm(about!.text);
+      const doc = parseDocument(fm);
+      for (const [k, v] of Object.entries(fields)) v === undefined || v === '' ? doc.delete(k) : doc.set(k, v);
+      return `---\n${doc.toString({ lineWidth: 0 })}---\n${body}`;
+    }
+
+    $('#save').addEventListener('click', async () => {
+      const save = $<HTMLButtonElement>('#save');
+      save.disabled = true; setStatus('#editor-status', 'Preparing the photo…');
+      try {
+        const out = document.createElement('canvas'); out.width = OUT_W; out.height = OUT_H;
+        render(out, 'portrait');
+        // Re-encoding through a canvas keeps only the pixels: no location, camera or other metadata.
+        const blob: Blob = await new Promise((ok, fail) => out.toBlob((b) => (b ? ok(b) : fail(new Error('Couldn’t encode the photo.'))), 'image/jpeg', 0.88));
+        setStatus('#editor-status', `Saving (${Math.round(blob.size / 1024)} KB)…`);
+        const text = aboutWith({
+          photo: PHOTO_URL,
+          photo_alt: $<HTMLInputElement>('#alt').value.trim(),
+          photo_focus: `50% ${$<HTMLInputElement>('#circle').value}%`,
+          photo_in_about: $<HTMLInputElement>('#in-about').checked,
+          photo_on_card: $<HTMLInputElement>('#on-card').checked,
+        });
+        await commit('Update profile photo', [
+          { path: PHOTO_PATH, content: toBase64(await blob.arrayBuffer()), encoding: 'base64' },
+          { path: ABOUT, content: text, encoding: 'utf-8' },
+        ]);
+        await loadAbout();
+        setStatus('#editor-status', 'Saved. Your photo goes live in about a minute.');
+      } catch (err) { setStatus('#editor-status', (err as Error).message, true); }
+      save.disabled = false;
+    });
+
+    $('#remove').addEventListener('click', async () => {
+      if (!confirm('Remove your profile photo from the site? The file stays in the repository history.')) return;
+      setStatus('#editor-status', 'Removing…');
+      try {
+        const files: Parameters<typeof commit>[1] = [{ path: ABOUT, content: aboutWith({ photo: undefined }), encoding: 'utf-8' }];
+        if (currentPath === PHOTO_URL) files.push({ path: PHOTO_PATH, remove: true });
+        await commit('Remove profile photo', files);
+        await loadAbout();
+        setStatus('#editor-status', 'Removed. The site updates in about a minute.');
+      } catch (err) { setStatus('#editor-status', (err as Error).message, true); }
+    });
+
+    // ---- Sign in ----
+    $('#signin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      token = $<HTMLInputElement>('#token').value.trim();
+      setStatus('#signin-status', 'Loading from GitHub…');
+      try {
+        await loadAbout();
+        try { $<HTMLInputElement>('#remember').checked ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY); } catch {}
+        $('#signin').hidden = true; $('#editor').hidden = false;
+        setStatus('#editor-status', currentPath ? 'Your current photo is on the right. Drop in a new one, or re-frame it.' : 'No photo yet. Drop one in to start.');
+      } catch (err) { setStatus('#signin-status', (err as Error).message, true); }
+    });
+    try {
+      const saved = localStorage.getItem(TOKEN_KEY);
+      if (saved) { $<HTMLInputElement>('#token').value = saved; $<HTMLInputElement>('#remember').checked = true; }
+    } catch {}
+  </script>
+</body>
+</html>

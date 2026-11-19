@@ -6,6 +6,7 @@ import * as fontkit from 'fontkit';
 import wawoff from 'wawoff2';
 import sharp from 'sharp';
 import { buildTheme } from './theme';
+import { photoCrop, photoSettings } from './photo';
 
 // The 1200×630 preview image LinkedIn, Slack, X and messaging apps show when the site is shared
 // (/social-card.png). Built from the editor's content (name, role, location, stats, site icon) in
@@ -82,14 +83,28 @@ export async function socialCardPng() {
     const png = await sharp(src, iconPath.endsWith('.svg') ? { density: 300 } : {}).resize(88, 88, { fit: 'cover' }).png().toBuffer();
     iconSvg = `<image x="${PAD}" y="72" width="88" height="88" href="data:image/png;base64,${png.toString('base64')}"/>`;
   }
+  // Profile photo (About → Photo) as a circle at the top right; the domain then sits beside the icon.
+  const photo = await photoSettings();
+  let photoSvg = '';
+  const P = 232;
+  if (photo?.onCard) {
+    const png = await photoCrop(P * 2, P * 2, 'png');
+    const px = W - PAD - P, py = 76;
+    photoSvg = `<clipPath id="pc"><circle cx="${px + P / 2}" cy="${py + P / 2}" r="${P / 2}"/></clipPath>`
+      + `<circle cx="${px + P / 2}" cy="${py + P / 2}" r="${P / 2 + 6}" fill="${c.surface}" stroke="${c.line}" stroke-width="2"/>`
+      + `<image x="${px}" y="${py}" width="${P}" height="${P}" clip-path="url(#pc)" preserveAspectRatio="xMidYMid slice" href="data:image/png;base64,${png.toString('base64')}"/>`;
+  }
+  const textW = photoSvg ? inner - P - 40 : inner;
   const domain = 'jawaharchiluveru.pro';
-  parts.push(text(bodyMedium, domain, 26, W - PAD - measure(bodyMedium, domain, 26), 126, c.muted));
+  parts.push(photoSvg
+    ? text(bodyMedium, domain, 26, PAD + (iconSvg ? 112 : 0), 126, c.muted)
+    : text(bodyMedium, domain, 26, W - PAD - measure(bodyMedium, domain, 26), 126, c.muted));
 
   // Name, then role · location.
-  const nameSize = fit(displayBold, about.name, 84, 56, inner);
+  const nameSize = fit(displayBold, about.name, 84, 48, textW);
   parts.push(text(displayBold, about.name, nameSize, PAD, 268, c.text));
   const role = [about.role, about.location].filter(Boolean).join('  ·  ');
-  const roleSize = fit(body, role, 36, 26, inner);
+  const roleSize = fit(body, role, 36, 22, textW);
   parts.push(text(body, role, roleSize, PAD, 326, c.muted));
 
   // Up to three stats as tiles along the bottom.
@@ -119,6 +134,7 @@ export async function socialCardPng() {
   <rect width="${W}" height="${H}" fill="url(#glowB)"/>
   <rect y="${H - 12}" width="${W}" height="12" fill="url(#bar)"/>
   ${iconSvg}
+  ${photoSvg}
   ${parts.join('\n  ')}
 </svg>`;
   return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();

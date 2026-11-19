@@ -1,0 +1,18 @@
+---
+// The profile photo at a given shape; renders nothing when no photo is set.
+import { photoSettings } from '../lib/photo';
+import { withBase } from '../lib/content';
+interface Props { shape?: 'portrait' | 'square'; class?: string; eager?: boolean; sizes?: string }
+const { shape = 'portrait', class: cls, eager = false, sizes = '(max-width: 640px) 60vw, 320px' } = Astro.props;
+const p = await photoSettings();
+const u = (f: string) => withBase(`/photo/${f}`);
+---
+{p && (shape === 'portrait' ? (
+  <picture class={cls}>
+    <source type="image/webp" srcset={`${u('portrait-480.webp')} 480w, ${u('portrait-960.webp')} 960w`} sizes={sizes}>
+    <img src={u('portrait-960.jpg')} alt={p.alt} width="960" height="1200" loading={eager ? 'eager' : 'lazy'} decoding="async">
+  </picture>
+) : (
+  <img class={cls} src={u('square-256.webp')} srcset={`${u('square-256.webp')} 256w, ${u('square-512.webp')} 512w`} sizes={sizes}
+    alt={p.alt} width="256" height="256" loading={eager ? 'eager' : 'lazy'} decoding="async">
+))}
