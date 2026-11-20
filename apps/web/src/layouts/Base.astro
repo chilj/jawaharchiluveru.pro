@@ -94,7 +94,7 @@ const imageAlt = ownImage ? about.social_image_alt
   {(maintPage || (maint?.enabled && maint.mode === 'banner')) && <Maintenance />}
   {preprod && (
     <div class="preprod-banner" role="note">
-      <strong>Preprod</strong> preview of <code>{preprod.branch}</code>{preprod.commit && <> at <code>{preprod.commit}</code></>}. Not the live site; analytics are off.
+      <span><strong>Preprod</strong> preview of <code>{preprod.branch}</code>{preprod.commit && <> at <code>{preprod.commit}</code></>}. Not the live site; analytics are off.</span>
       <a href={new URL(Astro.url.pathname, 'https://www.jawaharchiluveru.pro').href}>View live</a>
     </div>
   )}
