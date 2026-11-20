@@ -5,8 +5,9 @@
 // address the visitor typed, so nothing personal can travel in a URL. Plus the metric values and the
 // home page's A/B version.
 import { rumConfig } from '../lib/rum';
+import { preprod } from '../lib/content';
 const rum = await rumConfig();
-const on = !!rum.endpoint && rum.sample > 0;
+const on = !preprod && !!rum.endpoint && rum.sample > 0;
 ---
 {on && <span hidden data-rum={JSON.stringify({ ...rum, page: Astro.url.pathname })}></span>}
 

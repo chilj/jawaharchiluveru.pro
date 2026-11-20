@@ -5,6 +5,11 @@ type Status = 'planned' | 'draft' | 'published';
 /** Unpublished entries show up in `npm run dev` and review builds, never on the live site. */
 export const showUnpublished = import.meta.env.DEV || process.env.SHOW_DRAFTS === 'true';
 
+/** A Preprod build (PREPROD=true): a preview of a branch on Cloudflare Pages, never the live site. */
+export const preprod = process.env.PREPROD === 'true'
+  ? { branch: process.env.PREPROD_BRANCH || 'preview', commit: (process.env.PREPROD_COMMIT || '').slice(0, 7) }
+  : undefined;
+
 export const isVisible = (status: Status) => status === 'published' || showUnpublished;
 
 /** A field still holding a "TODO" placeholder. */

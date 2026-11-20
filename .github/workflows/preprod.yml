@@ -1,0 +1,80 @@
+name: Preprod
+
+# Preview every branch before it reaches main. Each push to a branch other than main builds the site
+# as a Preprod preview (banner at the top, analytics and page-speed tracking off, hidden from search
+# engines) and publishes it on Cloudflare Pages at two addresses:
+#   https://<branch>.<project>.pages.dev   this branch, kept until the branch's next push
+#   https://preprod.<project>.pages.dev    always the most recent branch pushed
+# GitHub lists each run under the "Preprod" environment (Code → Environments). Uses the same
+# CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets as the backup copy; skipped without them.
+# Free: Cloudflare Pages direct uploads don't use build minutes there.
+
+on:
+  push:
+    branches-ignore: [main, gh-pages]
+  workflow_dispatch:
+    inputs:
+      drafts:
+        description: Also show planned and draft entries
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: preprod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preprod:
+    runs-on: ubuntu-latest
+    environment:
+      name: Preprod
+      url: ${{ steps.publish.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'jawaharchiluveru' }}
+    steps:
+      - name: Cloudflare secrets missing
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
+        run: echo "::warning::Preprod needs the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets (the same ones as the backup copy)."
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Branch name as a Cloudflare alias: lower case, letters/digits/hyphens, at most 28 characters.
+      - id: alias
+        run: |
+          a=$(echo "$GITHUB_REF_NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' | cut -c1-28 | sed -E 's/-+$//')
+          echo "alias=${a:-preview}" >> "$GITHUB_OUTPUT"
+      - name: Build the Preprod preview
+        run: npm run ${{ inputs.drafts && 'build:review' || 'build' }}
+        env:
+          PREPROD: 'true'
+          PREPROD_BRANCH: ${{ github.ref_name }}
+          PREPROD_COMMIT: ${{ github.sha }}
+      - id: publish
+        name: Publish to Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        run: |
+          out=apps/web/${{ inputs.drafts && 'dist-review' || 'dist' }}
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > "$out/_headers"
+          W="npx --yes wrangler@4.45.0"
+          $W pages deploy "$out" --project-name="$CF_PAGES_PROJECT" --branch="${{ steps.alias.outputs.alias }}" --commit-hash="$GITHUB_SHA" --commit-dirty=true | tee branch.log
+          $W pages deploy "$out" --project-name="$CF_PAGES_PROJECT" --branch=preprod --commit-hash="$GITHUB_SHA" --commit-dirty=true | tee latest.log
+          BRANCH_URL="https://${{ steps.alias.outputs.alias }}.$CF_PAGES_PROJECT.pages.dev"
+          LATEST_URL="https://preprod.$CF_PAGES_PROJECT.pages.dev"
+          echo "url=$BRANCH_URL" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Preprod preview of \`$GITHUB_REF_NAME\`"
+            echo ""
+            echo "- This branch: $BRANCH_URL"
+            echo "- Latest branch pushed: $LATEST_URL"
+            echo ""
+            echo "Analytics and page-speed tracking are off, and search engines are told not to index it."
+          } >> "$GITHUB_STEP_SUMMARY"
