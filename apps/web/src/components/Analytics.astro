@@ -2,6 +2,7 @@
 // Loads whichever analytics services have an ID in content/analytics.yaml, after the page has
 // rendered (so they never slow it down), and records key actions as events in all of them.
 import { getEntry } from 'astro:content';
+import { preprod } from '../lib/content';
 
 const a = (await getEntry('analytics', 'analytics'))?.data;
 const valid = {
@@ -12,7 +13,8 @@ const valid = {
 for (const [k, v] of Object.entries({ clarity: a?.clarity_id, ga4: a?.ga4_id, cloudflare: a?.cloudflare_token })) {
   if (v?.trim() && !valid[k as keyof typeof valid]) console.warn(`[analytics] ${k} ID "${v}" doesn't look valid; ${k} stays off.`);
 }
-const enabled = Object.values(valid).some(Boolean);
+// Preprod previews send nothing, so they never mix with real visitors' data.
+const enabled = !preprod && Object.values(valid).some(Boolean);
 const cookieBased = !!(valid.clarity || valid.ga4);
 const config = {
   ...valid,

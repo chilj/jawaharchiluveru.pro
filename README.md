@@ -111,6 +111,19 @@ Things to know:
   Clarity/GA4 load only after **Accept**. The choice lasts 6 months; **Cookie settings** in the
   footer reopens it. The Privacy page text is editable under Profile & settings.
 
+## Preprod (preview before merge)
+
+Every push to a branch other than `main` builds a **Preprod** preview (`.github/workflows/preprod.yml`)
+and publishes it on Cloudflare Pages, free, with the backup copy's secrets:
+
+- `https://<branch>.jawaharchiluveru.pages.dev`: that branch (lower case, hyphens, up to 28 characters)
+- `https://preprod.jawaharchiluveru.pages.dev`: whichever branch was pushed last
+
+Previews show a Preprod banner (branch and commit), send no analytics or page-speed data, and tell
+search engines not to index them. GitHub lists them under **Environments → Preprod**, and the run
+summary links both addresses. **Run workflow** on the Preprod action with "Also show planned and
+draft entries" previews unpublished content too.
+
 ## Workflow
 
 1. Pull `main`, make a small change in `content/`, preview with `npm run dev`.

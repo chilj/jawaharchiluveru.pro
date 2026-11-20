@@ -1,6 +1,6 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
-import { getSections, isVisible, withBase } from '../lib/content';
+import { getSections, isVisible, preprod, withBase } from '../lib/content';
 import Icon from '../components/Icon.astro';
 import Analytics from '../components/Analytics.astro';
 import Feedback from '../components/Feedback.astro';
@@ -57,6 +57,7 @@ const imageAlt = ownImage ? about.social_image_alt
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{title}</title>
   <meta name="description" content={description}>
+  {preprod && <meta name="robots" content="noindex, nofollow">}
   <meta property="og:title" content={title}>
   <meta property="og:description" content={description}>
   <meta property="og:url" content={canonical}>
@@ -91,6 +92,12 @@ const imageAlt = ownImage ? about.social_image_alt
 </head>
 <body class={maintPage ? 'maint-on' : undefined}>
   {(maintPage || (maint?.enabled && maint.mode === 'banner')) && <Maintenance />}
+  {preprod && (
+    <div class="preprod-banner" role="note">
+      <strong>Preprod</strong> preview of <code>{preprod.branch}</code>{preprod.commit && <> at <code>{preprod.commit}</code></>}. Not the live site; analytics are off.
+      <a href={new URL(Astro.url.pathname, 'https://www.jawaharchiluveru.pro').href}>View live</a>
+    </div>
+  )}
   <div class="backdrop" aria-hidden="true">
     <span class="glow glow-a"></span><span class="glow glow-b"></span><span class="glow glow-c"></span>
   </div>
