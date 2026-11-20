@@ -30,6 +30,11 @@ const about = defineCollection({
     tagline: z.string(),
     seo_title: z.string().optional(),     // home page <title>; default "name | role"
     description: z.string(),
+    photo: z.string().optional(),          // profile photo (any size; /admin/photo/ crops and compresses it)
+    photo_alt: z.string().optional(),
+    photo_focus: z.string().regex(/^\d{1,3}% \d{1,3}%$/).default('50% 35%'),  // the point kept in view when cropped
+    photo_in_about: z.boolean().default(true),
+    photo_on_card: z.boolean().default(true),  // on the generated link-preview card
     social_image: z.string().optional(),  // 1200×630 preview for LinkedIn, Slack, X
     social_image_alt: z.string().optional(),
     site_icon: z.string().optional(),        // detailed square icon, used at 180px and up

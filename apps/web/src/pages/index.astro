@@ -13,12 +13,15 @@ import { brandFor } from '../lib/icons';
 import { getResume } from '../lib/resume';
 import { getCertifications } from '../lib/certifications';
 import { skillId } from '../lib/skills';
+import ProfilePhoto from '../components/ProfilePhoto.astro';
+import { photoSettings } from '../lib/photo';
 import {
   byOrder, formatMonth, yearRange, tenure, getSections, isPlaceholder, isVisible, showUnpublished, withBase, LEVELS,
 } from '../lib/content';
 
 const { nav, byId } = await getSections();
 const aboutEntry = (await getEntry('about', 'about'))!;
+const aboutPhoto = (await photoSettings())?.inAbout;
 const about = aboutEntry.data;
 const { Content: Bio } = await render(aboutEntry);
 
@@ -195,7 +198,12 @@ const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))
 
   {show('about') && (
     <Section {...section('about')}>
-      <div class="prose"><Bio /></div>
+      {aboutPhoto ? (
+        <div class="about-with-photo">
+          <ProfilePhoto class="about-photo" sizes="(max-width: 640px) 70vw, 280px" />
+          <div class="prose"><Bio /></div>
+        </div>
+      ) : <div class="prose"><Bio /></div>}
     </Section>
   )}
 
