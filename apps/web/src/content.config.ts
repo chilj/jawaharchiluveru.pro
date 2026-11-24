@@ -223,6 +223,7 @@ const experiment = defineCollection({
   loader: file(`${CONTENT}/experiment.yaml`, { parser: (text) => [{ id: 'experiment', ...(parseYaml(text) ?? {}) }] }),
   schema: z.object({
     enabled: z.boolean().default(false),
+    home: z.enum(['journey', 'bento', 'classic']).default('classic'),  // the version everyone sees when the test is off
     name: z.string().regex(/^[a-z0-9-]{1,40}$/).default('landing'),
     variants: z.array(z.object({
       id: z.enum(['journey', 'bento', 'classic']),

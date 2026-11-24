@@ -253,7 +253,8 @@ collections:
         label: A/B test (home page)
         file: content/experiment.yaml
         fields:
-          - { name: enabled, label: Run the test, widget: boolean, default: false, hint: "Off: everyone sees the current hero. On: each visitor is assigned one version below (by weight) and keeps it on return visits." }
+          - { name: home, label: Home page version, widget: select, default: classic, options: [{ label: 'B · Career journey', value: journey }, { label: 'D · Bento dashboard', value: bento }, { label: 'Classic hero', value: classic }], hint: "What everyone sees while the test is off. Only this version is built into the page." }
+          - { name: enabled, label: Run the test, widget: boolean, default: false, hint: "Off: everyone sees the Home page version above. On: each visitor is assigned one version below (by weight) and keeps it on return visits." }
           - { name: name, label: Test name, widget: string, default: landing, pattern: ['^[a-z0-9-]{1,40}$', 'Lowercase letters, numbers and dashes'], hint: "Shown in analytics. Change it to start a fresh test: everyone is reassigned." }
           - name: variants
             label: Versions

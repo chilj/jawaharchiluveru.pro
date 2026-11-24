@@ -1,4 +1,5 @@
 enabled: false
+home: bento
 name: landing-2026-11
 variants:
   - id: journey
