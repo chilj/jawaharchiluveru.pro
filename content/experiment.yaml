@@ -1,6 +1,4 @@
-# A/B test for the top of the home page. Edit here or in the site editor at /admin
-# (Profile & settings → A/B test). Each visitor is assigned a version once and keeps it.
-enabled: true
+enabled: false
 name: landing-2026-11
 variants:
   - id: journey
