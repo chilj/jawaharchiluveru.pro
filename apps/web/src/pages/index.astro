@@ -119,6 +119,9 @@ const exp = (await getEntry('experiment', 'experiment'))?.data;
 const abListed = exp?.enabled ? exp.variants : [];
 const abVariants = abListed.filter((v) => v.weight > 0);   // versions visitors can be assigned
 const abOn = abVariants.some((v) => v.id !== 'classic');
+// With the test off, only the chosen version is built (no script, no hidden alternatives).
+const homeVersion = exp?.home ?? 'classic';
+const showHero = (id: 'journey' | 'bento') => (abOn ? abListed.some((v) => v.id === id) : homeVersion === id);
 // Every listed version can be previewed with ?variant=<id>, even at 0%.
 const abConfig = abOn ? { name: exp!.name, variants: abVariants.map((v) => ({ id: v.id, weight: v.weight })), preview: [...new Set(['classic', ...abListed.map((v) => v.id)])] } : null;
 const heroPrimary = {
@@ -155,13 +158,13 @@ const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))
       </script>
     )}
   </Fragment>
-  {abOn && abListed.some((v) => v.id === 'journey') && (
-    <div class="ab-variant" data-variant-block="journey">
+  {showHero('journey') && (
+    <div class={abOn ? 'ab-variant' : undefined} data-variant-block="journey" id={abOn ? undefined : 'top'}>
       <HeroJourney about={about} roles={heroRoles} intro={connect.intro} primary={heroPrimary} resume={heroResume} />
     </div>
   )}
-  {abOn && abListed.some((v) => v.id === 'bento') && (
-    <div class="ab-variant" data-variant-block="bento">
+  {showHero('bento') && (
+    <div class={abOn ? 'ab-variant' : undefined} data-variant-block="bento" id={abOn ? undefined : 'top'}>
       <HeroBento about={about}
         now={nowRole && { org: nowRole.org, title: nowRole.title, product: nowRole.product?.trim() || undefined }}
         breadth={breadth.map((b) => ({ label: b.label, count: b.count }))}
@@ -171,7 +174,7 @@ const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))
         intro={connect.intro} primary={heroPrimary} resume={heroResume} />
     </div>
   )}
-  <section class={abOn ? 'hero wrap ab-classic' : 'hero wrap'} id="top">
+  {(abOn || homeVersion === 'classic') && <section class={abOn ? 'hero wrap ab-classic' : 'hero wrap'} id="top">
     <p class="eyebrow">{about.role}{about.location && <> · <span class="nowrap">{about.location}</span></>}</p>
     <h1>{about.name}</h1>
     <p class="lede">{about.tagline}</p>
@@ -189,7 +192,7 @@ const latestPost = (await getCollection('blog', (e) => isVisible(e.data.status))
         {about.stats.map((s) => <div><dt>{s.value}</dt><dd>{s.label}</dd></div>)}
       </dl>
     )}
-  </section>
+  </section>}
 
   <div class="fold-controls wrap" aria-label="Sections">
     <button type="button" data-fold-all="open"><Icon name="unfold-vertical" />Expand all</button>
