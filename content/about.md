@@ -2,15 +2,21 @@
 name: Jawahar Chiluveru
 role: Senior Technical Product Manager
 location: Dallas–Fort Worth, TX
-tagline: Technical Product Manager with 16+ years delivering scalable digital platforms across retail, e-commerce, fintech and enterprise systems.
+tagline: Technical Product Manager with 13+ years delivering scalable digital platforms across retail, e-commerce, fintech and enterprise systems.
 seo_title: Jawahar Chiluveru | Senior Technical PM, Platform & Loyalty
 description: Senior Technical Product Manager in Dallas–Fort Worth. 16+ years building loyalty, omnichannel and developer platforms for Levi's, 7-Eleven and PayPal.
+photo: ''
+photo_alt: ''
+photo_focus: 50% 35%
+photo_in_about: true
+photo_on_card: true
 social_image: ''
-site_icon: /files/site-icon.svg
-site_icon_small: /files/site-icon-small.svg
-header_logo: site_icon
-header_initials: JC
 social_image_alt: 'Jawahar Chiluveru, Senior Technical Product Manager in Dallas–Fort Worth: 16+ years, 25M+ loyalty members served, 25+ major platform releases led.'
+site_icon: /files/site-icon.svg
+header_logo: site_icon
+header_logo_image: ''
+header_initials: JC
+site_icon_small: /files/site-icon-small.svg
 stats:
   - value: 16+
     label: years in product & delivery
@@ -40,4 +46,4 @@ Master's Degrees in Engineering Management from The University of Texas at Arlin
 
 **Mr. Cooper, PayPal / Braintree, Wells Fargo Advisors, State Farm -** _Financial Services, Fintech & Insurance (\~4 years)_
 
-**RR Donnelley, Progressive Digital Media -** _Media, Logistics & Publishing (\~4 years)_
+**RR Donnelley, Progressive Digital Media -** _Media, Logistics & Publishing (\~1 years)_
