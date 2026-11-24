@@ -18,7 +18,7 @@ header_logo_image: ''
 header_initials: JC
 site_icon_small: /files/site-icon-small.svg
 stats:
-  - value: 16+
+  - value: 13+
     label: years in product & delivery
   - value: 20+
     label: multi-million dollar projects delivered across industries
