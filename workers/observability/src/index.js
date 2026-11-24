@@ -21,6 +21,7 @@ const BOTS = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|gtmetrix|ping
 const DAY = 86400000;
 const MIN_PUBLIC_COUNT = 5;      // countries with fewer page views are grouped as "other" in the public summary
 const HOUR = 3600000;
+const RAW_CHECKS_DAYS = 14;    // raw uptime checks kept; hourly totals are kept RETENTION_DAYS
 const DAILY_WRITE_GUARD = 80000; // rows/day; D1's free plan allows 100,000 written rows a day
 
 // Sites from SITES ("id|label|host,host;…"). The first is the portfolio, whose pages report their own
@@ -156,86 +157,97 @@ async function summary(url, env, ctx, cors, sites) {
   return new Response(row?.json ?? '{}', { headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' } });
 }
 
+// Summaries are rebuilt once an hour. To stay well inside D1's free daily read allowance, each
+// rebuild reads every site's last 30 days of measurements ONCE (both windows are computed from
+// them in JavaScript), the uptime totals from checks_hourly, and the newest check of each address.
 async function storeSummaries(env) {
   const now = Date.now();
   const sites = sitesOf(env);
+  const since30 = now - 30 * DAY;
+  const [upRows, upLast] = (await env.DB.batch([
+    env.DB.prepare('SELECT hour, target, n, ok, ms_sum FROM checks_hourly WHERE hour > ?1').bind(Math.floor(since30 / HOUR) * HOUR),
+    env.DB.prepare('SELECT target, ts, ok, status, ms FROM checks WHERE ts = (SELECT MAX(ts) FROM checks)'),
+  ])).map((x) => x.results);
   const stmts = [];
   for (const site of sites) {
+    const [rows, incidents] = (await env.DB.batch([
+      env.DB.prepare('SELECT ts, page, metric, value, rating, device, variant, country FROM rum WHERE site = ?1 AND ts > ?2').bind(site.id, since30),
+      env.DB.prepare('SELECT kind, started, resolved, detail FROM incidents WHERE site = ?1 AND (resolved IS NULL OR started > ?2) ORDER BY started DESC').bind(site.id, since30),
+    ])).map((x) => x.results);
     for (const days of [7, 30]) {
-      const body = await computeSummary(env, days, now, site, sites);
+      const body = computeSummary(env, days, now, site, sites, { rows, incidents, upRows, upLast });
       stmts.push(env.DB.prepare('INSERT INTO site_summaries (site, days, ts, json) VALUES (?, ?, ?, ?) ON CONFLICT(site, days) DO UPDATE SET ts = excluded.ts, json = excluded.json').bind(site.id, days, now, JSON.stringify(body)));
     }
   }
   await env.DB.batch(stmts);
 }
 
-// Percentiles and rating shares are computed in SQL (window functions), grouped by `by`.
-// p75 = the value at row ceil(0.75 × count) of each group, sorted.
+// p75 = the value at position ceil(0.75 × count) of the sorted values (the same rule as p75Sql).
+const p75Of = (values) => { const v = [...values].sort((a, b) => a - b); return v[Math.floor((3 * v.length + 3) / 4) - 1]; };
+const dayOf = (ts) => new Date(ts).toISOString().slice(0, 10);
+/** Group rows by a key; returns [key, rows][] sorted by key (like SQL GROUP BY). */
+function groupBy(rows, keyFn) {
+  const m = new Map();
+  for (const r of rows) { const k = keyFn(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r); }
+  return [...m].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+}
+/** { [key]: { [metric]: stat } } for rows grouped by `key` (null: one group, "_"). */
+function stats(rows, key) {
+  const out = {};
+  for (const [, g] of groupBy(rows, (r) => `${key ? r[key] : '_'}\u0000${r.metric}`)) {
+    const k = key ? g[0][key] : '_', metric = g[0].metric, n = g.length;
+    const good = g.filter((r) => r.rating === 'good').length, poor = g.filter((r) => r.rating === 'poor').length;
+    const p = p75Of(g.map((r) => r.value));
+    (out[k] ??= {})[metric] = { n, p75: p, rating: rate(metric, p), good: good / n, needs: (n - good - poor) / n, poor: poor / n };
+  }
+  return out;
+}
+const countBy = (rows, keyFn) => groupBy(rows, keyFn).map(([k, g]) => [k, g.length]);
+
+// Percentiles are also used in SQL for the 10-minute goal check (24 hours of one site's data).
 const CTE = "WITH r AS (SELECT strftime('%Y-%m-%d', ts / 1000, 'unixepoch') AS day, page, metric, value, rating, device, variant, country FROM rum WHERE ts > ?1 AND site = ?2)";
 const p75Sql = (by, where = '') => `${CTE} SELECT ${by}, value AS p75 FROM (SELECT ${by}, value, ROW_NUMBER() OVER (PARTITION BY ${by} ORDER BY value) AS rn, COUNT(*) OVER (PARTITION BY ${by}) AS cnt FROM r WHERE 1 = 1 ${where}) WHERE rn = (3 * cnt + 3) / 4`;
-const shareSql = (by, where = '') => `${CTE} SELECT ${by}, COUNT(*) AS n, SUM(rating = 'good') AS good, SUM(rating = 'poor') AS poor FROM r WHERE 1 = 1 ${where} GROUP BY ${by}`;
 
-async function computeSummary(env, days, now, site, sites) {
+function computeSummary(env, days, now, site, sites, data) {
   const since = now - days * DAY;
-  const q = (sql) => env.DB.prepare(sql).bind(since, site.id);   // RUM queries: ?1 = since, ?2 = site
-  const q1 = (sql) => env.DB.prepare(sql).bind(since);           // checks: ?1 = since
   const siteTargets = env.TARGETS.split(',').map((t) => t.trim().split('=')).filter(([n, u]) => n && u && siteForHost(sites, hostOf(u))?.id === site.id).map(([n]) => n);
-  const groups = { all: ['metric', ''], device: ['device, metric', ''], variant: ['variant, metric', "AND page = '/' AND variant IS NOT NULL"] };
-  const stmts = [];
-  for (const [, [by, where]] of Object.entries(groups)) stmts.push(q(p75Sql(by, where)), q(shareSql(by, where)));
-  stmts.push(
-    q(p75Sql('day, metric', "AND metric IN ('LCP', 'INP', 'CLS')")),
-    q(`${CTE} SELECT day, COUNT(*) AS views FROM r WHERE metric = 'TTFB' GROUP BY day`),
-    q(`${CTE} SELECT page, COUNT(*) AS views FROM r WHERE metric = 'TTFB' GROUP BY page ORDER BY views DESC LIMIT 6`),
-    q(p75Sql('page, metric', "AND metric = 'LCP'")),
-    q(`${CTE} SELECT country, COUNT(*) AS views FROM r WHERE metric = 'TTFB' AND country IS NOT NULL AND country != 'XX' AND country != 'T1' GROUP BY country ORDER BY views DESC`),
-    q1('SELECT target, COUNT(*) AS checks, SUM(ok) AS ok, AVG(ms) AS avg FROM checks WHERE ts > ?1 GROUP BY target'),
-    env.DB.prepare('SELECT target, ts, ok, status, ms FROM checks c WHERE ts = (SELECT MAX(ts) FROM checks WHERE target = c.target)'),
-    q('SELECT kind, started, resolved, detail FROM incidents WHERE site = ?2 AND (resolved IS NULL OR started > ?1) ORDER BY started DESC LIMIT 10'),
-  );
-  const res = (await env.DB.batch(stmts)).map((x) => x.results);
-
-  // Merge p75 rows and share rows into { [key]: { [metric]: stat } }.
-  const merge = (p75rows, shareRows, key) => {
-    const out = {};
-    for (const s of shareRows) {
-      const k = key ? s[key] : '_';
-      const p = p75rows.find((x) => x.metric === s.metric && (!key || x[key] === s[key]))?.p75 ?? null;
-      (out[k] ??= {})[s.metric] = { n: s.n, p75: p, rating: p == null ? null : rate(s.metric, p), good: s.good / s.n, needs: (s.n - s.good - s.poor) / s.n, poor: s.poor / s.n };
-    }
-    return out;
-  };
-  const [allP, allS, devP, devS, varP, varS, dayP, dayViews, topPages, pageP, byCountry, upAgg, upLast, incidents] = res;
-  const metrics = merge(allP, allS, null)._ ?? {};
-  const dayList = [...new Set(dayP.map((x) => x.day))].sort();
+  const rows = data.rows.filter((r) => r.ts > since);
+  const views = rows.filter((r) => r.metric === 'TTFB');
+  const metrics = stats(rows, null)._ ?? {};
+  const vitals = rows.filter((r) => ['LCP', 'INP', 'CLS'].includes(r.metric));
+  const dayP = {};
+  for (const [, g] of groupBy(vitals, (r) => `${dayOf(r.ts)}\u0000${r.metric}`)) (dayP[dayOf(g[0].ts)] ??= {})[g[0].metric] = p75Of(g.map((r) => r.value));
+  const dayViews = Object.fromEntries(countBy(views, (r) => dayOf(r.ts)));
+  const byViews = (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+  const topPages = countBy(views, (r) => r.page).sort(byViews).slice(0, 6);
+  const pageLcp = Object.fromEntries(groupBy(rows.filter((r) => r.metric === 'LCP'), (r) => r.page).map(([p, g]) => [p, p75Of(g.map((r) => r.value))]));
+  const byCountry = countBy(views.filter((r) => r.country && r.country !== 'XX' && r.country !== 'T1'), (r) => r.country).sort(byViews);
+  const firstHour = Math.floor(since / HOUR) * HOUR;
+  const up = {};
+  for (const u of data.upRows) if (u.hour >= firstHour) { const t = (up[u.target] ??= { checks: 0, ok: 0, ms: 0 }); t.checks += u.n; t.ok += u.ok; t.ms += u.ms_sum; }
   return {
     generated: now, days, thresholds: THRESHOLDS,
     site: site.id, sites: sites.map((s) => ({ id: s.id, label: s.label })),
     views: metrics.TTFB?.n ?? 0,
     metrics,
-    devices: merge(devP, devS, 'device'),
-    variants: merge(varP, varS, 'variant'),
-    daily: dayList.map((day) => ({
-      day,
-      LCP: dayP.find((x) => x.day === day && x.metric === 'LCP')?.p75 ?? null,
-      INP: dayP.find((x) => x.day === day && x.metric === 'INP')?.p75 ?? null,
-      CLS: dayP.find((x) => x.day === day && x.metric === 'CLS')?.p75 ?? null,
-      views: dayViews.find((x) => x.day === day)?.views ?? 0,
+    devices: stats(rows, 'device'),
+    variants: stats(rows.filter((r) => r.page === '/' && r.variant != null), 'variant'),
+    daily: Object.keys(dayP).sort().map((day) => ({
+      day, LCP: dayP[day].LCP ?? null, INP: dayP[day].INP ?? null, CLS: dayP[day].CLS ?? null, views: dayViews[day] ?? 0,
     })),
     // Other sites' paths come from visitors' address bars: only list pages with enough views.
-    pages: topPages.filter((p) => site.primary || p.views >= MIN_PUBLIC_COUNT)
-      .map((p) => ({ page: p.page, views: p.views, LCP: pageP.find((x) => x.page === p.page)?.p75 ?? null })),
+    pages: topPages.filter(([, v]) => site.primary || v >= MIN_PUBLIC_COUNT).map(([page, v]) => ({ page, views: v, LCP: pageLcp[page] ?? null })),
     // Page views by country (two-letter codes from Cloudflare; XX = unknown and T1 = Tor are left out).
     // Countries with fewer than MIN_PUBLIC_COUNT page views are grouped so no single visitor stands out.
     countries: [
-      ...byCountry.filter((c) => c.views >= MIN_PUBLIC_COUNT).map((c) => ({ country: c.country, views: c.views })),
-      ...(() => { const n = byCountry.filter((c) => c.views < MIN_PUBLIC_COUNT).reduce((t, c) => t + c.views, 0); return n ? [{ country: 'other', views: n }] : []; })(),
+      ...byCountry.filter(([, v]) => v >= MIN_PUBLIC_COUNT).map(([country, v]) => ({ country, views: v })),
+      ...(() => { const n = byCountry.filter(([, v]) => v < MIN_PUBLIC_COUNT).reduce((t, [, v]) => t + v, 0); return n ? [{ country: 'other', views: n }] : []; })(),
     ],
-    uptime: upAgg.filter((u) => siteTargets.includes(u.target)).map((u) => {
-      const last = upLast.find((x) => x.target === u.target);
-      return { target: u.target, checks: u.checks, uptime: u.ok / u.checks, avgMs: Math.round(u.avg || 0), last: last ? { ts: last.ts, ok: !!last.ok, status: last.status, ms: last.ms } : null };
+    uptime: Object.entries(up).sort(([a], [b]) => (a < b ? -1 : 1)).filter(([t]) => siteTargets.includes(t)).map(([target, u]) => {
+      const last = data.upLast.find((x) => x.target === target);
+      return { target, checks: u.checks, uptime: u.ok / u.checks, avgMs: Math.round(u.ms / u.checks || 0), last: last ? { ts: last.ts, ok: !!last.ok, status: last.status, ms: last.ms } : null };
     }),
-    incidents,
+    incidents: data.incidents.filter((i) => i.resolved == null || i.started > since).slice(0, 10),
   };
 }
 
@@ -257,7 +269,9 @@ async function runAgent(env) {
     }
   }));
   const insert = env.DB.prepare('INSERT INTO checks (ts, target, ok, status, ms) VALUES (?, ?, ?, ?, ?)');
-  await env.DB.batch(results.map((r) => insert.bind(now, r.target, r.ok ? 1 : 0, r.status, r.ms)));
+  const rollup = env.DB.prepare('INSERT INTO checks_hourly (hour, target, n, ok, ms_sum) VALUES (?, ?, 1, ?, ?) ON CONFLICT(hour, target) DO UPDATE SET n = n + 1, ok = ok + excluded.ok, ms_sum = ms_sum + excluded.ms_sum');
+  const hourOf = Math.floor(now / HOUR) * HOUR;
+  await env.DB.batch(results.flatMap((r) => [insert.bind(now, r.target, r.ok ? 1 : 0, r.status, r.ms), rollup.bind(hourOf, r.target, r.ok ? 1 : 0, r.ms)]));
 
   // 2. Goals. Down: two failed checks in a row. Slow: a Web Vital's 24-hour p75 above "good".
   for (const r of results) {
@@ -291,7 +305,9 @@ async function runAgent(env) {
   const cutoff = now - (parseInt(env.RETENTION_DAYS || '90', 10) || 90) * DAY;
   await env.DB.batch([
     env.DB.prepare('DELETE FROM rum WHERE ts < ?').bind(cutoff),
-    env.DB.prepare('DELETE FROM checks WHERE ts < ?').bind(cutoff),
+    // Raw checks only feed outage detection and "last checked"; uptime history lives in checks_hourly.
+    env.DB.prepare('DELETE FROM checks WHERE ts < ?').bind(now - RAW_CHECKS_DAYS * DAY),
+    env.DB.prepare('DELETE FROM checks_hourly WHERE hour < ?').bind(cutoff),
     env.DB.prepare('DELETE FROM incidents WHERE resolved IS NOT NULL AND resolved < ?').bind(cutoff),
   ]);
 }
