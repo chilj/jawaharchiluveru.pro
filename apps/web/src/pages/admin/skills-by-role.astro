@@ -124,7 +124,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
     type MatrixSkill = { name: string; group: string; level?: string; pos: number };
     type Role = {
       path: string; sha: string; raw: string; org: string; short?: string; start: string; end?: string;
-      earlier: boolean; highlights: string[]; skills: Map<string, { name: string; evidence: string }>;
+      earlier: boolean; hidden: boolean; highlights: string[]; skills: Map<string, { name: string; evidence: string }>;
     };
 
     let token = '';
@@ -188,7 +188,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
         (data.skills ?? []).forEach((s: any) => skills.set(key(s.name), { name: s.name, evidence: s.evidence ?? '' }));
         return {
           path: f.path, sha, raw: text, org: data.org, short: data.short, start: String(data.start), end: data.end ? String(data.end) : undefined,
-          earlier: !!data.earlier, highlights: (data.highlights ?? []).map(String), skills,
+          earlier: !!data.earlier, hidden: data.show === false, highlights: (data.highlights ?? []).map(String), skills,
         } as Role;
       }));
       roles.sort((a, b) => b.start.localeCompare(a.start));
@@ -215,7 +215,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
     function renderGrid() {
       const vr = visibleRoles();
       const thead = el('thead', {}, el('tr', {}, el('th', { scope: 'col' }, 'Skill'),
-        ...vr.map((r) => el('th', { scope: 'col', className: dirty.has(r.path) ? 'changed' : '' }, r.short ?? r.org, el('span', {}, years(r))))));
+        ...vr.map((r) => el('th', { scope: 'col', className: `${dirty.has(r.path) ? 'changed' : ''}${r.hidden ? ' is-hidden' : ''}`, title: r.hidden ? 'Hidden on the site (Show on site is off)' : '' }, r.short ?? r.org, el('span', {}, r.hidden ? `${years(r)} · hidden` : years(r))))));
       const tbody = el('tbody');
       let group = '';
       for (const row of rows()) {
@@ -309,7 +309,7 @@ const theme = buildTheme((await getEntry('theme', 'theme'))?.data);
       const opts = (sel: HTMLSelectElement, first?: string) => {
         const keep = sel.value;
         sel.replaceChildren(...(first ? [el('option', { value: '' }, first)] : []),
-          ...roles.map((r) => el('option', { value: r.path }, `${roleLabel(r)}${r.earlier ? ' (earlier)' : ''}`)));
+          ...roles.map((r) => el('option', { value: r.path }, `${roleLabel(r)}${r.earlier ? ' (earlier)' : ''}${r.hidden ? ' (hidden on site)' : ''}`)));
         if (keep && roles.some((r) => r.path === keep)) sel.value = keep;
       };
       opts($<HTMLSelectElement>('#role-pick'));

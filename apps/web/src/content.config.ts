@@ -64,6 +64,7 @@ const career = defineCollection({
     short: z.string().optional(),                 // column label in the evidence map; default: org
     skills: z.array(z.object({ name: z.string(), evidence: z.string().optional() })).default([]),  // evidence map
     earlier: z.boolean().default(false),
+    show: z.boolean().default(true),   // off: hidden everywhere on the site (kept in the editor)
     status,
   }),
 });

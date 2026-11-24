@@ -472,6 +472,7 @@ collections:
       - { name: location, label: Location, widget: string, required: false }
       - { name: logo, label: Logo, widget: string, required: false, hint: 'Simple Icons slug from https://simpleicons.org. Leave empty for a monogram.' }
       - { name: mark, label: Monogram, widget: string, required: false, hint: 'Initials for the tile, e.g. LS. Default: from the company name.' }
+      - { name: show, label: Show on site, widget: boolean, default: true, hint: 'Turn off to hide this role everywhere on the site (career timeline, Career section, role counts, and the roles listed in skill search) without deleting it. Turn it back on any time.' }
       - { name: earlier, label: List under "Earlier career", widget: boolean, default: false }
       - { name: status, label: Status, widget: select, options: [planned, draft, published], default: published }
       - { name: highlights, label: Highlights, widget: list, required: false }

@@ -7,7 +7,7 @@ export const skillId = (name: string) => `skill-${name.toLowerCase().replace(/[^
 /** Every skill with its group, level, evidence and the roles it was used in (for /skills.json). */
 export async function skillIndex() {
   const toolkit = (await getCollection('toolkit')).sort((a, b) => a.data.order - b.data.order);
-  const career = (await getCollection('career', (e) => isVisible(e.data.status) && e.data.status === 'published'))
+  const career = (await getCollection('career', (e) => e.data.show && isVisible(e.data.status) && e.data.status === 'published'))
     .sort((a, b) => b.data.start.localeCompare(a.data.start));
   const roles = new Map<string, { role: string; evidence?: string }[]>();
   for (const { data: r } of career) {

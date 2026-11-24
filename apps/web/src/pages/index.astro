@@ -25,7 +25,7 @@ const aboutPhoto = (await photoSettings())?.inAbout;
 const about = aboutEntry.data;
 const { Content: Bio } = await render(aboutEntry);
 
-const career = (await getCollection('career', (e) => isVisible(e.data.status)))
+const career = (await getCollection('career', (e) => e.data.show && isVisible(e.data.status)))
   .sort((a, b) => b.data.start.localeCompare(a.data.start));
 const roles = career.filter((e) => !e.data.earlier);
 const earlier = career.filter((e) => e.data.earlier);
