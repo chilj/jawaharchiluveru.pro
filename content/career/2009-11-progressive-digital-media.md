@@ -8,6 +8,7 @@ end: 2011-11
 location: Hyderabad, India
 logo: ''
 mark: PDM
+show: false
 earlier: true
 status: published
 highlights: []
