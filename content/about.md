@@ -28,7 +28,7 @@ stats:
 
 I turn complex, cross-functional modernization efforts into measurable business outcomes — the kind of TPM who can sit in an architecture review and a steering committee meeting on the same day and speak both languages fluently.
 
-Over 16+ years, I've led platform modernization, API ecosystems, shared-services architecture, and loyalty/lifecycle-marketing platforms for organizations ranging from Fortune 500 retailers to fintech and insurance leaders. 
+Over 13+ years, I've led platform modernization, API ecosystems, shared-services architecture, and loyalty/lifecycle-marketing platforms for organizations ranging from Fortune 500 retailers to fintech and insurance leaders. 
 
 Skilled in all stages of the software product lifecycle — from project resource estimation and product increment/release scheduling to delineating process requirements. 
 
